@@ -1,0 +1,1192 @@
+﻿@{
+  ViewBag.Title = "Расходы";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-classic/resources/theme-classic-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-classic/theme-classic.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+  <script type="text/javascript">
+
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+
+    Ext.define('Charges', {
+      extend: 'Ext.data.Model',
+      idProperty: 'ItemID,PfpID',
+      fields: ['ItemID', 'Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'QtyP']
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeCharges',
+      pageSize: 2000,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      model: 'Charges',
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("ChargesBCSList")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('ChargesDet', {
+      extend: 'Ext.data.Model',
+//      idProperty: 'ItemID',
+      fields: [
+        { name: 'id' },
+        { name: 'DateReg', type: 'date', dateFormat: "c" },
+        { name: 'DatePay', type: 'date', dateFormat: "c" },
+        { name: 'FinInstID' },
+        { name: 'FinInst', persist: false },
+        { name: 'ReceiverID' },
+        { name: 'Receiver', persist: false },
+        { name: 'ItemID' },
+        { name: 'Item', persist: false },
+        { name: 'TypeID' },
+        { name: 'TypeName', persist: false },
+        { name: 'DateRegEnd', type: 'date', dateFormat: "c" },
+        { name: 'QtyP' },
+        { name: 'Comment' },
+        { name: 'PeriodicityID' },
+        { name: 'PeriodicityName', persist: false },
+        { name: 'TRID' },
+        { name: 'TRName', persist: false },
+        { name: 'FileName' },
+        { name: 'FundID' },
+        { name: "Fund", persist: false }
+      ]
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeChargesDet',
+      pageSize: 2000,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      model: 'ChargesDet',
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("ChargesDetList")',
+          create: '@Url.Action("ChargesDetCreate")',
+          update: '@Url.Action("ChargesDetUpdate")',
+          destroy: '@Url.Action("ChargesDetDel")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          rootProperty: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeFI',
+      remoteSort: true,
+      autoLoad: true,
+      fields: ['id', 'text'],
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetPlatList")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeType',
+      fields: ['id', 'text'],
+      autoLoad: true,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetPlatType")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storePeriodicity',
+      fields: ['id', 'text'],
+      autoLoad: true,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetPeriodicity")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeTR',
+      fields: ['id', 'text'],
+      autoLoad: true,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetTR")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeFund',
+      fields: ['id', 'text'],
+      autoLoad: true,
+      data: [{ id: 39191, text: 'RUR' }, { id: 39192, text: 'USD' }]
+    });
+
+    Ext.define('Charges.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.chargesgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          allowDeselect: false,
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            preserveScrollOnRefresh: true,
+            trackOver: true
+          },
+          columns: [{
+            header: 'Статья1',
+            dataIndex: 'Item1',
+            width: 270
+          }, {
+            header: 'Статья2',
+            dataIndex: 'Item2',
+            width: 270
+          }, {
+            header: 'Статья3',
+            dataIndex: 'Item3',
+            width: 270
+          }, {
+            header: 'Статья4',
+            dataIndex: 'Item4',
+            width: 350
+          }, {
+            header: 'Статья5',
+            dataIndex: 'Item5',
+            width: 70
+          }, {
+            header: 'План',
+            dataIndex: 'QtyP',
+            width: 110,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'datefield',
+              id: 'd1',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              width: 90,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date()))
+            }, {
+              xtype: 'datefield',
+              id: 'd2',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              width: 90,
+              margin: '0 5 0 0',
+              value: Ext.Date.clearTime(new Date(), false)
+            }, {
+              xtype: 'combo',
+              itemId: 'cbType',
+              store: Ext.create('Ext.data.Store', {
+                fields: ['id', 'value'],
+                data: [
+                    { id: 0, value: 'Дата оплаты' },
+                    { id: 1, value: 'Дата учёта' }
+                ]
+              }),
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              valueField: 'id',
+              selectOnFocus: true,
+              width: 120,
+              listeners: {
+                beforerender: function () { this.setValue(1, false); }
+              }
+            }, {
+              xtype: 'combobox',
+              itemId: 'cbFinInst',
+              store: 'storeFI',
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 200,
+              listeners: {
+                beforerender: function () { this.setValue(1790); }
+              }
+            }, ' Непустые: ', {
+              xtype: 'checkbox',
+              itemId: 'cbNP'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              text: 'Экспорт',
+              itemId: 'export',
+              scope: this,
+              handler: this.onExportClick
+            }, {
+              text: 'Импорт',
+              itemId: 'import',
+              scope: this,
+              handler: this.onImportClick
+            }, '->', @Html.Partial("MenuFin"), ' ']
+          }]
+        });
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = {
+          d1: this.down('#d1').getValue(),
+          d2: this.down('#d2').getValue(),
+          DateType: this.down('#cbType').getValue(),
+          np: this.down('#cbNP').getValue()
+        };
+        this.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        var grid = this.up('viewport').down('#griddet');
+        if (selections.length === 0) {
+          grid.down('#refresh').setDisabled(true);
+          grid.down('#create').setDisabled(true);
+        }
+        else {
+          if (grid) {
+            grid.store.proxy.extraParams = {
+              d1: this.down('#d1').getValue(),
+              d2: this.down('#d2').getValue(),
+              DateType: this.down('#cbType').getValue(),
+              itemID: selections[0].get('ItemID')
+            };
+            grid.store.load();
+            grid.down('#refresh').setDisabled(false);
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onExportClick: function () {
+        var form = Ext.getDom('chargesexport');
+        form.d1.value = this.down('#d1').rawValue;
+        form.d2.value = this.down('#d2').rawValue;
+        form.DateType.value = this.down('#cbType').getValue();
+        form.FinInstID.value = this.down('#cbFinInst').getValue();
+        form.submit();
+      },
+
+      onImportClick: function () {
+        if (!this.wini) {
+          this.wini = Ext.create('Charges.WinIC', { scope: this });
+        }
+        this.wini.setTitle('Импорт');
+        this.wini.show(this);
+      }
+    });
+
+    Ext.define('ChargesDet.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.chargesdetwin',
+      initComponent: function () {
+        Ext.apply(this, {
+          activeRecord: null,
+          width: 500,
+          closeAction: 'hide',
+          layout: 'fit',
+          modal: true,
+          autoHeight: true,
+          plain: true,
+          buttonAlign: 'center',
+          border: true,
+          items: [{
+            xtype: 'form',
+            bodyPadding: 10,
+            defaults: { anchor: '100%' },
+            defaultType: 'textfield',
+            layoutConfig: { labelSeparator: '' },
+            fieldDefaults: { labelWidth: 125, labelAlign: 'right' },
+            items: [{
+              xtype: 'datefield',
+              name: 'DateReg',
+              allowBlank: false,
+              fieldLabel: 'Дата учёта',
+              format: 'd.m.Y',
+              startDay: 1,
+              anchor: '50%'
+            }, {
+              xtype: 'datefield',
+              name: 'DatePay',
+              allowBlank: false,
+              fieldLabel: 'Дата платежа',
+              format: 'd.m.Y',
+              startDay: 1,
+              anchor: '50%'
+            }, {
+              name: 'FinInst',
+              fieldLabel: 'Плательщик',
+              readOnly: true
+            }, {
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                xtype: 'combo',
+                name: 'ReceiverID',
+                store: Ext.create('Ext.data.Store', {
+                  fields: ['id', 'name', 'brief'],
+                  proxy: {
+                    type: 'ajax',
+                    actionMethods: { read: 'POST' },
+                    url: '@Url.Action("GetPoluch2")',
+                    reader: {
+                      type: 'json',
+                      root: 'data'
+                    }
+                  }
+                }),
+                valueField: 'id',
+                displayField: 'name',
+                typeAhead: false,
+                queryDelay: 500,
+                hideTrigger: true,
+                forceSelection: true,
+                fieldLabel: 'Получатель',
+                minChars: 2,
+                allowBlank: false,
+                flex: 1,
+                listeners: {
+                }
+              }, {
+                xtype: 'button',
+                itemId: 'btnReceiverID',
+                text: 'Добавить',
+                margin: '0 0 0 5',
+                scope: this,
+                handler: this.onNewContragent
+              }]
+            }, {
+              name: 'Item',
+              fieldLabel: 'Статья',
+              readOnly: true,
+              anchor: '50%'
+            }, {
+              xtype: 'combo',
+              name: 'PeriodicityID',
+              store: 'storePeriodicity',
+              fieldLabel: 'Периодичность',
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              anchor: '50%'
+            }, {
+              xtype: 'combo',
+              name: 'TRID',
+              store: 'storeTR',
+              fieldLabel: 'Т/Р',
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              anchor: '50%'
+            }, , {
+              xtype: 'combo',
+              name: 'FundID',
+              store: 'storeFund',
+              fieldLabel: 'Валюта',
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              anchor: '50%'
+            }, {
+              xtype: 'customnumber',
+              name: 'QtyP',
+              fieldLabel: 'Сумма',
+              allowDecimals: true,
+              decimalPrecision: 2,
+              anchor: '50%',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }, {
+              xtype: 'combo',
+              name: 'TypeID',
+              store: 'storeType',
+              fieldLabel: 'Тип платежа',
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              anchor: '50%',
+              listeners: {
+                'change': this.onTypeChange
+              }
+            }, {
+              xtype: 'datefield',
+              name: 'DateRegEnd',
+              fieldLabel: 'Конец периода',
+              anchor: '50%',
+              format: 'd.m.Y',
+              startDay: 1
+            }, {
+              name: 'Comment',
+              fieldLabel: 'Примечание'
+            }, {
+              xtype: 'hidden',
+              name: 'FinInstID'
+            }, {
+              xtype: 'hidden',
+              name: 'ItemID'
+            }],
+            listeners: {
+              //'actioncomplete': this.onActionComplete
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onTypeChange: function (e) {
+        var v = e.getValue();
+        this.up('form').getForm().findField('DateRegEnd').setVisible(v == 39300);
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        var form = me.down('form').getForm();
+        me.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          form.loadRecord(record);
+          var c = form.findField('ReceiverID');
+          var f = record.get('ReceiverID');
+          if (f) {
+            var l = function (r) {
+              c.setValue(f);
+              c.store.un('load', l);
+            };
+            c.store.on('load', l);
+            c.store.load({ params: { id: f } });
+          }
+        } else {
+          me.down('#save').disable();
+          form.reset();
+        }
+      },
+
+      onSave: function () {
+        var me = this;
+        var active = me.activeRecord, form = me.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (me.title == 'Добавить')
+            me.fireEvent('create', me, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            me.fireEvent('update');
+          }
+          me.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      },
+
+      onNewContragent: function (button) {
+        var fld = button.itemId.substring(3);
+        this.newContragent(fld);
+      },
+
+      newContragent: function (fld) {
+        var me = this;
+        Ext.Msg.prompt('Новый Получатель', 'Наименование:', function (btn, text) {
+          if (btn == 'ok') {
+            Ext.Ajax.request({
+              url: '@Url.Action("AddContragent")',
+              timeout: 60000,
+              params: {
+                name: text
+              },
+              success: function (response) {
+                var r = Ext.decode(response.responseText);
+                var c = me.down('form').getForm().findField(fld);
+                var f = r.data.id;
+                var l = function (r) {
+                  c.setValue(f);
+                  c.store.un('load', l);
+                };
+                c.store.on('load', l);
+                c.store.load({ params: { id: f } });
+              },
+              scope: this,
+              failure: function (response) {
+                alert('Ошибка!');
+              }
+            });
+          }
+        });
+      }
+    });
+
+    Ext.define('ChargesDet.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.chargesdetgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          allowDeselect: false,
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          columns: [{
+            header: 'Дата учёта',
+            dataIndex: 'DateReg',
+            renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+            width: 70
+          }, {
+            header: 'Дата оплаты',
+            dataIndex: 'DatePay',
+            renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+            width: 70
+          }, {
+            header: 'Плательщик',
+            dataIndex: 'FinInst',
+            width: 120
+          }, {
+            header: 'Получатель',
+            dataIndex: 'Receiver',
+            width: 250,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Статья',
+            dataIndex: 'Item',
+            width: 50
+          }, {
+            header: 'Тип платежа',
+            dataIndex: 'TypeName',
+            width: 100
+          }, {
+            header: 'Конец периода',
+            dataIndex: 'DateRegEnd',
+            renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+            width: 90
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'PeriodicityName',
+            width: 100
+          }, {
+            header: 'Т/Р',
+            dataIndex: 'TRName',
+            width: 100
+          }, {
+            header: 'Валюта',
+            dataIndex: 'Fund',
+            width: 70
+          }, {
+            header: 'План',
+            dataIndex: 'QtyP',
+            width: 110,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }, {
+            header: 'Файл',
+            dataIndex: 'FileName',
+            renderer: function (v) {
+              return !v ? '' : Ext.String.format('<a href="@Url.Action("GetFile")?data={1}" target="_blank">{0}</a>', v, encodeURIComponent(v));
+            },
+            width: 100
+          }, {
+            header: 'Примечание',
+            dataIndex: 'Comment',
+            flex: 1
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-refresh',
+              itemId: 'refresh',
+              text: 'Обновить',
+              disabled: true,
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-add',
+              disabled: true,
+              itemId: 'create',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              text: 'Скопировать',
+              disabled: true,
+              itemId: 'copy',
+              scope: this,
+              handler: this.onCopyClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Файл',
+              disabled: true,
+              itemId: 'fileform',
+              scope: this,
+              handler: this.onFileFormClick
+            }]
+          }]
+        });
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        var grid = this.up('viewport').down('#grid');
+        var tool = grid.down('toolbar');
+
+        this.store.proxy.extraParams = {
+          d1: tool.down('#d1').getValue(),
+          d2: tool.down('#d2').getValue(),
+          itemID: grid.getView().getSelectionModel().getSelection()[0].get('ItemID')
+        };
+        this.store.load();
+      },
+
+      onCreateWin: function () {
+        this.win = Ext.create('ChargesDet.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        if (this.store.proxy.extraParams.itemID > 0) {
+          var grid = this.up('viewport').down('#grid');
+          var tool = grid.down('toolbar');
+          var rec = new ChargesDet({
+            DateReg: Ext.Date.clearTime(new Date(), false),
+            DatePay: Ext.Date.clearTime(new Date(), false),
+            FinInstID: tool.down('#cbFinInst').getValue(),
+            FinInst: tool.down('#cbFinInst').getRawValue(),
+            ReceiverID: null,
+            Receiver: null,
+            ItemID: this.store.proxy.extraParams.itemID,
+            Item: grid.getSelectionModel().getSelection()[0].get('Item5'),
+            QtyP: null,
+            Comment: '',
+            TypeID: 15186,
+            PeriodicityID: 47187,
+            TRID: 58881,
+            DateRegEnd: null
+          });
+          if (!this.win) {
+            this.onCreateWin();
+          }
+          this.win.setTitle('Добавить');
+          this.win.setActiveRecord(rec);
+          this.win.show(this);
+        }
+      },
+
+      onCopyClick: function () {
+        if (!this.win) {
+          this.onCreateWin();
+        }
+        this.win.setTitle('Добавить');
+
+        var rec = this.getSelectionModel().getSelection()[0];
+        this.win.setActiveRecord(rec);
+        this.win.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.win) {
+          this.onCreateWin();
+        }
+        this.win.setTitle('Изменить');
+        this.win.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.win.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#fileform').setDisabled(selections.length === 0);
+        this.down('#copy').setDisabled(selections.length === 0);
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.store.sync();
+          }
+        }
+      },
+
+      onFileFormClick: function () {
+        if (!this.winf) {
+          this.winf = Ext.create('OrdPaymF.Win', {
+            scope: this,
+            listeners: {
+              scope: this,
+              update: function () {
+                this.store.sync();
+              }
+            }
+          });
+        }
+        this.winf.setTitle('Привязать');
+        var rec = this.getSelectionModel().getSelection()[0];
+        this.winf.setUrl('@Url.Action("FileUploadCh")');
+        this.winf.setFileName('FileName');
+        this.winf.setActiveRecord(rec);
+        this.winf.show(this);
+      }
+    });
+
+    Ext.define('Charges.WinIC', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.winci',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 500,
+          autoHeight: true,
+          closeAction: 'hide',
+          modal: true,
+          layout: 'fit',
+          plain: true,
+          bodyStyle: 'padding:5px;',
+          buttonAlign: 'center',
+          border: true,
+          items: [
+            Ext.create('Ext.form.Panel', {
+              border: true,
+              frame: false,
+              autoHeight: true,
+              autoWidth: true,
+              baseCls: 'x-plain',
+              bodyStyle: 'padding:5px 5px 0',
+              bodyPadding: 5,
+              defaults: { anchor: '100%' },
+              layoutConfig: { labelSeparator: '' },
+              fieldDefaults: { labelWidth: 28, labelAlign: 'right' },
+              items: [{
+                xtype: 'filefield',
+                emptyText: 'Выбор файла',
+                name: 'file',
+                fieldLabel: 'Файл',
+                allowBlank: false,
+                buttonText: '',
+                buttonConfig: {
+                  iconCls: 'upload-icon'
+                }
+              }]
+            })
+          ],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Импортировать',
+              //disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Выход',
+              scope: this,
+              handler: this.onExit
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onSave: function () {
+        var form = this.down('form').getForm();
+        if (form.isValid()) {
+          form.submit({
+            url: '@Url.Action("ChargesImport")',
+            //waitMsgTarget: false,
+            //waitMsg: 'Загрузка файла...',
+            success: function (fp, o) {
+              Ext.Msg.show({
+                msg: o.result.message != null ? o.result.message : "",
+                buttons: Ext.MessageBox.OK,
+                scope: this
+              });
+            },
+            failure: function (fp, o) {
+              Ext.Msg.show({
+                msg: o.result.message != null ? o.result.message : 'Ошибка.',
+                buttons: Ext.MessageBox.OK,
+                scope: this
+              });
+            }
+          });
+        }
+      },
+
+      onExit: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('OrdPaymF.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.ordpayfmwin',
+      initComponent: function () {
+        Ext.apply(this, {
+          activeRecord: null,
+          fileurl: null,
+          width: 500,
+          closeAction: 'hide',
+          layout: 'fit',
+          modal: true,
+          autoHeight: true,
+          plain: true,
+          buttonAlign: 'center',
+          border: true,
+          items: [{
+            xtype: 'form',
+            bodyPadding: 10,
+            defaults: { anchor: '100%' },
+            defaultType: 'textfield',
+            layoutConfig: { labelSeparator: '' },
+            fieldDefaults: { labelWidth: 100, labelAlign: 'left' },
+            items: [{
+              itemId: 'FileName',
+              name: 'FileName',
+              fieldLabel: 'Файл',
+              readOnly: true
+            }, {
+              xtype: 'form',
+              padding: '0 0 15 0',
+              border: false,
+              waitMsgTarget: true,
+              defaults: { anchor: '100%' },
+              items: [{
+                xtype: 'filefield',
+                emptyText: 'Выбор файла',
+                name: 'fn',
+                fieldLabel: 'Загрузка',
+                buttonText: '',
+                buttonConfig: {
+                  iconCls: 'upload-icon'
+                }
+              }],
+              buttons: [{
+                text: 'Загрузить',
+                handler: function () {
+                  var form = this.up('form').getForm();
+                  if (form.isValid()) {
+                    form.submit({
+                      url: this.up('window').fileurl + '?id=' + this.up('window').activeRecord.get('id'),
+                      waitMsg: 'Отправка файла...',
+                      waitMsgTarget: true,
+                      success: function (fp, o) {
+                        fp.owner.up('form').getForm().getFields().get(0).setValue(o.result.file);
+                        //fp.owner.up('form').getForm().findField('FileName').setValue(o.result.file);
+                        alert('Файл "' + o.result.file + '" сохранен');
+                      },
+                      failure: function (fp, o) {
+                        alert('Ошибка');
+                      }
+                    });
+                  }
+                }
+              }]
+            }],
+            listeners: {
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+        //this.down('form').getForm().on('actioncomplete', this.onActionComplete, this);
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        var form = me.down('form').getForm();
+        me.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          form.loadRecord(record);
+        } else {
+          me.down('#save').disable();
+          form.reset();
+        }
+      },
+
+      setFileName: function (name) {
+        var me = this;
+        me.down('form').getForm().getFields().get(0).name = name;
+      },
+
+      setUrl: function (_fileurl) {
+        var me = this
+        me.fileurl = _fileurl
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          form.updateRecord(active);
+          this.fireEvent('update');
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = Ext.getCmp(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = Ext.getCmp(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+
+    Ext.onReady(function () {
+
+      Ext.tip.QuickTipManager.init();
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          region: 'center',
+          itemId: 'grid',
+          xtype: 'chargesgrid',
+          store: 'storeCharges',
+          flex: 1
+        }, {
+          region: 'south',
+          itemId: 'griddet',
+          xtype: 'chargesdetgrid',
+          store: 'storeChargesDet',
+          height: '20%',
+          border: false,
+          split: true
+        }]
+      });
+
+    });
+
+  </script>
+}
+<form id="chargesexport" action="@Url.Action("ChargesExport")" method="POST" style="display: none;">
+  <input type="hidden" name="d1" />
+  <input type="hidden" name="d2" />
+  <input type="hidden" name="DateType" />
+</form>

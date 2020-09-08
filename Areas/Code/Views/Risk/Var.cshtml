@@ -1,0 +1,124 @@
+﻿@{
+  ViewBag.Title = "Импорт из CSV IRSVaR, VaR, IRSTrVaR, TrVaR, Корреляции";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+
+  </style>
+  <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-theme-classic/build/resources/ext-theme-classic-all.css">
+  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/5.1.0/build/bootstrap.js"></script>
+  <script src="~/Scripts/ExtJS5/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setConfig({ enabled: true });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      var fp = Ext.create('Ext.panel.Panel', {
+        activeItem: 0,
+        border: true,
+        title: '@ViewBag.Title',
+        frame: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 600,
+        defaultType: 'textfield',
+        layoutConfig: { labelSeparator: '' },
+        defaults: { anchor: '100%' },
+        fieldDefaults: {
+          msgTarget: 'side'
+        },
+        items: [{
+          xtype: 'form',
+          itemId: 'step1',
+          border: false,
+          //frame: false,
+          layout: 'hbox',
+          bodyPadding: 10,
+          bodyStyle: 'background:rgb(223, 233, 246);',
+          items: [{
+            xtype: 'filefield',
+            flex: 1,
+            labelAlign: 'left',
+            labelWidth: 70,
+            emptyText: 'Выбор файла',
+            name: 'FileName',
+            fieldLabel: 'Загрузка',
+            buttonText: '',
+            buttonConfig: {
+              iconCls: 'upload-icon'
+            }
+          }, {
+            xtype: 'button',
+            margin: '0 0 0 10',
+            text: 'Загрузить',
+            handler: function () {
+              var form = this.up('form').getForm();
+              if (form.isValid()) {
+                form.submit({
+                  url: '@Url.Action("FUVar")',
+                  waitMsg: 'Отправка файла...',
+                  waitMsgTarget: true,
+                  success: function (fp1, o) {
+                    fp.down('#save').enable();
+                    alert('Файл "' + o.result.file + '" загружен');
+                  },
+                  failure: function (fp, o) {
+                    alert('Ошибка');
+                  }
+                });
+              }
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Выполнить',
+              disabled: true,
+              //scope: this,
+              handler: function () {
+
+                var me = this.up('form');
+                if (me.getForm().isValid()) {
+                  Ext.getBody().mask('Выполнение...');
+                  Ext.Ajax.setTimeout(120000);
+                  Ext.Ajax.request({
+                    url: '@Url.Action("LoadVar")',
+                    method: 'POST',
+                    success: function (response, opts) { Ext.getBody().unmask(); Ext.Msg.alert('Info', 'Данные загружены в БД'); },
+                    failure: function (response, opts) { Ext.getBody().unmask(); Ext.Msg.alert('Error', a == undefined ? "" : a.result == undefined ? "Ош" : a.result.message); }
+                  });
+                }
+              }
+            }]
+          }]
+        }]
+      });
+
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>

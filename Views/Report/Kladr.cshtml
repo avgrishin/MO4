@@ -1,0 +1,541 @@
+﻿@model MO.Models.Rep1Param
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 3px 3px 3px 3px;
+      /*border: 1px solid #fff;
+      border-bottom: 1px solid #eeeeee;*/
+      white-space: normal;
+      color: #555;
+    }
+    .search-item div
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+      margin-before: 0.5em; margin-after: 0.5em;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+
+      var a = ["a", "b", "c", "d"]; //Ext.Array.toArray("abcd");
+      var b = Ext.Array.toArray("efgh");
+      Ext.Array.insert(a, a.length / 2, b);
+      var f = [[1, 2, "a"], 3, "foo", ["bar", {}]];
+      var flat_arr = [].concat.apply([], f);
+      var tree = {
+        id: '1',
+        children: [{
+          id: '2',
+          children: [{
+            id: '5',
+            children: [
+                {
+                  id: '9'
+                }
+            ]
+          }, {
+            id: '6'
+          }]
+        }, {
+          id: '3',
+          children: [{
+            id: '7'
+          }, {
+            id: '8'
+          }]
+        }, {
+          id: '4'
+        }]
+      };
+
+      var iterator = function (root, func) {
+        var a = [];
+        a.push(root);
+        while (a.length > 0) {
+          var v = a.shift();
+          func(v);
+          for (var c in v.children)
+            a.push(v.children[c]);
+        }
+      }
+
+      iterator(tree, function (node) {
+        console.log(node.id);
+      })
+
+      Ext.define('KLADR', {
+        extend: 'Ext.data.Model',
+        idProperty: 'CODE',
+        fields: ['NAME', 'SOCR', 'CODE']
+      });
+
+      var fp = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: 'КЛАДР',
+        frame: true,
+        //renderTo: 'f',
+        autoHeight: true,
+        width: 600,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        items: [{
+          xtype: 'combo',
+          itemId: 'cbRegion',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr", new { id = 1 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbRegion',
+          displayField: 'NAME',
+          typeAhead: false,
+          queryDelay: 1000,
+          //pageSize: 10,
+          width: 570,
+          hideTrigger: true,
+          forceSelection: true,
+          fieldLabel: 'Регион:',
+          anchor: '100%',
+          minChars: 2,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: false,
+          listeners: {
+            select: function (view, rec, node, index, e) {
+              this.up('panel').down('#cbRayon').store.proxy.url = '@Url.Action("GetKladr", new { id = 2 })' + '?Code1=' + this.getValue().substring(0, 2);
+              this.up('panel').down('#cbRayon').clearValue();
+
+              this.up('panel').down('#cbTown').store.proxy.url = '@Url.Action("GetKladr", new { id = 3 })' + '?Code1=' + this.getValue().substring(0, 2) + '000';
+              this.up('panel').down('#cbTown').clearValue();
+
+              this.up('panel').down('#cbNP').store.proxy.url = '@Url.Action("GetKladr", new { id = 4 })' + '?Code1=' + this.getValue().substring(0, 2) + '000000';
+              this.up('panel').down('#cbNP').clearValue();
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbRayon',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr", new { id = 2 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbRayon',
+          displayField: 'NAME',
+          typeAhead: false,
+          queryDelay: 1000,
+          width: 570,
+          hideTrigger: true,
+          forceSelection: true,
+          fieldLabel: 'Район:',
+          anchor: '100%',
+          minChars: 2,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true,
+          listeners: {
+            select: function (view, rec, node, index, e) {
+              this.up('panel').down('#cbTown').store.proxy.url = '@Url.Action("GetKladr", new { id = 3 })' + '?Code1=' + this.getValue().substring(0, 5);
+              this.up('panel').down('#cbTown').clearValue();
+
+              this.up('panel').down('#cbNP').store.proxy.url = '@Url.Action("GetKladr", new { id = 4 })' + '?Code1=' + this.getValue().substring(0, 5) + '000';
+              this.up('panel').down('#cbNP').clearValue();
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbTown',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr", new { id = 3 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbTown',
+          displayField: 'NAME',
+          typeAhead: false,
+          queryDelay: 1000,
+          width: 570,
+          hideTrigger: true,
+          forceSelection: true,
+          fieldLabel: 'Город:',
+          anchor: '100%',
+          minChars: 2,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true,
+          listeners: {
+            select: function (view, rec, node, index, e) {
+
+              this.up('panel').down('#cbNP').store.proxy.url = '@Url.Action("GetKladr", new { id = 4 })' + '?Code1=' + this.getValue().substring(0, 8);
+              this.up('panel').down('#cbNP').clearValue();
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbNP',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr", new { id = 4 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbNP',
+          displayField: 'NAME',
+          typeAhead: false,
+          queryDelay: 1000,
+          width: 570,
+          hideTrigger: true,
+          forceSelection: true,
+          fieldLabel: 'Населённый пункт:',
+          anchor: '100%',
+          minChars: 2,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              fp.form.submit({
+                url: '@Url.Action("Rep", new { id = 2 })',
+                success: function (f, a) { window.location = '@Url.Action("Rep", new { id = 1 })?' + fp.getForm().getValues(true, false, false, true); },
+                failure: function (f, a) { Ext.Msg.alert('Warning', 'Error'); }
+              });
+            }
+          },
+          formBind: true
+        }],
+        listeners: {
+          actioncomplete: function (form, action) {
+            if (action.type == 'load') {
+              //var c = this.getForm().findField('cbClient');
+              //var f = action.result.data.instID;
+              //var l = function (r) {
+              //  c.setValue(f);
+              //  c.store.un('load', l);
+              //};
+              //c.store.on('load', l);
+              //c.store.load({params: { id: f }});
+            }
+          }
+        }
+      });
+
+      var fp1 = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: 'КЛАДР 1',
+        frame: true,
+        renderTo: 'f1',
+        autoHeight: true,
+        width: 600,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        items: [{
+          xtype: 'combo',
+          itemId: 'cbRegion',
+          store: Ext.create('Ext.data.Store', {
+            autoLoad: true,
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr1", new { id = 1 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbRegion',
+          displayField: 'NAME',
+          fieldLabel: 'Регион:',
+          typeAhead: true,
+          queryMode: 'local',
+          triggerAction: 'all',
+          selectOnFocus: true,
+          anchor: '100%',
+          width: 570,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: false,
+          listeners: {
+            select: function (view, rec, e) {
+              this.up('panel').down('#cbRayon').store.load({ params: { Code1: this.getValue().substring(0, 2) } });
+              this.up('panel').down('#cbRayon').clearValue();
+
+              this.up('panel').down('#cbTown').store.load({ params: { Code1: this.getValue().substring(0, 2) + '000' } });
+              this.up('panel').down('#cbTown').clearValue();
+
+              this.up('panel').down('#cbNP').store.load({ params: { Code1: this.getValue().substring(0, 2) + '000000' } });
+              this.up('panel').down('#cbNP').clearValue();
+            },
+            blur: function (cb, e, o) {
+              if (this.getValue() == null) {
+                this.up('panel').down('#cbRayon').store.removeAll();
+                this.up('panel').down('#cbRayon').clearValue();
+                this.up('panel').down('#cbTown').store.removeAll();
+                this.up('panel').down('#cbTown').clearValue();
+                this.up('panel').down('#cbNP').store.removeAll();
+                this.up('panel').down('#cbNP').clearValue();
+              }
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbRayon',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr1", new { id = 2 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbRayon',
+          displayField: 'NAME',
+          width: 570,
+          fieldLabel: 'Район:',
+          typeAhead: true,
+          queryMode: 'local',
+          triggerAction: 'all',
+          selectOnFocus: true,
+          anchor: '100%',
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true,
+          listeners: {
+            select: function (view, rec, node, index, e) {
+              this.up('panel').down('#cbTown').store.load({ params: { Code1: this.getValue().substring(0, 5) } });
+              this.up('panel').down('#cbTown').clearValue();
+
+              this.up('panel').down('#cbNP').store.load({ params: { Code1: this.getValue().substring(0, 5) + '000' } });
+              this.up('panel').down('#cbNP').clearValue();
+            },
+            blur: function (cb, e, o) {
+              if (this.getValue() == null) {
+                this.up('panel').down('#cbTown').store.removeAll();
+                this.up('panel').down('#cbTown').clearValue();
+                this.up('panel').down('#cbNP').store.removeAll();
+                this.up('panel').down('#cbNP').clearValue();
+              }
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbTown',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr1", new { id = 3 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbTown',
+          displayField: 'NAME',
+          width: 570,
+          fieldLabel: 'Город:',
+          typeAhead: true,
+          queryMode: 'local',
+          triggerAction: 'all',
+          selectOnFocus: true,
+          anchor: '100%',
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true,
+          listeners: {
+            select: function (view, rec, node, index, e) {
+              this.up('panel').down('#cbNP').store.load({ params: { Code1: this.getValue().substring(0, 8) } });
+              this.up('panel').down('#cbNP').clearValue();
+            },
+            blur: function (cb, e, o) {
+              if (this.getValue() == null) {
+                //this.up('panel').down('#cbNP').store.removeAll();
+                this.up('panel').down('#cbNP').clearValue();
+              }
+            }
+          }
+        }, {
+          xtype: 'combo',
+          itemId: 'cbNP',
+          store: Ext.create('Ext.data.Store', {
+            model: 'KLADR',
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("GetKladr1", new { id = 4 })',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          valueField: 'CODE',
+          name: 'cbNP',
+          displayField: 'NAME',
+          width: 570,
+          fieldLabel: 'Населённый пункт:',
+          typeAhead: true,
+          queryMode: 'local',
+          triggerAction: 'all',
+          selectOnFocus: true,
+          anchor: '100%',
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><div>{NAME} {SOCR}</div>{CODE}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              fp.form.submit({
+                url: '@Url.Action("Rep", new { id = 2 })',
+                success: function (f, a) { window.location = '@Url.Action("Rep", new { id = 1 })?' + fp.getForm().getValues(true, false, false, true); },
+                failure: function (f, a) { Ext.Msg.alert('Warning', 'Error'); }
+              });
+            }
+          },
+          formBind: true
+        }],
+        listeners: {
+          actioncomplete: function (form, action) {
+            if (action.type == 'load') {
+              //var c = this.getForm().findField('cbClient');
+              //var f = action.result.data.instID;
+              //var l = function (r) {
+              //  c.setValue(f);
+              //  c.store.un('load', l);
+              //};
+              //c.store.on('load', l);
+              //c.store.load({params: { id: f }});
+            }
+          }
+        }
+      });
+      //      Ext.Function.defer(function () {
+      //  fp.getForm().load({ url: '@Url.Action("GetParam", new { id = 2 })', waitMsg: 'Загрузка' });
+      //  Ext.MessageBox.hide();
+      //}, 100);
+
+    });
+  </script>
+}
+<div id="f" style="padding: 30px"></div>
+<div id="f1" style="padding: 30px"></div>
+

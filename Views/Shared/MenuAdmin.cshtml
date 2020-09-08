@@ -1,0 +1,5 @@
+﻿{ text: 'Admin', xtype: 'splitbutton', handler: function () { window.location =
+'@Url.Action("Index", "Admin", new { area = "" })' }, menu: { items: [{ text: 'Классификаторы',
+handler: function () { window.location = '@Url.Action("Index", "ObjCls", new { area = "Code" })'
+} }, { text: 'Декларации', handler: function () { window.location = '@Url.Action("Index", "InvestDecl", new { area = "Code" })'
+} }]} }

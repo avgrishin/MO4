@@ -1,0 +1,258 @@
+﻿@{
+  ViewBag.Title = "ФинДоход";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+    Ext.define('FinDohod', {
+      extend: 'Ext.data.Model',
+      idProperty: 'FdsID',
+      fields: ['ID', 'FdsID', 'Fin_Sector', 'Fin_SubSector', 'Fin_Item', 'Sub_UrUnitName_To', 'Sub_OrgUnitName_To', 'TCS_Type_From', 'Prod_Klass', 'Prod_ShortName', 'Prod_Group', 'Quartier', 'An', 'QtyP', 'QtyF']
+    });
+
+    var storeAn = Ext.create('Ext.data.Store', {
+      fields: ['value'],
+      data: [{ value: (new Date()).getFullYear() - 2 }, { value: (new Date()).getFullYear() - 1 }, { value: (new Date()).getFullYear() }, { value: (new Date()).getFullYear() + 1 }]
+    });
+
+    var storeQuartier = Ext.create('Ext.data.Store', {
+      fields: ['value'],
+      data: [{ value: 1 }, { value: 2 }, { value: 3 }, { value: 4}]
+    });
+
+
+    Ext.define('FinDohod.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.findohodgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          region: 'center',
+          //layout: 'fit',
+          //frame: true,
+          defaultType: 'textfield',
+          selType: 'cellmodel',
+          layoutConfig: { labelSeparator: '' },
+          plugins: [Ext.create('Ext.grid.plugin.RowEditing')],
+          columns: [{
+            header: 'Fin_Sector',
+            dataIndex: 'Fin_Sector',
+            width: 100
+          }, {
+            header: 'Fin_SubSector',
+            dataIndex: 'Fin_SubSector',
+            width: 100
+          }, {
+            header: 'Fin_Item',
+            dataIndex: 'Fin_Item',
+            width: 100
+          }, {
+            header: 'Sub_UrUnitName_To',
+            dataIndex: 'Sub_UrUnitName_To',
+            width: 100
+          }, {
+            header: 'Sub_OrgUnitName_To',
+            dataIndex: 'Sub_OrgUnitName_To',
+            width: 100
+          }, {
+            header: 'TCS_Type_From',
+            dataIndex: 'TCS_Type_From',
+            width: 100
+          }, {
+            header: 'Prod_Klass',
+            dataIndex: 'Prod_Klass',
+            width: 80
+          }, {
+            header: 'Prod_Group',
+            dataIndex: 'Prod_Klass',
+            width: 80
+          }, {
+            header: 'Prod_Group',
+            dataIndex: 'Prod_ShortName',
+            width: 140
+          }, {
+            header: 'Квартал',
+            dataIndex: 'Quartier',
+            align: 'right',
+            width: 50
+          }, {
+            header: 'Год',
+            dataIndex: 'An',
+            align: 'right',
+            width: 50
+          }, {
+            header: 'План',
+            dataIndex: 'QtyP',
+            width: 120,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }, {
+            header: 'Факт',
+            dataIndex: 'QtyF',
+            width: 120,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Год: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbAn',
+              store: storeAn,
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 50,
+              listeners: {
+                beforerender: function () { this.setValue((new Date()).getFullYear(), false); }
+              }
+            }), {
+              xtype: 'tbtext', text: ' Квартал: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbQuartier',
+              store: storeQuartier,
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 35,
+              listeners: {
+                beforerender: function () { this.setValue(parseInt((new Date()).getMonth() / 3) + 1, false); }
+              }
+            }), {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, '->', @Html.Partial("MenuFin")]
+          }, {
+            xtype: 'pagingtoolbar',
+            dock: 'bottom',
+            displayInfo: true,
+            listeners: {
+              scope: this,
+              beforerender: function () { this.dockedItems.items[2].bindStore(this.store); }
+            }
+          }]
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { y: Ext.getCmp('cbAn').value, q: Ext.getCmp('cbQuartier').value };
+        this.store.load();
+      }
+    });
+
+    Ext.onReady(function () {
+
+      Ext.apply(Ext.grid.RowEditor.prototype, {
+        saveBtnText: "Сохранить",
+        cancelBtnText: "Отменить"
+      });
+
+      var store = Ext.create('Ext.data.Store', {
+        pageSize: 500,
+        remoteSort: true,
+        autoSync: true,
+        //        buffered: true,
+        autoLoad: false,
+        model: 'FinDohod',
+        proxy: {
+          type: 'ajax',
+          api: {
+            read: '@Url.Action("FinDohodList")',
+            update: '@Url.Action("FinDohodUpdate")'
+          },
+          actionMethods: { read: 'POST' },
+          reader: {
+            type: 'json',
+            root: 'data',
+            totalProperty: 'totalCount'
+          },
+          writer: {
+            type: 'json',
+            root: 'data',
+            writeAllFields: true,
+            allowSingle: false,
+            encode: false
+          },
+          simpleSortMode: true
+        }
+      });
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          itemId: 'grid',
+          xtype: 'findohodgrid',
+          store: store
+        }]
+      });
+
+    });
+
+  </script>
+}

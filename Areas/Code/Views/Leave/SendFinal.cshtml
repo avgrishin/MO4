@@ -1,0 +1,109 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q { get; set; }
+  public string host { get; set; }
+  public string email { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+</style>
+<h3>Заявление на отпуск</h3>
+<table>
+  <tr>
+    <th>Сотрудник</th>
+    <td>@q.Name1</td>
+    <td>@q.UserName1</td>
+    <td>@q.Sign1.ToString("dd.MM.yyyy HH:mm")</td>
+  </tr>
+  <tr>
+    <th>Вид отпуска</th>
+    <td colspan="3">@q.TypeName</td>
+  </tr>
+  <tr>
+    <th>Период</th>
+    <td>@q.DateB.ToString("dd.MM.yyyy") - @q.DateE.ToString("dd.MM.yyyy")</td>
+    <th>Календарных дней</th>
+    <td>@q.Days.ToString()</td>
+  </tr>
+  @if (!string.IsNullOrEmpty(q.Comment1))
+  {
+    <tr>
+      <th>Примечание</th>
+      <td colspan="3">@q.Comment1</td>
+    </tr>
+  }
+  <tr>
+    <th>Обязанности будут возлагаться на</th>
+    <td colspan="3">@q.Name2</td>
+  </tr>
+  <tr>
+    @if (q.Sign4 == null)
+    {
+      <th>Требует согласования</th>
+      <td>@q.Name4</td>
+      <td>@q.UserName4</td>
+      <td>&nbsp;</td>
+    }
+    else
+    {
+      <th>Согласовано</th>
+      <td>@q.Name4</td>
+      <td>@q.UserName4</td>
+      <td>@q.Sign4.ToString("dd.MM.yyyy HH:mm")</td>
+    }
+  </tr>
+  @if (!string.IsNullOrEmpty(q.Comment4))
+  {
+    <tr>
+      <th>Примечание</th>
+      <td colspan="3">@q.Comment4</td>
+    </tr>
+  }
+  @if (!string.IsNullOrEmpty(q.Name5))
+  {
+    <tr>
+      @if (q.Sign5 == null)
+      {
+        <th>Требует согласования</th>
+        <td>@q.Name5</td>
+        <td>@q.UserName5</td>
+        <td>&nbsp;</td>
+      }
+      else
+      {
+        <th>Согласовано</th>
+        <td>@q.Name5</td>
+        <td>@q.UserName5</td>
+        <td>@q.Sign5.ToString("dd.MM.yyyy HH:mm")</td>
+      }
+    </tr>
+      if (!string.IsNullOrEmpty(q.Comment5))
+      {
+    <tr>
+      <th>Примечание</th>
+      <td colspan="3">@q.Comment5</td>
+    </tr>
+      }
+
+  }
+</table>
+<p style="color: white; font-style: italic">@email</p>

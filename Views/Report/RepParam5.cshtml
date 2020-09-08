@@ -1,0 +1,173 @@
+﻿@model MO.Models.RepParam17
+@{
+
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 0px 5px 0px 5px;
+      border: 1px solid #fff;
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="@Url.Content("~/Scripts/ExtJS41/ext-lang-ru.js")" type="text/javascript"></script>
+  <script type="text/javascript">
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = Ext.getCmp(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = Ext.getCmp(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+
+      Ext.define('CbModel', {
+        extend: 'Ext.data.Model',
+        idProperty: 'id',
+        fields: ['id', 'name', 'brief']
+      });
+
+      var storeCl = Ext.create('Ext.data.Store', {
+        autoLoad: false,
+        model: 'CbModel',
+        proxy: {
+          type: 'ajax',
+          actionMethods: { read: 'POST' },
+          url: '@Url.Action("GetCbBPifer")',
+          reader: {
+            type: 'json',
+            root: 'data'
+          }
+        }
+      });
+
+      var fp = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: '@ViewBag.Title',
+        frame: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 600,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        //layoutConfig: { labelSeparator: '' },
+        items: [{
+          xtype: 'datefield',
+          id: 'd1',
+          name: 'd1',
+          fieldLabel: 'Начальная дата',
+          allowBlank: "false",
+          format: 'd.m.Y',
+          vtype: 'daterange',
+          endDateField: 'd2',
+          startDay: 1,
+          value:'@string.Format("{0:dd.MM.yyyy}", Model.d1)'
+        }, {
+          xtype: 'datefield',
+          id: 'd2',
+          name: 'd2',
+          fieldLabel: 'Конечная дата',
+          allowBlank: false,
+          format: 'd.m.Y',
+          vtype: 'daterange',
+          startDateField: 'd1',
+          startDay: 1,
+          value: '@string.Format("{0:dd.MM.yyyy}", Model.d2)'
+        }, {
+          xtype: 'combo',
+          id: 'cid',
+          store: storeCl,
+          displayField: 'name',
+          valueField: 'id',
+          typeAhead: false,
+          queryMode: 'local',
+          fieldLabel: 'Клиент',
+          forceSelection: true,
+          triggerAction: 'all',
+          selectOnFocus: true,
+          name: 'cid',
+          allowBlank: false,
+          anchor: '100%'
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              var form = Ext.getDom('export');
+              form.d1.value = fp.getForm().findField('d1').rawValue;
+              form.d2.value = fp.getForm().findField('d2').rawValue;
+              form.cid.value = fp.getForm().findField('cid').value;
+              form.submit();
+            }
+          },
+          formBind: true
+        }]
+      });
+      storeCl.load();
+      fp.getForm().findField('cid').setValue(@Model.cid);
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>
+<form id="export" method="POST" style="display: none;">
+  <input type="hidden" name="d1" />
+  <input type="hidden" name="d2" />
+  <input type="hidden" name="cid" />
+</form>

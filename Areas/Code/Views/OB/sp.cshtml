@@ -1,0 +1,706 @@
+﻿@{
+  ViewBag.Title = "Привязка договора к стратегии/пулу";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS62/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-crisp/theme-crisp.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+
+  <script type="text/javascript">
+
+    Ext.override(Ext.form.field.ComboBox, {
+      assertValue: function () {
+        var me = this,
+            value = me.getRawValue(),
+            rec;
+
+        if (me.multiSelect) {
+          // For multiselect, check that the current displayed value matches the current
+          // selection, if it does not then revert to the most recent selection.
+          if (value !== me.getDisplayValue()) {
+            me.setValue(me.lastSelection);
+          }
+        } else {
+          // For single-select, match the displayed value to a record and select it,
+          // If no value and we're allowing blank, clear the current value.
+          // if it does not match a record then revert to the most recent selection.
+          if (!value.length && me.allowBlank) {
+            me.setValue(null);
+          } else {
+            rec = me.findRecordByDisplay(value);
+            if (rec) {
+              me.select(rec);
+            } else {
+              me.setValue(me.lastSelection);
+            }
+          }
+        }
+        me.collapse();
+      }
+    });
+
+
+    Ext.define('Treaty', {
+      extend: 'Ext.data.Model',
+      idProperty: 'TreatyID',
+      fields: [
+        { name: 'TreatyID', type: 'int' },
+        { name: 'Name', type: 'string' },
+        { name: 'ClientBrief', type: 'string', persist: false },
+        { name: 'ClientName', type: 'string', persist: false },
+        { name: 'ContrName', type: 'string', persist: false },
+        { name: 'Portal', type: 'string', persist: false },
+        { name: 'FinInstID', type: 'int' },
+        { name: 'IsDisabled', type: 'boolean', defaultValue: false },
+        { name: 'DateStart', type: 'date', dateFormat: 'c' },
+        { name: 'DateFinish', type: 'date', dateFormat: 'c' }
+      ],
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("getTreatyList")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeTreaty',
+      model: 'Treaty'
+    });
+
+    Ext.define('PortfolioTreaty', {
+      extend: 'Ext.data.Model',
+      idProperty: 'ID',
+      fields: [
+        { name: 'ID', type: 'int' },
+        { name: 'PortfolioID', type: 'int' },
+        { name: 'TreatyID', type: 'int' },
+        { name: 'StartDate', type: 'date', dateFormat: 'c' },
+        { name: 'FinishDate', type: 'date', dateFormat: 'c' },
+        { name: 'Name', type: 'string', persist: false },
+        { name: 'Brief', type: 'string', persist: false },
+        { name: 'TypeName', type: 'string', persist: false }
+      ],
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        api: {
+          read: '@Url.Action("getPortfolioTreatyList")',
+          destroy: '@Url.Action("delTreatyPortfolio")'
+        },
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        },
+        writer: {
+          type: 'json',
+          rootProperty: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storePortfolioTreaty',
+      model: 'PortfolioTreaty'
+    });
+
+    Ext.define('Portfolio', {
+      extend: 'Ext.data.Model',
+      idProperty: 'PortfolioID',
+      fields: [
+        { name: 'PortfolioID', type: 'int' },
+        { name: 'Brief', type: 'string' },
+        { name: 'Name', type: 'string' },
+        { name: 'PortfolioTypeID', type: 'int' },
+        { name: 'PortfolioType', type: 'string', persist: false }
+      ]
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storePortfolio',
+      model: 'Portfolio',
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("getPortfolioList")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storePortType',
+      idProperty: 'PortfolioTypeID',
+      fields: [
+        { name: 'PortfolioTypeID', type: 'int' },
+        { name: 'Name', type: 'string' }
+      ],
+      data: [[8, 'Стратегия'], [3, 'Пул']]
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeTreatyType',
+      idProperty: 'TreatyTypeID',
+      fields: [
+        { name: 'TreatyTypeID', type: 'int' },
+        { name: 'Name', type: 'string' }
+      ],
+      data: [[1, 'ДУ'], [3, 'БРОК'], [340, 'ОК']]
+    });
+
+    Ext.define('TreatyGrid.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.treatygrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          store: 'storeTreaty',
+          columns: [{
+            dataIndex: 'Name',
+            header: 'Наименование',
+            flex: 1
+          }, {
+            dataIndex: 'ClientBrief',
+            header: 'Сокращение',
+            flex: 1
+          }, {
+            dataIndex: 'ClientName',
+            header: 'Клиент',
+            flex: 2
+          }, {
+            dataIndex: 'ContrName',
+            header: 'Контрагент',
+            flex: 1
+          }, {
+            dataIndex: 'DateStart',
+            header: 'Начало',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            width: 100
+          }, {
+            dataIndex: 'DateFinish',
+            header: 'Конец',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            width: 100
+          }, {
+            dataIndex: 'Portal',
+            header: 'Портал',
+            width: 80
+          }, {
+            dataIndex: 'TreatyID',
+            header: 'ID',
+            width: 60
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [' Тип: ', {
+              itemId: 'cbType',
+              xtype: 'combobox',
+              store: 'storeTreatyType',
+              displayField: 'Name',
+              valueField: 'TreatyTypeID',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              //width: 180,
+              listeners: {
+                beforerender: function () {
+                  this.setValue(this.getStore().getData().getAt(0).get('TreatyTypeID'))
+                }
+              }
+            }, {
+              xtype: 'tbtext',
+              text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfFind'
+            }, '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              handler: this.onRefreshClick,
+              scope: this
+            }]
+          }],
+          viewConfig: {
+            enableTextSelection: true,
+            listeners: {
+              scope: this,
+              beforerender: {
+                //fn: this.onRefreshClick
+              },
+              itemdblclick: {
+                fn: this.onSelect
+              },
+              itemclick: {
+                fn: this.onSelectChange
+              }
+            }
+          }
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = {
+          filter: this.down('#tfFind').getValue(),
+          TreatyTypeID: this.down('#cbType').getValue()
+        };
+        this.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        var grid = this.up('panel').down('#portftreaty');
+        if (grid) {
+          if (selections.length === 0) {
+            grid.down('#create').setDisabled(true);
+          }
+          else {
+            grid.store.proxy.extraParams = { TreatyID: this.getView().getSelectionModel().getSelection()[0].get('TreatyID'), PortfolioTypeID: grid.down('#cbType').getValue() };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onSelect: function (view, record, item, index, e) {
+        this.up('window').fireEvent('sel', record.get('Name'), record.get('TreatyID'));
+        return false;
+      }
+    });
+
+    Ext.define('TreatyPortfolio.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.treatyportfoliowin',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 700,
+          //closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            //height: 300,
+            defaults: { anchor: '100%' },
+            bodyPadding: 10,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'right',
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                xtype: 'datefield',
+                format: 'd.m.Y',
+                width: 250,
+                name: 'DateStart',
+                fieldLabel: 'Начиная с даты'
+              }]
+            }, {
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                name: 'Name',
+                fieldLabel: 'Портфель',
+                xtype: 'textfield',
+                readOnly: true,
+                allowBlank: false,
+                flex: 1
+              }, {
+                xtype: 'button',
+                text: 'Выбрать',
+                scope: this,
+                handler: this.onShowType
+              }]
+            }, {
+              xtype: 'hidden',
+              name: 'PortfolioID'
+            }, {
+              xtype: 'hidden',
+              name: 'TreatyID'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Выход',
+              scope: this,
+              handler: this.onExit
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onShowType: function () {
+        var w = Ext.create('Ext.window.Window', {
+          scope: this,
+          title: this.portType,
+          modal: true,
+          width: 1000,
+          height: window.innerHeight,
+          layout: 'fit',
+          items: [{
+            xtype: 'portfoliogrid',
+            portfolioTypeId: this.portfolioTypeId
+          }],
+          listeners: {
+            scope: this,
+            sel: function (text, id) {
+              this.down('form').getForm().findField('Name').setValue(text);
+              this.down('form').getForm().findField('PortfolioID').setValue(id);
+              w.close();
+            }
+          }
+        }).show(this);
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var me = this;
+        var form = me.down('form').getForm();
+        if (form.isValid()) {
+          form.submit({
+            jsonSubmit: false,
+            url: '@Url.Action("addPortfolioTreaty")',
+            success: function (f, a) {
+              me.fireEvent('created');
+              me.hide();
+            },
+            failure: function (f, a) {
+              Ext.Msg.alert('Error', 'Изменения не записаны. Проверьте значения данных.');
+            }
+          });
+        }
+      },
+
+      onExit: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('PortfolioGrid.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.portfoliogrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          store: 'storePortfolio',
+          columns: [{
+            dataIndex: 'Brief',
+            header: 'Сокращение',
+            flex: 1
+          }, {
+            dataIndex: 'Name',
+            header: 'Наименование',
+            flex: 3
+          }, {
+            dataIndex: 'PortfolioType',
+            header: 'Тип',
+            flex: 1
+          }, {
+            dataIndex: 'PortfolioID',
+            header: 'ID',
+            width: 20
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext',
+              text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfFind'
+            }, ' ', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              handler: this.onRefreshClick,
+              scope: this
+            }]
+          }],
+          viewConfig: {
+            enableTextSelection: true,
+            listeners: {
+              scope: this,
+              beforerender: {
+                fn: this.onRefreshClick
+              },
+              itemdblclick: {
+                fn: this.onSelect
+              }
+            }
+          }
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { TypeID: this.portfolioTypeId, filter: this.down('#tfFind').getValue() };
+        this.store.load();
+      },
+
+      onSelect: function (view, record, item, index, e) {
+        this.up('window').fireEvent('sel', record.get('Name'), record.get('PortfolioID'));
+        return false;
+      }
+    });
+
+    Ext.define('PortfTreatyGrid.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.portftreatygrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          columns: [{
+            dataIndex: 'NameBrief',
+            header: 'Сокращение',
+            flex: 2
+          }, {
+            dataIndex: 'Name',
+            header: 'Портфель',
+            flex: 2
+          }, {
+            dataIndex: 'TypeName',
+            header: 'Тип',
+            flex: 1
+          }, {
+            header: 'Начало',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'StartDate',
+            width: 100
+          }, {
+            header: 'Конец',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'FinishDate',
+            width: 100
+          }, {
+            dataIndex: 'ID',
+            header: 'ID',
+            width: 30
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [' Тип: ', {
+              itemId: 'cbType',
+              xtype: 'combobox',
+              store: 'storePortType',
+              displayField: 'Name',
+              valueField: 'PortfolioTypeID',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 180,
+              listeners: {
+                beforerender: function () {
+                  var me = this
+                  this.store.load(function (records, operation, success) {
+                    if (records.length > 0)
+                      me.setValue(records[0].get('PortfolioTypeID'))
+                  });
+                }
+              }
+            }, ' ', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              handler: this.onRefreshClick,
+              scope: this
+            }, {
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              disabled: true,
+              itemId: 'create',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }]
+          }],
+          viewConfig: {
+            enableTextSelection: true,
+            listeners: {
+              scope: this,
+              //beforerender: {
+              //  fn: this.onRefreshClick
+              //},
+              itemdblclick: {
+                fn: this.onSelect
+              },
+              itemclick: {
+                fn: this.onSelectChange
+              }
+            }
+          }
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams.PortfolioTypeID = this.down('#cbType').getValue()
+        //};
+        this.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+      },
+
+      onAddClick: function () {
+        var rec = Ext.create('PortfolioTreaty', { TreatyID: this.store.proxy.extraParams.TreatyID, DateStart: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0) });
+        var wini = Ext.create('TreatyPortfolio.Win', {
+          portfolioTypeId: this.down('#cbType').getValue(),
+          portType: this.down('#cbType').getDisplayValue(),
+          scope: this,
+          listeners: {
+            scope: this,
+            created: function (form, data) {
+              this.onRefreshClick();
+            }
+          }
+        });
+        wini.setTitle('Добавить');
+        wini.setActiveRecord(rec);
+        wini.show(this);
+      },
+
+      onDeleteClick: function () {
+        var me = this;
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            selection.dropped = true;
+            selection.save({
+              success: function () {
+                me.store.remove(selection);
+              },
+              failure: function () {
+                selection.dropped = false;
+                Ext.Msg.alert('Error', 'Запись не удалена.');
+              }
+            });
+          }
+        }
+      },
+
+      onDeleteClick1: function () {
+        var me = this;
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+
+          if (window.confirm('Удалить стр.?')) {
+            Ext.Ajax.request({
+              url: '@Url.Action("delPortfolioTreaty")',
+              params: { id: selection.get('ID') },
+              success: function (response) {
+                if (Ext.decode(response.responseText).success)
+                  me.store.load(function() { me.getView().refreshSelection() });
+                else
+                  Ext.Msg.alert('Error', 'Запись не удалена.');
+              },
+              failure: function (f, a) {
+                Ext.Msg.alert('Error', 'Ошибка при удалении.');
+              }
+            });
+          }
+        }
+      },
+
+      onSelect: function (view, record, item, index, e) {
+        this.up('window').fireEvent('sel', record.get('Name'), record.get('TreatyID'));
+        return false;
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          xtype: 'tabpanel',
+          tabPosition: 'top',
+          region: 'center',
+          activeTab: 0,
+          frame: false,
+          items: [{
+            itemId: 'tcTreaty',
+            title: 'Договоры',
+            tag: 0,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              xtype: 'treatygrid',
+              store: 'storeTreaty'
+            }, {
+              region: 'south',
+              xtype: 'portftreatygrid',
+              store: 'storePortfolioTreaty',
+              height: '20%',
+              itemId: 'portftreaty',
+              border: false,
+              split: true
+            }]
+          }],
+          listeners: {}
+        }]
+      });
+    });
+  </script>
+}

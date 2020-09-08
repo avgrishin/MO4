@@ -1,0 +1,266 @@
+﻿@model dynamic
+@{
+  ViewBag.Title = "Распоряжение на оплату";
+  Layout = "_Layout.cshtml";
+}
+
+<div style="padding-left: 10px" class="container">
+  <h2>@ViewBag.Title</h2>
+  @Html.ValidationSummary("", new { @class = "text-danger" })
+  @if (Model.q1.PPTypeID == 1 && Model.NextStateID == 4)
+  { 
+    <div class="well">
+      <form method="post" class="form" action="FileUploadPP">
+        <input type="hidden" name="id" value="@Model.id" />
+        <div class="form-group">
+          <label for="file">Копия ПП</label>
+          <input type="file" name="file" />
+        </div>
+        <div class="form-group">
+          <label for="filenamepp">Файл ПП</label><br />
+          <input type="text" name="filenamepp" value="@Model.q1.FileNamePP" class="form-control" readonly="true" />
+        </div>
+        <input type="button" value="Загрузить" name="LoadPP" class="btn btn-default" />
+      </form>
+    </div>
+  }
+  <div class="well">
+    <form method="post" class="form">
+      <input type="hidden" name="id" value="@Model.id" />
+      <input type="hidden" name="s" value="@Model.s" />
+      @if (Model.NextStateID == 4)
+      { 
+        <div class="row">
+          <div class="form-group col-md-3">
+            <label for="datepay">Дата оплаты</label>
+            <input type="text" name="datepay" value="@(Model.q1.DatePay.ToShortDateString())" maxlength="10" size="12" class="form-control" />
+          </div>
+        </div>
+      }
+      <div class="form-group">
+        <label for="dscr">Комментарий</label><br />
+        <input type="text" name="descr" value="" maxlength="255" size="100" class="form-control" />
+      </div>
+      <input type="submit" value="Вернуть" name="refuse" class="btn btn-default" />
+      <input type="submit" value="Подтвердить" name="confirm" class="btn btn-primary" />
+    </form>
+  </div>
+
+  <table class="table table-condensed" style="width: auto">
+    <tr>
+      <th>Состояние</th>
+      <td>@Model.q1.State</td>
+    </tr>
+    @if (Model.q1.PPTypeID > 0 && Model.NextStateID == 4)
+    {
+      <tr>
+        <th>Платежное поручение</th>
+        <td>Требуется @(Model.q1.PPTypeID == 1 ? "копия" : Model.q1.PPTypeID == 2 ? "оригинал" : "?")</td>
+      </tr>        
+    }
+    <tr>
+      <th>Номер</th>
+      <td>@(string.IsNullOrWhiteSpace(Model.q1.Number) ? Model.q1.id.ToString() : Model.q1.Number)</td>
+    </tr>
+    <tr>
+      <th>Бюджет</th>
+      <td>@Model.q1.IsBudgetS</td>
+    </tr>
+    <tr>
+      <th>Компания плательщик</th>
+      <td>@Model.q1.NameBrief</td>
+    </tr>
+    <tr>
+      <th>Вид документа</th>
+      <td>@Model.q1.DocTypeName</td>
+    </tr>
+    <tr>
+      <th>Дата документа</th>
+      <td>@(Model.q1.DateDoc != null ? Model.q1.DateDoc.ToShortDateString() : "")</td>
+    </tr>
+    <tr>
+      <th>Номер документа</th>
+      <td>@Model.q1.DocNumb</td>
+    </tr>
+    <tr>
+      <th>Контрагент -  получатель средств</th>
+      <td>@Model.q1.Receiver</td>
+    </tr>
+    <tr>
+      <th>Номер договора</th>
+      <td>@(Model.q1.DogovorID == null ? Model.q1.Dogovor : (Model.q1.DogName + (Model.q1.DogDate != null ? " от " + Model.q1.DogDate.ToShortDateString() + "г." : "")))</td>
+    </tr>
+    @if (!String.IsNullOrWhiteSpace(Model.q1.FileNameCD))
+    {
+      <tr>
+        <th>Файл договора</th>
+        <td><a href="@Url.RouteUrl("Default", new { action = "GetFileCD", data = Model.q1.FileNameCD })">@Model.q1.FileNameCD</a></td>
+      </tr>
+    }
+    <tr>
+      <th>Валюта документа</th>
+      <td>@Model.q1.FundName</td>
+    </tr>
+    <tr>
+      <th>Исполнитель</th>
+      <td>@Model.q1.ExecutorName</td>
+    </tr>
+    <tr>
+      <th>Дата составления</th>
+      <td>@Model.q1.DateCreate.ToShortDateString()</td>
+    </tr>
+    <tr>
+      <th>Дата учёта</th>
+      <td>@(Model.q1.DateReg != null ? Model.q1.DateReg.ToShortDateString() : "")</td>
+    </tr>
+    @if (!string.IsNullOrWhiteSpace(Model.q1.FileName))
+    {
+      <tr>
+        <th>Файл</th>
+        <td><a href="@Url.RouteUrl("Default", new { action = "GetFile", data = Model.q1.FileName })">@Model.q1.FileName</a></td>
+      </tr>
+    }
+  </table>
+  <table class="table table-bordered table-condensed">
+    <caption>Позиции документа</caption>
+    <thead>
+      <tr>
+        <th class="text-center">№</th>
+        <th class="text-center">Статья расходов</th>
+        <th class="text-center">ПФП</th>
+        <th class='text-right'>Сумма в валюте документа</th>
+        <th>Экономическое содержание</th>
+      </tr>
+    </thead>
+    <tbody>
+      @{ 
+        int c = 1;
+        decimal? Qty = 0m;
+        foreach (var q1 in Model.q2)
+        {
+          Qty += (Model.q1.FundID == 39191) ? q1.Qty : q1.QtyR;
+        <tr>
+          <td class="text-center">@(c++)</td>
+          <td class="text-center">@q1.Item</td>
+          <td class="text-center">@q1.PFP</td>
+          <td class='text-right'>@(string.Format("{0:N2}", (Model.q1.FundID == 39191) ? q1.Qty : q1.QtyR))</td>
+          <td>@q1.Comment</td>
+        </tr>
+        }
+        <tr>
+          <th colspan="3">Всего</th>
+          <th class='text-right'>@(string.Format("{0:N2}", Qty))</th>
+          <td>&nbsp;</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <table class="table table-bordered table-condensed" style="width: auto">
+    <caption>Лог</caption>
+    <thead>
+      <tr>
+        <th class="text-center">Действие</th>
+        <th class="text-center">Дата время</th>
+        <th class="text-center">Login</th>
+        <th class='text-center'>Тип</th>
+        <th class='text-left'>Комментарий</th>
+      </tr>
+    </thead>
+    <tbody>
+      @{ 
+        foreach (var ql in Model.ql)
+        {
+        <tr>
+          <td>@ql.Act</td>
+          <td>@ql.InDateTime</td>
+          <td>@ql.Login</td>
+          <td>@ql.Type</td>
+          <td>@ql.Comment</td>
+        </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@section css {
+  @*<link href="~/Content/themes/smoothness/datepicker.css" rel="stylesheet" />*@
+  <link href="~/Content/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+}
+
+@section scripts {
+
+  <script type="text/javascript">
+    (function ($) {
+      @if (Model.NextStateID == 4)
+      {
+        <text>
+      $('input[type=text][name=datepay]:not([readonly=true])').datepicker({ showOtherMonths: true, selectOtherMonths: true, numberOfMonths: 1, duration: "slow", dateFormat: "dd.mm.yy", firstDay: 1, monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"], prevText: "Раньше", nextText: "Позже", dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"] });
+        </text>
+      }
+      $('input[type=submit][name=refuse]').on('click', function () {
+        if ($('input[type=text][name=descr]').val() == '') {
+          alert('Не заполнено поле "Комментарий"');
+          return false;
+        };
+        return true;
+      })
+
+      @if (Model.NextStateID == 4)
+      {
+        <text>
+      $('input[type=submit][name=confirm]').on('click', function () {
+        if ($('input[type=text][name=datepay]').val() == '') {
+          alert('Не заполнено поле "Дата платежа"');
+          return false;
+        }
+        </text>
+      }
+  @if (Model.q1.PPTypeID == 1 && Model.NextStateID == 4)
+  {
+    <text>
+        if ($('input[type=text][name=filenamepp]').val() == '') {
+          alert('Не заполнено поле "Файл ПП"');
+          return false;
+        };
+        </text>
+  }
+  @if (Model.NextStateID == 4)
+  {
+    <text>
+        return true;
+      })
+      </text>
+  }
+
+      $('input[type=button][name=LoadPP]').on('click', function () {
+
+        if ($('input[type=file][name=file]')[0].files.length == 0) {
+          alert('Не выбран файл');
+          return false;
+        };
+        var file = $('input[type=file][name=file]')[0].files[0];
+        var formData = new FormData();
+        formData.append("fn", file);
+
+        $.ajax({
+          url: "@Url.RouteUrl("Default", new { action = "FileUploadPP", id = Model.q1.id })",
+          type: "POST",
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (fp, o) {
+            var fn = jQuery.parseJSON(fp).file;
+            $('input[type=text][name=filenamepp]').val(fn)
+            alert('Файл "' + fn + '" сохранен.');
+          },
+          failure: function (fp, o) {
+            alert('Ошибка');
+          }
+        });
+
+      })
+    })(jQuery);
+  </script>
+}

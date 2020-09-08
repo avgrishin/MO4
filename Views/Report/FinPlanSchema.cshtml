@@ -1,0 +1,532 @@
+﻿@{
+  ViewBag.Title = "ФинПлан схема";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <link href="~/Scripts/ExtJS41/ux/grid/css/GridFilters.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/RangeMenu.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setConfig({ enabled: true });
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.grid.*',
+      'Ext.data.*',
+      'Ext.ux.grid.FiltersFeature',
+      'Ext.toolbar.Paging'
+    ]);
+
+    Ext.apply(Ext.util.Format, {
+      thousandSeparator: ' ',
+      decimalSeparator: '.'
+    });
+
+    Ext.define('FPS', {
+      extend: 'Ext.data.Model',
+      idProperty: 'ID',
+      fields: [
+        'ID', 'IFRS_SubSector', 'Sub_UrUnitName_To', 'Sub_OrgUnitName_To', 'Agent_Type', 'UR_Format_AG',
+        'Agent_Name', 'TCS_Istochnik_From_Kategory', 'TCS_Type_From', 'TCS_Vid_From',
+        'UR_Format_KL', 'Sub_UrUnitName_From', 'Prod_Klass', 'Prod_Group', 'Prod_SubGroup',
+        'Prod_Residence', 'Prod_ShortName', 'TaxGroup', 'Instr_Type'
+      ]
+    });
+
+    var filters = {
+      ftype: 'filters',
+      encode: true,
+      local: false,
+      autoReload: false
+    };
+
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+    Ext.define('FPS.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.fpswin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 500,
+          autoHeight: true,
+          closeAction: 'hide',
+          modal: true,
+          layout: 'fit',
+          plain: true,
+          bodyStyle: 'padding:5px;',
+          buttonAlign: 'center',
+          border: true,
+          items: [
+            Ext.create('Ext.form.Panel', {
+              activeRecord: null,
+              border: true,
+              frame: false,
+              autoHeight: true,
+              autoWidth: true,
+              baseCls: 'x-plain',
+              bodyStyle: 'padding:5px 5px 0',
+              bodyPadding: 5,
+              defaults: { anchor: '100%' },
+              defaultType: 'textfield',
+              layoutConfig: { labelSeparator: '' },
+              fieldDefaults: { labelWidth: 170, labelAlign: 'right' },
+              items: [{
+                name: 'IFRS_SubSector',
+                fieldLabel: 'IFRS_SubSector'
+              }, {
+                name: 'Sub_UrUnitName_To',
+                fieldLabel: 'Sub_UrUnitName_To'
+              }, {
+                name: 'Sub_OrgUnitName_To',
+                fieldLabel: 'Sub_OrgUnitName_To'
+              }, {
+                name: 'Agent_Type',
+                fieldLabel: 'Agent_Type'
+              }, {
+                name: 'UR_Format_AG',
+                fieldLabel: 'UR_Format_AG'
+              }, {
+                name: 'Agent_Name',
+                fieldLabel: 'Agent_Name'
+              }, {
+                name: 'TCS_Istochnik_From_Kategory',
+                fieldLabel: 'TCS_Istochnik_From_Kategory'
+              }, {
+                name: 'TCS_Type_From',
+                fieldLabel: 'TCS_Type_From'
+              }, {
+                name: 'TCS_Vid_From',
+                fieldLabel: 'TCS_Vid_From'
+              }, {
+                name: 'UR_Format_KL',
+                fieldLabel: 'UR_Format_KL'
+              }, {
+                name: 'Sub_UrUnitName_From',
+                fieldLabel: 'Sub_UrUnitName_From'
+              }, {
+                name: 'Prod_Klass',
+                fieldLabel: 'Prod_Klass'
+              }, {
+                name: 'Prod_Group',
+                fieldLabel: 'Prod_Group'
+              }, {
+                name: 'Prod_SubGroup',
+                fieldLabel: 'Prod_SubGroup'
+              }, {
+                name: 'Prod_Residence',
+                fieldLabel: 'Prod_Residence'
+              }, {
+                name: 'Prod_ShortName',
+                fieldLabel: 'Prod_ShortName'
+              }, {
+                name: 'TaxGroup',
+                fieldLabel: 'TaxGroup'
+              }, {
+                name: 'Instr_Type',
+                fieldLabel: 'Instr_Type'
+              }],
+              listeners: {
+                'actioncomplete': this.onActionComplete
+              }
+            })
+          ],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onActionComplete: function (form, action) {
+        //        if (action.type == 'load') {
+        //          var c = this.getForm().findField('Receiver');
+        //          var f = action.result.data.Receiver;
+        //          var l = function (r) {
+        //            c.setValue(f);
+        //            c.store.un('load', l);
+        //          };
+        //          c.store.on('load', l);
+        //          c.store.load({ params: { id: f} });
+        //        }
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.items.items[0].getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.items.items[0].getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.items.items[0].getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('FPS.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.fpsgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          region: 'center',
+          //layout: 'fit',
+          //frame: true,
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          columns: [{
+            header: 'IFRS_SubSector',
+            dataIndex: 'IFRS_SubSector',
+            width: 100
+          }, {
+            header: 'Sub_UrUnitName_To',
+            dataIndex: 'Sub_UrUnitName_To',
+            width: 100
+          }, {
+            header: 'Sub_OrgUnitName_To',
+            dataIndex: 'Sub_OrgUnitName_To',
+            width: 100
+          }, {
+            header: 'Agent_Type',
+            dataIndex: 'Agent_Type',
+            width: 100
+          }, {
+            header: 'Agent_Name',
+            dataIndex: 'Agent_Name',
+            width: 100
+          }, {
+            header: 'TCS_Istochnik_From_Kategory',
+            dataIndex: 'TCS_Istochnik_From_Kategory',
+            width: 100
+          }, {
+            header: 'TCS_Type_From',
+            dataIndex: 'TCS_Type_From',
+            width: 100
+          }, {
+            header: 'TCS_Vid_From',
+            dataIndex: 'TCS_Vid_From',
+            width: 100
+          }, {
+            header: 'UR_Format_KL',
+            dataIndex: 'UR_Format_KL',
+            width: 100
+          }, {
+            header: 'Sub_UrUnitName_From',
+            dataIndex: 'Sub_UrUnitName_From',
+            width: 100
+          }, {
+            header: 'Prod_Klass',
+            dataIndex: 'Prod_Klass',
+            width: 100
+          }, {
+            header: 'Prod_Group',
+            dataIndex: 'Prod_Group',
+            width: 100
+          }, {
+            header: 'Prod_SubGroup',
+            dataIndex: 'Prod_SubGroup',
+            width: 100
+          }, {
+            header: 'Prod_Residence',
+            dataIndex: 'Prod_Residence',
+            width: 100
+          }, {
+            header: 'Prod_ShortName',
+            dataIndex: 'Prod_ShortName',
+            width: 100
+          }, {
+            header: 'TaxGroup',
+            dataIndex: 'TaxGroup',
+            width: 100
+          }, {
+            header: 'Instr_Type',
+            dataIndex: 'Instr_Type',
+            width: 100
+          }],
+          features: [filters],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              //iconCls: 'icon-change',
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              text: 'Скопировать',
+              disabled: true,
+              itemId: 'copy',
+              scope: this,
+              handler: this.onCopyClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }, '->', @Html.Partial("MenuFin")]
+          }, {
+            xtype: 'pagingtoolbar',
+            dock: 'bottom',
+            displayInfo: true,
+            listeners: {
+              scope: this,
+              beforerender: function () { this.dockedItems.items[2].bindStore(this.store); }
+            }
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+        this.onRefreshClick();
+      },
+
+      onRefreshClick: function () {
+        //this.store.proxy.extraParams = { db: Ext.getCmp('DateB').value, de: Ext.getCmp('DateE').value };
+        this.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('FPS.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new FPS();
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onCopyClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#copy').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+    });
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = Ext.getCmp(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = Ext.getCmp(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+
+    Ext.onReady(function () {
+      var wini;
+
+      Ext.apply(Ext.ux.grid.FiltersFeature.prototype, {
+        menuFilterText: "Фильтр"
+      });
+
+      var store = Ext.create('Ext.data.Store', {
+        pageSize: 50,
+        remoteSort: true,
+        autoSync: false,
+        autoLoad: false,
+        model: 'FPS',
+        proxy: {
+          type: 'ajax',
+          api: {
+            read: '@Url.Action("FPSList")',
+            create: '@Url.Action("FPSCreate")',
+            update: '@Url.Action("FPSUpdate")',
+            destroy: '@Url.Action("FPSDel")'
+          },
+          actionMethods: { read: 'POST' },
+          reader: {
+            type: 'json',
+            root: 'data',
+            totalProperty: 'totalCount'
+          },
+          writer: {
+            type: 'json',
+            root: 'data',
+            writeAllFields: true,
+            allowSingle: false,
+            encode: false
+          },
+          simpleSortMode: true
+        }
+      });
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          itemId: 'grid',
+          xtype: 'fpsgrid',
+          store: store
+        }]
+      });
+
+    });
+  </script>
+}

@@ -1,0 +1,1083 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "ЖРПК";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .gray-row .x-grid-cell {
+      text-decoration: line-through;
+      color: gray;
+  }
+
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setConfig({ enabled: true });
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.grid.*',
+      'Ext.data.*',
+      'Ext.toolbar.Paging'
+    ]);
+
+    Ext.apply(Ext.util.Format, {
+      thousandSeparator: ' ',
+      decimalSeparator: '.'
+    });
+
+    Ext.define('Enкуп', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'Num', 'Numero', 'Portal', 'ClnNameBrief', 'ClnName', 'Number', 'DateStart', 'StrategyUser', 'ClnManager', 'DocDate', 'RecuDate', 'Temps', 'Original', 'Fax', 'DocTypeID', 'DTName', 'EmployeID', 'EmployeNom', 'Remarque'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEnregList")',
+          create: '@Url.Action("addEnreg")',
+          update: '@Url.Action("updEnreg")',
+          destroy: '@Url.Action("delEnreg")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeEnreg',
+      model: 'Enreg'
+    });
+
+
+    //Ext.define('EMail', {
+    //  extend: 'Ext.data.Model',
+    //  idProperty: 'id',
+    //  fields: ['id', 'name', 'email']
+    //});
+
+
+@*    var storeEMail = Ext.create('Ext.data.Store', {
+      //storeId: 'storeEMail',
+      remoteSort: true,
+      model: 'EMail',
+      autoLoad: true,
+      proxy: {
+        actionMethods: { read: 'POST' },
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEMailList")'
+        },
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });*@
+
+
+    Ext.define('Enreg.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.enregwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          title: 'Параметры',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'top',
+              msgTarget: 'side'
+            },
+            items: [{
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.items.items[0].getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.items.items[0].getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Envoi.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.envoigrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Тип раскрываемой информации',
+            dataIndex: 'TypeInf',
+            //width: 200,
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок раскрытия',
+            dataIndex: 'SrokRask',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Место предоставления',
+            dataIndex: 'Mesto',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Основание',
+            dataIndex: 'Osnovan',
+            width: 120,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'Periodich',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Вид активов',
+            dataIndex: 'VidAktiv',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок рассылки для напоминаний',
+            dataIndex: 'SrokRass',
+            width: 130,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }]
+          }/*, {
+            xtype: 'pagingtoolbar',
+            dock: 'bottom',
+            displayInfo: true,
+            listeners: {
+              beforerender: function () { this.child('#refresh').hide(); this.bindStore(this.up('grid').store); }
+            }
+          }*/]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.on('itemclick', this.onItemClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("envoyerCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { isAuto: this.up('panel').tag == 1 };
+        this.store.load();
+        var o = this.up('panel').down('#horraire');
+        if (o) o.down('#create').setDisabled(true);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Envoi.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new Envoi({ IsAuto: this.up('panel').tag == 1 });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        var grid = this.up('panel').down('#horraire');
+        if (selections.length === 0)
+          grid.down('#create').setDisabled(true);
+        else {
+          if (grid) {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onItemClick: function () {
+        //var grid = this.up('panel').down('#horraire');
+        //if (grid) {
+        //  grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+        //  grid.store.load();
+        //  grid.down('#create').setDisabled(false);
+        //}
+      }
+
+    });
+
+    Ext.define('Horraire.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.horrairegrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          title: 'Расписание',
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true
+          },
+          columns: [{
+            header: 'Тип',
+            dataIndex: 'EnvoiHoraireType',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'День',
+            dataIndex: 'Day',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'Месяц',
+            dataIndex: 'Month',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'ConseilID',
+            dataIndex: 'ConseilID',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'EnvoiID',
+            dataIndex: 'EnvoiID',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'ID',
+            dataIndex: 'id',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              disabled: true,
+              itemId: 'create',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { isAuto: this.up('panel').tag == 1 };
+        this.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Horraire.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec;
+        if (this.store.storeId = 'storeConseilHoraire')
+          rec = new ConseilHoraire({ ConseilID: this.store.proxy.extraParams.id, EnvoiHoraireTypeID: 1 });
+        else
+          rec = new EnvoiHoraire({ EnvoiID: this.store.proxy.extraParams.id, EnvoiHoraireTypeID: 1 });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+    });
+
+    Ext.define('Conseil.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.conseilwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'tabpanel',
+            itemId: 'tp',
+            anchor: '100%',
+            //plain: false,
+            border: false,
+            //flex: 1,
+            height: 530,
+            border: false,
+            items: [{
+              xtype: 'form',
+              tag: 0,
+              title: 'Параметры',
+              bodyPadding: 10,
+              activeRecord: null,
+              border: false,
+              defaultType: 'textfield',
+              defaults: { anchor: '100%' },
+              layout: 'anchor',
+              fieldDefaults: {
+                labelAlign: 'top',
+                msgTarget: 'side'
+              },
+              items: [{
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'Violation',
+                fieldLabel: 'Содержание недостатка/нарушения'
+              }, {
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'Conseil',
+                fieldLabel: 'Рекомендация'
+              }, {
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                items: [{
+                  xtype: 'datefield',
+                  labelWidth: 102,
+                  width: 198,
+                  labelAlign: 'left',
+                  format: 'd.m.Y',
+                  name: 'Terme',
+                  fieldLabel: 'Срок выполнения'
+                }, {
+                  xtype: 'datefield',
+                  labelAlign: 'right',
+                  labelWidth: 110,
+                  format: 'd.m.Y',
+                  width: 200,
+                  name: 'Prolongation',
+                  fieldLabel: 'Продление'
+                }]
+              }, {
+                name: 'Possesseur',
+                fieldLabel: 'Владелец'
+              }, {
+                name: 'Commentaire',
+                fieldLabel: 'Комментарии'
+              }, {
+                xtype: 'checkboxfield',
+                name: 'IsEnabled',
+                fieldLabel: 'Активна',
+                labelAlign: 'left'  
+              }, {
+                itemId: 'EmailTo',
+                name: 'EmailTo',
+                xtype: 'hidden'
+              }, {
+                itemId: 'EmailCc',
+                name: 'EmailCc',
+                xtype: 'hidden'
+              }]
+            }, {
+              tag: 1,
+              title: 'Адресаты',
+              layout: 'anchor',
+              defaults: { anchor: '100%' },
+              border: false,
+              items: [{
+                xtype: 'grid',
+                border: false,
+                itemId: 'gTo',
+                anchor: '100% 50%',
+                title: 'Кому',
+                store: storeEMailTo,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }, {
+                xtype: 'grid',
+                border: false,
+                itemId: 'gCc',
+                anchor: '100% 50%',
+                title: 'Копия',
+                store: storeEMailCc,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailTo.removeAll();
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Conseil.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.conseilgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Содержание недостатка/нарушения',
+            dataIndex: 'Violation',
+            //width: 200,
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Рекомендация',
+            dataIndex: 'Conseil',
+            width: 250,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок выполнения',
+            dataIndex: 'Terme',
+            width: 70,
+            xtype: 'datecolumn',
+            renderer: function (val) {
+                return '<span style="color:' + (val >= Ext.Date.clearTime(new Date(), false) ? '#73b51e' : '#cf4c35') + ';">' + Ext.util.Format.dateRenderer('d.m.Y')(val) + '</span>';
+            }
+          }, {
+            header: 'Продление',
+            dataIndex: 'Prolongation',
+            width: 70,
+            xtype: 'datecolumn',
+            renderer: function (val) {
+              return '<span style="color:' + (val >= Ext.Date.clearTime(new Date(), false) ? '#73b51e' : '#cf4c35') + ';">' + Ext.util.Format.dateRenderer('d.m.Y')(val) + '</span>';
+            }
+          }, {
+            header: 'Владелец',
+            dataIndex: 'Possesseur',
+            width: 120,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Комментарии',
+            dataIndex: 'Commentaire',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.on('itemclick', this.onItemClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("conseilCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        this.store.load();
+        var o = this.up('panel').down('#horraire');
+        if (o) o.down('#create').setDisabled(true);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Conseil.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new Conseil();
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        var grid = this.up('panel').down('#horraire');
+        if (selections.length === 0)
+          grid.down('#create').setDisabled(true);
+        else {
+          if (grid) {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onItemClick: function () {
+        //var grid = this.up('panel').down('#horraire');
+        //if (grid) {
+        //  grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+        //  grid.store.load();
+        //  grid.down('#create').setDisabled(false);
+        //}
+      }
+
+    });
+
+    Ext.onReady(function () {
+
+      Ext.tip.QuickTipManager.init();
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          id: 'tp',
+          xtype: 'tabpanel',
+          tabPosition: 'top',
+          region: 'center',
+          activeTab: 0,
+          frame: false,
+          items: [{
+            itemId: 'tcAuto',
+            tag: 1,
+            title: 'Авто-рассылка',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoigrid',
+              store: 'storea'
+            }, {
+              region: 'south',
+              height: '20%',
+              itemId: 'horraire',
+              border: false,
+              xtype: 'horrairegrid',
+              store: 'storeEnvoiHoraire',
+              split: true
+            }]
+          }, {
+            itemId: 'tcManuel',
+            tag: 0,
+            title: 'Ручная рассылка',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoigrid',
+              store: 'storem'
+            }]
+          }, {
+            itemId: 'tcConseil',
+            tag: 2,
+            title: 'Рекомендации',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'conseilgrid',
+              store: 'storeConseil'
+            }, {
+              region: 'south',
+              height: '20%',
+              itemId: 'horraire',
+              border: false,
+              xtype: 'horrairegrid',
+              store: 'storeConseilHoraire',
+              split: true
+            }]
+          }]
+        }]
+      });
+
+    });
+  </script>
+}

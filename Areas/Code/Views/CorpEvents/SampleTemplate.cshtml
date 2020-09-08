@@ -1,0 +1,119 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q1 { get; set; }
+  public dynamic q2 { get; set; }
+  public Guid id { get; set; }
+  public MO.Areas.Code.Models.numDep t { get; set; }
+  public string host { get; set; }
+  public string descr { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+</style>
+<span>Уважаемый коллега,<br>
+  @if (descr != "")
+  {
+    <text><b>Вам отказано в исполнении поручения</b></text><br />
+  }
+  @if (t == MO.Areas.Code.Models.numDep.IsAll)
+  {
+    @q2.str 
+  }
+  else if (t != MO.Areas.Code.Models.numDep.IsSS)
+  {
+    <text>просим @q2.str клиента по <a href='http://@host/code/CorpEvents/confirmEnrDet?id=@id&t=@((int)t)&a=@q2.NameTo'>ссылке</a></text>
+  }
+</span>
+<table>
+  <tr>
+    <th>Клиент</th>
+    <td>@q1.ClientName</td>
+  </tr>
+  <tr>
+    <th>Код клиента</th>
+    <td>@q1.ClientCode</td>
+  </tr>
+  <tr>
+    <th>№ Договора</th>
+    <td>@q1.trNameBrief</td>
+  </tr>
+  <tr>
+    <th>Дата договора</th>
+    <td>@q1.DateStart.ToString("dd.MM.yy")</td>
+  </tr>
+  <tr>
+    <th>Документ</th>
+    <td>@q1.DTName</td>
+  </tr>
+  <tr>
+    <th>Оригинал</th>
+    <td>@(q1.Original ?? false ? "Да" : "Нет")</td>
+  </tr>
+  <tr>
+    <th>Клиентский</th>
+    <td>@q1.ClnManager</td>
+  </tr>
+@*  <tr>
+    <th>Управляющий</th>
+    <td>@q1.StrategyUser</td>
+  </tr>*@
+  <tr>
+    <th colspan="2">Сроки исполнения (Дата исполнения)</th>
+  </tr>
+  <tr>
+    <th>По договору</th>
+    <td>@q1.DaysDog дн. (@q1.DateDog.ToString("dd.MM.yy"))</td>
+  </tr>
+  <tr>
+    <th>По документу</th>
+    <td>@q1.DaysDoc дн. (@q1.DateDoc.ToString("dd.MM.yy"))</td>
+  </tr>
+  <tr>
+    <th>Сумма</th>
+    <td>@(q1.Qty == null ? "" : string.Format("{0:N2}", q1.Qty))</td>
+  </tr>
+  <tr>
+    <th>Примечание</th>
+    <td>@q1.Remarque&nbsp;</td>
+  </tr>
+  @if (descr != "")
+  {
+    <tr>
+      <th>ОТКАЗ</th>
+      <td>@descr&nbsp;</td>
+    </tr>
+  }
+  @if (!String.IsNullOrWhiteSpace(q1.FileName))
+  {
+    <tr>
+      <th>Файл</th>
+      <td>@(string.Format("<a href='http://{1}/code/corpevents/GetFileEnr?data={2}'>{0}</a>", q1.FileName, host, System.Web.HttpUtility.UrlEncode(q1.FileName)))</td>
+    </tr>
+  }
+</table>
+<br>
+@if (t != MO.Areas.Code.Models.numDep.IsAll && t != MO.Areas.Code.Models.numDep.IsSS)
+{
+  <span><a href='http://@host/code/CorpEvents/refusalEnrDet?id=@id&t=@((int)t)&a=@q2.NameTo'>в случае невозможности исполнения распоряжения просьба перейти по ссылке отказа и объяснить причину ОТКАЗа</a></span>
+  <br />
+  <span>Подпись: Мидл-офис</span>
+}

@@ -1,0 +1,45 @@
+﻿@model dynamic
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div style="padding-left: 30px">
+  <h1>Закрытие доверенности</h1>
+  @using (Html.BeginForm("closeWarrant", "jur", new { area = "code" }, FormMethod.Post))
+  {
+    <input type="hidden" name="ID" value="@Model.ID.ToString()" />
+    <table style="border-collapse: collapse; border-spacing: 0;" border="1">
+      <tr>
+        <th>Номер</th>
+        <td>@Model.Nomer</td>
+      </tr>
+      <tr>
+        <th>Дата выдачи</th>
+        <td>@Model.DateB.ToString("dd.MM.yy")</td>
+      </tr>
+      <tr>
+        <th>Доверитель</th>
+        <td>@Model.Confidant</td>
+      </tr>
+      <tr>
+        <th>Поверенный</th>
+        <td>@Model.Principal</td>
+      </tr>
+      <tr>
+        <th>Место предоставления</th>
+        <td>@Model.Place</td>
+      </tr>
+      <tr>
+        <th>Функции</th>
+        <td>@Model.Functions</td>
+      </tr>
+      <tr>
+        <th>Срок действия</th>
+        <td>@(Model.DateE != null ? Model.DateE.ToString("dd.MM.yy") : "")</td>
+      </tr>
+      <tr>
+        <th colspan="2" style="text-align: center">
+          <input type="submit" value="Закрыть" /></th>
+      </tr>
+    </table>
+  }
+</div>

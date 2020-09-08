@@ -1,0 +1,330 @@
+﻿@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  ViewBag.Title = "Список Email";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add {
+      background-image: url("http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-theme-crisp/build/resources/images/tree/drop-add.gif") !important;
+    }
+
+    .icon-delete {
+      background-image: url("http://cdn.sencha.com/ext/gpl/5.1.0/examples/writer/images/delete.png") !important;
+    }
+
+    .icon-refresh {
+      background-image: url("http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-theme-crisp/build/resources/images/grid/refresh.png") !important;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-theme-crisp/build/resources/ext-theme-crisp-all.css">
+  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/5.1.0/build/bootstrap.js"></script>
+  @*<script src="@Url.Content("~/Scripts/ExtJS41/ext-lang-ru.js")" type="text/javascript"></script>*@
+  <script type="text/javascript">
+
+    Ext.define('EMail', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name', 'email']
+    });
+
+    var store = Ext.create('Ext.data.Store', {
+      remoteSort: true,
+      model: 'EMail',
+      autoLoad: true,
+      //autoSync: true,
+      proxy: {
+        actionMethods: { read: 'POST' },
+        type: 'ajax',
+        api: {
+          create: '@Url.Action("addEMail")',
+          update: '@Url.Action("updEMail")',
+          destroy: '@Url.Action("delEMail")',
+          read: '@Url.Action("getEMailList")'
+        },
+        reader: {
+          type: 'json',
+          successProperty: 'success',
+          root: 'data',
+          messageProperty: 'message'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        listeners: {
+          exception: function (proxy, response, operation) {
+            alert(operation.getError());
+          }
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('EM.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.emwin',
+
+      initComponent: function () {
+        //this.addEvents('create');
+        //this.addEvents('update');
+        Ext.apply(this, {
+          activeRecord: null,
+          title: 'Добавить',
+          width: 450,
+          autoHeight: true,
+          closeAction: 'hide',
+          modal: true,
+          layout: 'fit',
+          plain: true,
+          bodyStyle: 'padding:5px;',
+          buttonAlign: 'center',
+          border: true,
+          items: {
+            xtype: 'panel',
+            border: true,
+            autoHeight: true,
+            baseCls: 'x-plain',
+            items: [{
+              xtype: 'form',
+              autoHeight: true,
+              border: true,
+              baseCls: 'x-plain',
+              bodyPadding: 5,
+              fieldDefaults: { labelWidth: 70, labelAlign: 'right' },
+              defaults: { anchor: '100%' },
+              items: [{
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                items: [{
+                  xtype: 'textfield',
+                  name: 'email',
+                  flex: 1,
+                  fieldLabel: 'EMail',
+                  vtype: 'email',
+                  allowBlank: false,
+                  blankText: 'Введите EMail',
+                  emptyText: 'Введите EMail',
+                  msgTarget: 'side',
+                  margin: '0 5 0 0'
+                }, {
+                  xtype: 'button',
+                  text: 'Найти',
+                  handler: this.onFind
+                }]
+              }, {
+                xtype: 'textfield',
+                name: 'name',
+                fieldLabel: 'Имя',
+                allowBlank: false,
+                blankText: 'Введите имя',
+                emptyText: 'Введите имя',
+                msgTarget: 'side'
+              }]
+            }]
+          },
+          buttons: [{
+            itemId: 'save',
+            text: 'Сохранить',
+            scope: this,
+            handler: this.onSave
+          }, {
+            text: 'Отмена',
+            scope: this,
+            handler: function () {
+              this.hide();
+            }
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        this.down('form').getForm().reset();
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+        }
+      },
+
+      onFind: function () {
+        var me = this;
+        Ext.Ajax.request({
+          url: '@Url.Action("findADInfo")',
+          timeout: 60000,
+          params: {
+            email: me.up('form').getForm().getValues().email
+          },
+          success: function (response) {
+            var jr = Ext.decode(response.responseText);
+            if (jr.success == true)
+              me.up('form').getForm().findField('name').setValue(Ext.decode(response.responseText).name);
+            else
+              alert('Email не найден!')
+          },
+          scope: this,
+          failure: function (response) {
+            alert('Ошибка!');
+          }
+        });
+
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      }
+
+    });
+
+    Ext.define('EM.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.emgrid',
+      wini: null,
+      initComponent: function () {
+        Ext.apply(this, {
+          height: 700,
+          title: 'EMail',
+          store: store,
+          columnLines: true,
+          columns: [/*{
+              xtype: 'rownumberer',
+              width: 30,
+              sortable: false
+            },*/ {
+              header: "Имя",
+              dataIndex: 'name',
+              width: 240,
+              sortable: true
+            }, {
+              header: "EMail",
+              dataIndex: 'email',
+              flex: 1,
+              sortable: true
+            }]/*,
+          viewConfig: {
+            loadMask: false,
+            enableTextSelection: true,
+            animate: false,
+            trackOver: true,
+            stripeRows: true
+          }*/,
+          dockedItems: [{
+            xtype: 'toolbar',
+            items: [{
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              iconCls: 'icon-refresh',
+              scope: this,
+              text: 'Обновить',
+              handler: function () { store.load(); }
+            }, '->',@Html.Partial("MenuAdmin"), ' ', @Html.Partial("MenuFin"), ' ']
+          }]
+        });
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onAddClick: function () {
+        var rec = new EMail({ name: '', email: '' });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('EM.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.store.sync();
+          }
+        }
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      }
+
+    });
+
+    Ext.onReady(function () {
+
+      Ext.tip.QuickTipManager.init();
+      var grid = Ext.create('EM.Grid', {
+        id: 'grid-panel',
+        renderTo: 'grid'
+      });
+
+    });
+  </script>
+}
+<div id="grid" style="padding: 30px">
+</div>

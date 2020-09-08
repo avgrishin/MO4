@@ -1,0 +1,8 @@
+﻿@model dynamic
+@{
+  ViewBag.Title = "Подтверждение";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div style="padding-left:10px">
+  <h2>Подтверждён документ @Model.ed.DocNum. @Model.dep @Model.NameTo Логин @User.Identity.Name</h2>
+</div>

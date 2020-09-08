@@ -1,0 +1,155 @@
+﻿@model MO.Models.Mission
+@{
+  Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mission</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" rel="stylesheet" />
+  <style type="text/css">
+    @@font-face
+    {
+      font-family: HelveticaNeue-Light;
+      src: url('/fonts/HelveticaNeue-Light.ttf') format('truetype');
+    }
+
+    html, body
+    {
+      height: 100%;
+      width: 100%;
+      margin:0 0 0 0;
+      padding: 0 0 0 0;
+      font-family: 'HelveticaNeue-Light';
+    }
+
+    body
+    {
+      background-image: url(/content/images/8890281719_1933cef307_k.jpg);
+      background-size: cover;
+      display: table;
+    }
+
+    .theme-showcase
+    {
+      vertical-align: middle;
+      display: table-cell;
+    }
+
+    .form-mission
+    {
+      max-width: 700px;
+      padding: 15px;
+      margin: 0 auto;
+      background-color: white;
+    }
+
+      .form-mission .form-mission-heading
+      {
+        font-size: 22px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .form-mission .form-mission-heading1
+      {
+        font-size: 22px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        color: green;
+      }
+
+      .form-mission .radio
+      {
+        font-weight: normal;
+        margin-bottom: 10px;
+      }
+
+      .form-mission h4
+      {
+        color: red;
+      }
+
+      .form-mission .form-control
+      {
+        position: relative;
+        height: auto;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 15px;
+        font-size: 16px;
+      }
+
+      .form-mission .div-header
+      {
+        background-image: url(/Content/Images/header-bg.png);
+        height: 80px;
+        margin: -15px -15px 0 -15px;
+        position: relative;
+      }
+
+    .form-group
+    {
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+  </style>
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+  @Scripts.Render("~/bundles/jquery")
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container theme-showcase" role="main">
+    <a href="https://ib.homecredit.ru/hcfbib.server.portal.app-theme-login/fonts/HelveticaNeue-Light.ttf">font</a>
+    <div class="row">
+
+      <form class="form-mission" role="form" method="post">
+        <div class="div-header text-center">
+          <div>
+            <img alt="" border="0" src="@Href("~/Content/Images/logo2.png")" style="padding-top:0px;padding-left:20px;" />
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="form-mission-heading1">ГОЛОСУЙ ЗА МИССИЮ</div>
+          <div class="form-mission-heading">Доверительное Управление на основе ценности</div>
+        </div>
+        <div class="form-group">
+          <div class="radio">
+            <label>
+              <input name="Option" id="radio1" value="1" @(Model.Option == 1 ? "checked" : "") type="radio">
+              ДА
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input name="Option" id="radio2" value="0" @(Model.Option == 0 ? "checked" : "") type="radio">
+              НЕТ <small>(Введите комментарий)</small>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea class="form-control" rows="3" placeholder="Комментарий" name="Comment" maxlength="160">@Model.Comment</textarea>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-lg btn-primary" type="submit">Отправить</button>
+        </div>
+        <div class="form-group">
+          <h4>@ViewBag.Error</h4>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

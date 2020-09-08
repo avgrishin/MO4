@@ -1,0 +1,286 @@
+﻿@model MO.ViewModels.Rep1ViewModel
+@{
+  Layout = null;
+    
+}
+@using MO.Helpers;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <title>@ViewBag.Title</title>
+  <style type="text/css">
+    body, td, th, button, input, select, textarea
+    {
+      font: message-box; /*font-family: sans-serif, Helvetica, Tahoma, Verdana, Arial;
+      font-size:10px;*/
+    }
+    .tbl
+    {
+      table-layout: auto;
+      background-color: #dddddd;
+    }
+    .tbl td
+    {
+      padding: 2px 3px 2px 3px;
+      word-wrap: break-word;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: normal;
+    }
+    .tbl tr.hs
+    {
+      background-color: #cbcbcb;
+    }
+    .tbl tr.hs th a, .tbl tr.hs td a
+    {
+      text-decoration: none;
+      text-align: center;
+      color: #8b0000;
+      display: block;
+    }
+    .tbl tr.hs th, .tbl tr.hs td
+    {
+      background: url("../../content/images/pager_bg.gif") repeat-x 0 -2px;
+      font-weight: bold;
+      padding-bottom: 2px;
+      text-align: center;
+    }
+    .tbl .dr
+    {
+      background-color: #ffffff;
+    }
+    .tbl .adr
+    {
+      background-color: #edf5ff;
+    }
+  </style>
+</head>
+<body>
+  <div style="background-color: #fff; padding: 10px;">
+    <table style="border-width: 0; border-collapse: collapse; width: 700px" cellpadding="2"
+      cellspacing="0" border="0">
+      <tr>
+        <th style="text-align: center; font-size: 12px" colspan="2">
+          Отчет на @Model.rep1Cls2.de.Value.ToShortDateString() г.
+        </th>
+      </tr>
+      <tr>
+        <td>
+          Клиент
+        </td>
+        <td style="width: 100%">
+          <b>@Model.rep1Cls2.fiName</b>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Период
+        </td>
+        <td>
+          <b>
+            @Model.rep1Cls2.db.Value.ToShortDateString()</b> - <b>@Model.rep1Cls2.de.Value.ToShortDateString()</b>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Стоимость
+        </td>
+        <td>
+          <b>
+            @(string.Format("{0:N2}", Model.rep1Cls2.Qty == null ? 0 : Model.rep1Cls2.Qty))</b>
+          (Активы на конец периода)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Валюта
+        </td>
+        <td>
+          <b>
+            @Model.rep1Cls2.Fund</b>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Индекс
+        </td>
+        <td>
+          <b>
+            @Model.rep1Cls2.IndexName</b>
+        </td>
+      </tr>
+    </table>
+    <div>
+      @Html.Chart("Chart", "Report", new { id = 2, DateB = Model.rep1Param.DateB.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), DateE = Model.rep1Param.DateE.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), finInstID = Model.rep1Param.finInstID, fundID = Model.rep1Param.fundID, indexID = Model.rep1Param.indexID, strategyID = Model.rep1Param.strategyID }, new { style = "height:300px;width:700px;border-width:0px;" })
+    </div>
+    <div>
+      @Html.Chart("Chart", "Report", new { id = 0, DateB = Model.rep1Param.DateB.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), DateE = Model.rep1Param.DateE.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), finInstID = Model.rep1Param.finInstID, fundID = Model.rep1Param.fundID, indexID = Model.rep1Param.indexID, strategyID = Model.rep1Param.strategyID }, new { style = "height:300px;width:349px;border-width:0px;" })
+      @Html.Chart("Chart", "Report", new { id = 1, DateB = Model.rep1Param.DateB.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), DateE = Model.rep1Param.DateE.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), finInstID = Model.rep1Param.finInstID, fundID = Model.rep1Param.fundID, indexID = Model.rep1Param.indexID, strategyID = Model.rep1Param.strategyID }, new { style = "height:300px;width:349px;border-width:0px;" })
+    </div>
+    <table class="tbl" cellpadding="0" cellspacing="1" width="700px">
+      <tr class="hs">
+        <th>
+        </th>
+        <th>
+          С
+          @Model.rep1Cls2.db.Value.ToShortDateString()
+        </th>
+        <th>
+          Посл. 30 дней
+        </th>
+        <th>
+          Посл. 7 дней
+        </th>
+      </tr>
+      @{int row = 0;
+        foreach (var r in Model.rep1Cls6)
+        {
+        <tr class="@((row++) % 2 == 0 ? "dr" : "adr")">
+          <td>
+            @r.title
+          </td>
+          <td style="text-align: right">
+            @string.Format("{0:N2}", r.y)
+          </td>
+          <td style="text-align: right">
+            @string.Format("{0:N2}", r.d30)
+          </td>
+          <td style="text-align: right">
+            @string.Format("{0:N2}", r.d7)
+          </td>
+        </tr>
+        }
+      }
+    </table>
+    @{if (Model.isShowAssets)
+      {
+      <br />
+      <table class="tbl" cellpadding="0" cellspacing="1" width="700px">
+        <tr class="hs">
+          <th>
+            Актив
+          </th>
+          <th>
+            Кол-во
+          </th>
+          <th>
+            Котировка
+          </th>
+          <th>
+            НКД на бумагу
+          </th>
+          <th>
+            Сумма
+          </th>
+          <th>
+            Доля(%)
+          </th>
+          <th>
+            Отрасль
+          </th>
+        </tr>
+        @{string SecTypeName = "";
+          row = 0;
+          Double? Qty = 0, QtyAll = 0, Perc = 0;
+          foreach (var r3 in Model.rep1Cls3)
+          {
+            if (SecTypeName != r3.SecTypeName)
+            {
+              if (SecTypeName != "")
+              {
+          <tr class="dr">
+            <td colspan="5" style="text-align: right; font-weight: bold">
+              @string.Format("{0:N2}", Qty)
+            </td>
+            <td style="text-align: right; font-weight: bold">
+              @string.Format("{0:N2}", Perc)
+            </td>
+            <td>
+            </td>
+          </tr>
+              }
+              SecTypeName = r3.SecTypeName;
+              Qty = 0;
+              Perc = 0;
+          <tr>
+            <td colspan="7">
+              @SecTypeName
+            </td>
+          </tr>
+            }
+            Qty += r3.Qty;
+            Perc += r3.Perc;
+            QtyAll += r3.Qty;
+          <tr class="@((row++) % 2 == 0 ? "dr" : "adr")">
+            <td>
+              @r3.SecName<span style="color: Blue">@r3.AccType</span>
+            </td>
+            <td style="text-align: right">
+              @string.Format("{0:" + (r3.SecType == 4 ? "N2" : "N0") + "}", r3.Num)
+            </td>
+            <td style="text-align: right">
+              @string.Format("{0:N3}", r3.Price)
+            </td>
+            <td style="text-align: right">
+              @string.Format("{0:N2}", r3.Coupon)
+            </td>
+            <td style="text-align: right">
+              @string.Format("{0:N2}", r3.Qty)
+            </td>
+            <td style="text-align: right">
+              @string.Format("{0:N2}", r3.Perc)
+            </td>
+            <td>
+              @r3.Brand
+            </td>
+          </tr>
+          }
+        }
+        <tr class="dr">
+          <td colspan="5" style="text-align: right; font-weight: bold">
+            @string.Format("{0:N2}", Qty)
+          </td>
+          <td style="text-align: right; font-weight: bold">
+            @string.Format("{0:N2}", Perc)
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr class="hs">
+          <th style="text-align: left">
+            Всего
+          </th>
+          <td colspan="4" style="text-align: right; font-weight: bold">
+            @string.Format("{0:N2}", QtyAll)
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+        </tr>
+      </table>
+      }
+    }
+    <div style="font-size: 9px; width: 680px; border: solid 1px red; margin-top: 10px;
+      padding: 10px;">
+      <p>
+        Информация, содержащаяся в данном отчете, не является оценкой Активов в соответствии
+        с договором ДУ, выпиской со счета ДЕПО, расчетного счета Д.У., не является подтверждением
+        перехода прав собственности на ценные бумаги и подтверждением остатка денежных средств
+        на текущих счетах/счетах "до востребования" и срочных депозитах. Таким образом,
+        в соответствии с действующим законодательством, указанная информация не может быть
+        использована для целей бухгалтерского/налогового учета и/или составления бухгалтерской/налоговой
+        отчетности.</p>
+      <p>
+        Кроме того, данный отчет не содержит информацию о начисленном вознаграждении Управляющего
+        и рассчитанного по итогам года НДФЛ. Указанные данные будут предоставлены в официальном
+        отчете (Отчете Управляющего) в соответствии со сроками, предусмотренными договором
+        ДУ.</p>
+      <p>
+        Обращаем Ваше внимание, что если доставка файла была произведена по открытым сетям,
+        то мы не можем гарантировать ее безопасность, конфидициальность и достоверность.</p>
+    </div>
+  </div>
+</body>
+</html>

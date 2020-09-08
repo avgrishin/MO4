@@ -1,0 +1,16 @@
+﻿@model Nullable<DateTime>
+@using System.Globalization;
+@using MO.Helpers;
+@{
+  var defaultHtmlAttributesObject = new { type = "text", @class = "form-control", dp = "true" };
+  var htmlAttributesObject = ViewData["htmlAttributes"] ?? new { };
+  var htmlAttributes = Html.MergeHtmlAttributes(htmlAttributesObject, defaultHtmlAttributesObject);
+  if (Model != null)
+  {
+    @Html.TextBox("", ViewData.TemplateInfo.FormattedModelValue, htmlAttributes)
+  }
+  else
+  {
+    @Html.TextBox("", "", htmlAttributes);
+  }
+}

@@ -1,0 +1,112 @@
+﻿@model MO.Areas.Code.Models.LeaveViewModel
+@{
+  Layout = "_Layout.cshtml";
+}
+
+<div class="container form-horizontal">
+  <h2>@ViewBag.Title</h2>
+  @using (Html.BeginForm())
+  {
+    @Html.AntiForgeryToken()
+    <div class="well">
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name1, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7">
+          @Html.EditorFor(m => m.Name1, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+      </div>
+    </div>
+    <h4>ПРОШУ ПРЕДОСТАВИТЬ ОТПУСК</h4>
+    <div class="well">
+      <div class="form-group form">
+        <div class="col-md-4">
+          @Html.LabelFor(m => m.TypeId)
+          @Html.EditorFor(m => m.TypeName, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+        <div class="col-md-2">
+          @Html.LabelFor(m => m.DateB)
+          @Html.EditorFor(m => m.DateB, new { htmlAttributes = new { @readonly = "true" } })
+          @Html.ValidationMessageFor(m => m.DateB, "", new { @class = "text-danger" })
+
+        </div>
+        <div class="col-md-2">
+          @Html.LabelFor(m => m.DateE)
+          @Html.EditorFor(m => m.DateE, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+        <div class="col-md-2">
+          @Html.LabelFor(m => m.Days)
+          @Html.EditorFor(m => m.Days, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+      </div>
+    </div>
+    <h4>НА ПЕРИОД МОЕГО ОТПУСКА ИСПОЛНЕНИЕ ОБЯЗАННОСТЕЙ ВОЗЛАГАЕТСЯ НА</h4>
+    <div class="well">
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name2, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7">
+          @Html.EditorFor(m => m.Name2, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+      </div>
+    </div>
+    <h4>СОГЛАСОВАНИЕ</h4>
+    <div class="well">
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name4, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7">
+          @Html.EditorFor(m => m.Name4, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+      </div>
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name5, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7">
+          @Html.EditorFor(m => m.Name5, new { htmlAttributes = new { @readonly = "true" } })
+        </div>
+      </div>
+    </div>
+    
+    <div class="well">
+      <div class="form-group">
+        <div class="col-md-12">
+          @Html.LabelFor(m => m.Comment1, new { @class = "col-md-3 control-label" })
+          <div class="col-md-7">
+            <input type="text" name="Comment" class="form-control" />
+          </div>
+          <div class="col-md-2">
+            <input class="btn btn-primary" type="submit" value="Согласовать" />
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@section css {
+  <link href="~/Content/themes/smoothness/jquery-ui.css" rel="stylesheet" />
+  @Styles.Render("~/Content/select2")
+  <style>
+    .select2-container--bootstrap .select2-selection {
+      border-radius: 0;
+    }
+
+    .select2-results__option {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .well {
+      border-radius: 0;
+    }
+
+    @@media (min-width: 768px) {
+      .navbar {
+        border-radius: 0;
+      }
+    }
+  </style>
+}
+
+@section scripts {
+  @Scripts.Render("~/bundles/jqueryui")
+  @Scripts.Render("~/bundles/select2")
+  @Scripts.Render("~/bundles/bloodhound")
+}

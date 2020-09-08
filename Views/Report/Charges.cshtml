@@ -1,0 +1,482 @@
+﻿@{
+  ViewBag.Title = "Расходы";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+    Ext.define('Charges', {
+      extend: 'Ext.data.Model',
+      idProperty: 'ItemID,PfpID',
+      fields: ['ID', 'ItemID', 'Item1', 'Item2', 'Item3', 'Item4', 'Item5', 'Quartier', 'Mois', 'An', 'PfpID', 'Pfp', 'QtyP', 'QtyF']
+    });
+
+    var storeAn = Ext.create('Ext.data.Store', {
+      fields: ['value'],
+      data: [{ value: (new Date()).getFullYear() - 2 }, { value: (new Date()).getFullYear() - 1 }, { value: (new Date()).getFullYear() }, { value: (new Date()).getFullYear() + 1 }]
+    });
+
+    var storeQuartier = Ext.create('Ext.data.Store', {
+      fields: ['value'],
+      data: [{ value: 1 }, { value: 2 }, { value: 3 }, { value: 4 }]
+    });
+
+    var storeMois = Ext.create('Ext.data.Store', {
+      fields: ['value'],
+      data: [{ value: 1 }, { value: 2 }, { value: 3 }, { value: 4 }, { value: 5 }, { value: 6 }, { value: 7 }, { value: 8 }, { value: 9 }, { value: 10 }, { value: 11 }, { value: 12 }]
+    });
+
+    var storePFP = Ext.create('Ext.data.Store', {
+      remoteSort: true,
+      autoLoad: false,
+      fields: ['id', 'text'],
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("ChargesPFP")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('Charges.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.chargesgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          //layout: 'fit',
+          //frame: true,
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          plugins: [
+            'bufferedrenderer',
+            {
+              xclass: 'Ext.grid.plugin.RowEditing',
+              clicksToMoveEditor: 1,
+              autoCancel: false
+            }
+          ],
+          columns: [{
+            header: 'Статья1',
+            dataIndex: 'Item1',
+            width: 150
+          }, {
+            header: 'Статья2',
+            dataIndex: 'Item2',
+            width: 250
+          }, {
+            header: 'Статья3',
+            dataIndex: 'Item3',
+            width: 70
+          }, {
+            header: 'Статья4',
+            dataIndex: 'Item4',
+            width: 250
+          }, {
+            header: 'Статья5',
+            dataIndex: 'Item5',
+            width: 70
+          }, {
+            header: 'ПФП',
+            dataIndex: 'Pfp',
+            width: 50
+          }, {
+            header: 'Месяц',
+            dataIndex: 'Mois',
+            align: 'right',
+            width: 60
+          }, {
+            header: 'Квартал',
+            dataIndex: 'Quartier',
+            align: 'right',
+            width: 70
+          }, {
+            header: 'Год',
+            dataIndex: 'An',
+            align: 'right',
+            width: 50
+          }, {
+            header: 'План',
+            dataIndex: 'QtyP',
+            width: 110,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }, {
+            header: 'Факт',
+            dataIndex: 'QtyF',
+            width: 110,
+            xtype: 'numbercolumn',
+            align: 'right',
+            field: {
+              xtype: 'customnumber',
+              hideTrigger: true,
+              keyNavEnabled: false,
+              mouseWheelEnabled: false,
+              autoStripChars: true
+            }
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Год: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbAn',
+              store: storeAn,
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 50,
+              listeners: {
+                beforerender: function () { this.setValue((new Date()).getFullYear(), false); }
+              }
+            })@*, {
+              xtype: 'tbtext', text: ' Квартал: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbQuartier',
+              store: storeQuartier,
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 35,
+              listeners: {
+                beforerender: function () { this.setValue('1', false); }
+              }
+            })*@, {
+              xtype: 'tbtext', text: ' Месяц: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbMois',
+              store: storeMois,
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 35,
+              listeners: {
+                beforerender: function () { this.setValue('1', false); }
+              }
+            }), , {
+              xtype: 'tbtext', text: ' ПФП: '
+            }, Ext.create('Ext.form.field.ComboBox', {
+              id: 'cbPFP',
+              store: storePFP,
+              displayField: 'text',
+              valueField: 'id',
+              typeAhead: true,
+              queryMode: 'local',
+              emptyText: '*',
+              selectOnFocus: true,
+              width: 70,
+              listeners: {
+                beforerender: function () {
+                  this.store.load({ scope: this, callback: function () { /*this.setValue(this.store.data.items[0].raw.id, false);*/ } });
+                }
+              }
+            }), ' Непустые: ', {
+              xtype: 'checkbox',
+              itemId: 'cbNP'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              text: 'Экспорт',
+              itemId: 'export',
+              scope: this,
+              handler: this.onExportClick
+            }, {
+              text: 'Импорт плана',
+              itemId: 'impcharges',
+              scope: this,
+              handler: this.onImpChargesClick
+            }, {
+              text: 'Импорт',
+              itemId: 'import',
+              scope: this,
+              handler: this.onImportClick
+            }, '->', @Html.Partial("MenuFin"), ' ']
+          }, {
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Год: '
+            }]
+          }, {
+            xtype: 'pagingtoolbar',
+            dock: 'bottom',
+            displayInfo: true,
+            listeners: {
+              //scope: this,
+              beforerender: function () { this.bindStore(this.up('grid').store) /*this.dockedItems.items[2].bindStore(this.store)*/; }
+            }
+          }]
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { y: Ext.getCmp('cbAn').value, m: Ext.getCmp('cbMois').value, pfp: Ext.getCmp('cbPFP').value, np: this.down('#cbNP').getValue() };
+        this.store.load();
+      },
+
+      onExportClick: function () {
+        var form = Ext.getDom('export');
+        form.y.value = this.down('#cbAn').getValue(); //Ext.getCmp('cbAn').rawValue;
+        form.m.value = this.down('#cbMois').getValue(); // Ext.getCmp('cbMois').rawValue;
+        form.np.value = this.down('#cbNP').getValue();
+        form.submit();
+      },
+
+      onImpChargesClick: function () {
+        if (!this.wini) {
+          this.wini = Ext.create('Charges.WinIC', { scope: this });
+        }
+        this.wini.down('form').getForm().findField('mois').setValue(Ext.getCmp('cbMois').value);
+        this.wini.down('form').getForm().findField('an').setValue(Ext.getCmp('cbAn').value);
+        this.wini.setTitle('Импорт');
+        this.wini.show(this);
+      },
+
+      onImportClick: function () {
+        if (window.confirm('Выполнить импорт?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("ImportOrdCtrl")',
+            timeout: 60000,
+            params: {
+              y: Ext.getCmp('cbAn').rawValue,
+              m: Ext.getCmp('cbMois').rawValue
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      }
+    });
+
+    Ext.define('Charges.WinIC', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.winci',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 500,
+          autoHeight: true,
+          closeAction: 'hide',
+          modal: true,
+          layout: 'fit',
+          plain: true,
+          bodyStyle: 'padding:5px;',
+          buttonAlign: 'center',
+          border: true,
+          items: [
+            Ext.create('Ext.form.Panel', {
+              border: true,
+              frame: false,
+              autoHeight: true,
+              autoWidth: true,
+              baseCls: 'x-plain',
+              bodyStyle: 'padding:5px 5px 0',
+              bodyPadding: 5,
+              defaults: { anchor: '100%' },
+              layoutConfig: { labelSeparator: '' },
+              fieldDefaults: { labelWidth: 28, labelAlign: 'right' },
+              items: [{
+                xtype: 'filefield',
+                emptyText: 'Выбор файла',
+                name: 'file',
+                fieldLabel: 'Файл',
+                allowBlank: false,
+                buttonText: '',
+                buttonConfig: {
+                  iconCls: 'upload-icon'
+                }
+              }, {
+                xtype: 'hidden',
+                name: 'mois'
+              }, {
+                xtype: 'hidden',
+                name: 'an'
+              }]
+            })
+          ],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Импортировать',
+              //disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Выход',
+              scope: this,
+              handler: this.onExit
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onSave: function () {
+        var form = this.down('form').getForm();
+        if (form.isValid()) {
+          form.submit({
+            url: '@Url.Action("FileImport")',
+            waitMsgTarget: true,
+            waitMsg: 'Загрузка файла...',
+            success: function (fp, o) {
+              Ext.Msg.show({
+                msg: 'Файл "' + o.result.file + '" импортирован',
+                buttons: Ext.MessageBox.OK,
+                scope: this
+              });
+            },
+            failure: function (fp, o) {
+              Ext.Msg.show({
+                msg: o.result.message != null ? o.result.message : 'Ошибка.',
+                buttons: Ext.MessageBox.OK,
+                scope: this
+              });
+            }
+          });
+        }
+      },
+
+      onExit: function () {
+        this.hide();
+      }
+    });
+
+    Ext.onReady(function () {
+
+      Ext.apply(Ext.grid.RowEditor.prototype, {
+        saveBtnText: "Сохранить",
+        cancelBtnText: "Отменить"
+      });
+
+      var store = Ext.create('Ext.data.Store', {
+        pageSize: 2000,
+        remoteSort: true,
+        autoSync: true,
+        //buffered: true,
+        autoLoad: false,
+        model: 'Charges',
+        proxy: {
+          type: 'ajax',
+          api: {
+            read: '@Url.Action("ChargesList")',
+            update: '@Url.Action("ChargesUpdate")'
+          },
+          actionMethods: { read: 'POST' },
+          reader: {
+            type: 'json',
+            root: 'data',
+            totalProperty: 'totalCount'
+          },
+          writer: {
+            type: 'json',
+            root: 'data',
+            writeAllFields: true,
+            allowSingle: false,
+            encode: false
+          },
+          simpleSortMode: true
+        }
+      });
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          itemId: 'grid',
+          xtype: 'chargesgrid',
+          region: 'center',
+          flex: 1,
+          store: store
+        }]
+      });
+
+    });
+
+  </script>
+}
+<form id="export" action="@Url.Action("ChargesExcel")" method="POST" style="display: none;">
+  <input type="hidden" name="y" />
+  <input type="hidden" name="m" />
+  <input type="hidden" name="np" />
+</form>
+<form id="import" action="@Url.Action("ImportOrdCtrl")" method="POST" style="display: none;">
+  <input type="hidden" name="y" />
+  <input type="hidden" name="m" />
+</form>

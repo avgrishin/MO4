@@ -1,0 +1,61 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q { get; set; }
+  public string host { get; set; }
+  public string email { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+</style>
+<h3>Журнал исполнения поручений</h3>
+<table width="100%">
+  <tr>
+    <th>Дата регистрации</th>
+    <th>Регистрационный номер</th>
+    <th>Вид документа</th>
+    <th>Тема документа</th>
+    <th>Резолюция</th>
+    <th>Кем направлен</th>
+    <th>Исполнители</th>
+    <th>Для ознакомления</th>
+    <th>Срок исполнения</th>
+    <th>Входящий документ</th>
+    <th>Примечание</th>
+  </tr>
+  @foreach (var qq in q)
+  {
+    <tr style="color:@(qq.TDate < DateTime.Today ? "red" : qq.TDate < DateTime.Today.AddDays(7) ? "maroon" : "black")">
+      <td>@qq.ODate.ToString("dd.MM.yy")</td>
+      <td>@qq.RegNum</td>
+      <td>@qq.TypeName</td>
+      <td>@qq.Theme</td>
+      <td>@(qq.Resolution ?? "")</td>
+      <td>@qq.Directed</td>
+      <td>@qq.EmailToName @qq.EmailCcName</td>
+      <td>@(qq.IsAcquaintance == true ? "Да" : "")</td>
+      <td>@(qq.TDate == null ? "" : qq.TDate.ToString("dd.MM.yy"))</td>
+      <td>@(qq.FileNameI == null ? "" : string.Format("<a href='http://{0}/code/regdoc/getfilei?data={1}'>Файл</a>", host, System.Web.HttpUtility.UrlEncode(qq.FileNameI)))@(qq.LotusLinkI == null ? "" : string.Format(" <a href='{0}'>Документ Lotus Notes</a>", System.Web.HttpUtility.UrlEncode(qq.LotusLinkI)))</td>
+      <td>@qq.Comment</td>
+    </tr>
+  }
+</table>
+<p style="color: white; font-style: italic">@email</p>

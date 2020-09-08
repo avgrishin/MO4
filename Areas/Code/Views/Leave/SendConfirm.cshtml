@@ -1,0 +1,102 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q { get; set; }
+  public string host { get; set; }
+  public string email { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+</style>
+<h3>Заявление на отпуск</h3>
+<table>
+  <tr>
+    <th>Сотрудник</th>
+    <td>@q.Name1</td>
+  </tr>
+  <tr>
+    <th>Вид отпуска</th>
+    <td>@q.TypeName</td>
+  </tr>
+  <tr>
+    <th>Период</th>
+    <td>@q.DateB.ToString("dd.MM.yyyy") - @q.DateE.ToString("dd.MM.yyyy")</td>
+  </tr>
+  <tr>
+    <th>Календарных дней</th>
+    <td>@q.Days.ToString()</td>
+  </tr>
+  @if (!string.IsNullOrEmpty(q.Comment1))
+  {
+    <tr>
+      <th>Примечание</th>
+      <td>@q.Comment1</td>
+    </tr>
+  }
+  <tr>
+    <th>Обязанности будут возлагаться на</th>
+    <td>@q.Name2</td>
+  </tr>
+  <tr>
+    <th>@if (q.Sign4 == null)
+        {
+      @:Требует согласования
+          }
+        else
+        {
+      @:Согласовано
+          }</th>
+    <td>@q.Name4</td>
+  </tr>
+  @if (!string.IsNullOrEmpty(q.Comment4))
+  {
+    <tr>
+      <th>Примечание</th>
+      <td>@q.Comment4</td>
+    </tr>
+  }
+
+  @if (!string.IsNullOrEmpty(q.Name5))
+  {
+    <tr>
+      <th>
+        @if (q.Sign5 == null)
+        {
+          @:Требует согласования
+          }
+        else
+        {
+          @:Согласовано
+          }</th>
+      <td>@q.Name5</td>
+    </tr>
+        if (!string.IsNullOrEmpty(q.Comment5))
+        {
+    <tr>
+      <th>Примечание</th>
+      <td>@q.Comment5</td>
+    </tr>
+        }
+
+  }
+</table>
+Для согласования пройдите по <a href='http://@host/code/leave/confirmLeave/@q.ID'>ссылке</a>.
+<p style="color: white; font-style: italic">@email</p>

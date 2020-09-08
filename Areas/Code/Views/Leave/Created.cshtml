@@ -1,0 +1,103 @@
+﻿@model MO.Areas.Code.Models.LeaveViewModel
+@{
+  Layout = "_Layout.cshtml";
+}
+
+<div class="container">
+  <h2>@ViewBag.Title</h2>
+  <div class="well form-horizontal">
+    <div class="form-group">
+      @Html.LabelFor(m => m.Name1, new { @class = "col-md-3 control-label" })
+      <div class="col-md-7 form-control-static">
+        @Html.DisplayFor(m => m.Name1)
+      </div>
+    </div>
+  </div>
+  <h4>ПРОШУ ПРЕДОСТАВИТЬ ОТПУСК</h4>
+  <div class="well form-horizontal">
+    <div class="form-group">
+
+      <div class="col-md-4">
+        @Html.LabelFor(m => m.TypeId)
+        <span class="form-control-static">
+          @Html.DisplayFor(m => m.TypeName)
+        </span>
+      </div>
+      <div class="col-md-4">
+        @Html.LabelFor(m => m.DateB)
+        <span class="form-control-static">
+          @Html.DisplayFor(m => m.DateB)
+        </span>
+        @Html.LabelFor(m => m.DateE)
+        <span class="form-control-static">
+          @Html.DisplayFor(m => m.DateE)
+        </span>
+      </div>
+      <div class="col-md-4">
+        @Html.LabelFor(m => m.Days)
+        <span class="form-control-static">
+          @Html.DisplayFor(m => m.Days)
+        </span>
+      </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.Comment1))
+    {
+      <div class="form-group">
+        <div class="col-md-12">
+          @Html.LabelFor(m => m.Comment1)
+          <span class="form-control-static">
+            @Html.DisplayFor(m => m.Comment1)
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+  @if (!string.IsNullOrEmpty(Model.Name2))
+  {
+    <h4>НА ПЕРИОД МОЕГО ОТПУСКА ИСПОЛНЕНИЕ ОБЯЗАННОСТЕЙ ВОЗЛАГАЕТСЯ НА</h4>
+    <div class="well form-horizontal">
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name2, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7 form-control-static">
+          @Html.DisplayFor(m => m.Name2)
+        </div>
+      </div>
+    </div>
+  }
+  <h4>СОГЛАСОВАНИЕ</h4>
+  <div class="well form-horizontal">
+    <div class="form-group">
+      @Html.LabelFor(m => m.Name4, new { @class = "col-md-3 control-label" })
+      <div class="col-md-7 form-control-static">
+        @Html.DisplayFor(m => m.Name4)
+        @if (Model.Sign4 != null)
+        {
+          <i class="glyphicon glyphicon-ok"></i>
+          <small>@Html.DisplayFor(m => m.Sign4)</small>
+        }
+      </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.Name5))
+    {
+      <div class="form-group">
+        @Html.LabelFor(m => m.Name5, new { @class = "col-md-3 control-label" })
+        <div class="col-md-7 form-control-static">
+          @Html.DisplayFor(m => m.Name5)
+          @if (Model.Sign5 != null)
+          {
+            <i class="glyphicon glyphicon-ok"></i>
+            <small>@Html.DisplayFor(m => m.Sign5)</small>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@section css {
+  <style>
+    .form-control-static {
+      color: green;
+    }
+  </style>
+}

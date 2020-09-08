@@ -1,0 +1,179 @@
+﻿@{
+  ViewBag.Title = "Остатки паёв";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 0px 0px 0px 0px /*border: 1px solid #fff;
+      border-bottom: 1px solid #eeeeee;*/
+      white-space: normal;
+      color: #555;
+    }
+
+    .search-item span
+    {
+      padding-top: 5px;
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+@*  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS62/build/classic/theme-triton/resources/theme-triton-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS62/ext-bootstrap.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS62/build/classic/locale/locale-ru.js"></script>*@
+
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+
+      Ext.define('CbModel', {
+        extend: 'Ext.data.Model',
+        idProperty: 'id',
+        fields: ['id', 'name', 'brief']
+      });
+
+      var storeFund = Ext.create('Ext.data.Store', {
+        autoLoad: true,
+        model: 'CbModel',
+        proxy: {
+          type: 'ajax',
+          actionMethods: { read: 'POST' },
+          url: '@Url.Action("GetPIFList")',
+          reader: {
+            type: 'json',
+            root: 'data'
+          }
+        }
+      });
+      @{ var r = ModelMetadata.FromLambdaExpression(m => m, ViewData).Properties.ToList();}
+      var fp = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        standardSubmit: true,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: '@ViewBag.Title',
+        frame: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 340,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        items: [{
+          xtype: 'datefield',
+          name: 'd',
+          fieldLabel: 'Дата',
+          allowBlank: false,
+          format: 'd.m.Y',
+          startDay: 1,
+          value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -3)
+        }, {
+        //  name: 'clName',
+        //  fieldLabel: 'Клиент',
+        //  anchor: '100%',
+        //  value: ''
+        //}, {
+          xtype: 'combo',
+          name: 'clName',
+          store: Ext.create('Ext.data.Store', {
+            fields: ['id', 'brief', 'fam', 'im', 'ot'],
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              url: '@Url.Action("PostPifers")',
+              reader: {
+                type: 'json',
+                root: 'data'
+              }
+            }
+          }),
+          queryParam: 'q',
+          queryMode: 'remote',
+          //valueField: 'id',
+          displayField: 'brief',
+          typeAhead: false,
+          queryDelay: 1000,
+          width: 570,
+          hideTrigger: true,
+          forceSelection: false,
+          fieldLabel: 'Клиент',
+          anchor: '100%',
+          minChars: 2,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><span>{brief}</span>{fam} {im} {ot}</div>';
+            }
+          },
+          itemSelector: 'div.search-item',
+          allowBlank: true
+        }, {
+          xtype: 'combo',
+          store: storeFund,
+          displayField: 'brief',
+          valueField: 'id',
+          typeAhead: true,
+          queryMode: 'local',
+          fieldLabel: 'ПИФ',
+          //forceSelection: true,
+          //triggerAction: 'all',
+          selectOnFocus: true,
+          emptyText: 'Не указан',
+          anchor: '100%',
+          name: 'FinInstID',
+          //allowBlank: false,
+          listConfig: {
+            getInnerTpl: function () {
+              return '<div class="search-item"><span>{brief}</span>{name}</div>';
+            }
+          }
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              var form = Ext.getDom('export');
+              form.d.value = fp.getForm().findField('d').rawValue;
+              form.FinInstID.value = fp.getForm().findField('FinInstID').getValue();
+              form.clName.value = fp.getForm().findField('clName').rawValue;
+              form.submit();
+            }
+          },
+          formBind: true
+        }]
+      });
+
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>
+<form id="export" action="@Url.Action(ViewBag.RequestURL)" method="POST" style="display: none;">
+  <input type="hidden" name="d" />
+  <input type="hidden" name="clName" />
+  <input type="hidden" name="FinInstID" />
+</form>

@@ -1,0 +1,427 @@
+﻿@{
+  ViewBag.Title = "Клиенты ИК";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .green-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: green;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      @*border: 1px solid #fff;*@
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      margin: 0 0;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/GridFilters.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.ux.grid.FiltersFeature'
+    ]);
+
+    Ext.define('ClientIK', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', { name: 'NDate1', type: 'date', dateFormat: 'c' }, { name: 'NDate2', type: 'date', dateFormat: 'c' }, 'NID1', 'NID2', 'Client', 'IK'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("GetClientIKList")',
+          create: '@Url.Action("addClientIK")',
+          update: '@Url.Action("updClientIK")',
+          destroy: '@Url.Action("delClientIK")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeClientIK',
+      model: 'ClientIK'
+    });
+
+    Ext.define('Cl', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      autoLoad: true,
+      fields: ['id', 'Name']
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeClient',
+      autoLoad: true,
+      model: 'Cl',
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("GetClIKList")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeIK',
+      autoLoad: true,
+      model: 'Cl',
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("GetIKList")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        }
+      }
+    });
+
+    Ext.define('ClIK.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.clikwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          layout: 'fit',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            bodyPadding: 10,
+            defaults: { anchor: '100%' },
+            defaultType: 'textfield',
+            fieldDefaults: {
+              labelAlign: 'left',
+              labelWidth: 200,
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'combo',
+              store: 'storeIK',
+              displayField: 'Name',
+              valueField: 'id',
+              typeAhead: false,
+              queryMode: 'local',
+              fieldLabel: 'ИК',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              width: 135,
+              name: 'NID2',
+              allowBlank: false
+            }, {
+              xtype: 'combo',
+              store: 'storeClient',
+              displayField: 'Name',
+              valueField: 'id',
+              typeAhead: false,
+              queryMode: 'local',
+              fieldLabel: 'Клиент',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              width: 135,
+              name: 'NID1',
+              allowBlank: false
+            }, {
+              xtype: 'datefield',
+              name: 'NDate1',
+              fieldLabel: 'Начало',
+              anchor: '60%',
+              startDay: 1,
+              allowBlank: false,
+              format: 'd.m.Y'
+            }, {
+              xtype: 'datefield',
+              name: 'NDate2',
+              fieldLabel: 'Конец',
+              anchor: '60%',
+              startDay: 1,
+              allowBlank: false,
+              format: 'd.m.Y'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        var form = me.down('form').getForm();
+        me.activeRecord = record;
+        if (record) {
+          me.down('#save').enable();
+          form.loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          form.reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('ClIK.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.clikgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true
+          },
+          columns: [{
+            header: 'ИК',
+            dataIndex: 'IK',
+            width: 250
+          }, {
+            header: 'Клиент',
+            dataIndex: 'Client',
+            width: 250
+          }, {
+            header: 'Начало',
+            dataIndex: 'NDate1',
+            width: 80,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Конец',
+            dataIndex: 'NDate2',
+            width: 80,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'File.xml'
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('ClIK.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var me = this;
+        var rec = Ext.create('ClientIK', { 'NDate1': Ext.Date.clearTime(new Date(), false), 'NDate2': Ext.Date.clearTime(new Date(2050, 11, 31), false), NID1: null, NID2: null });
+        if (!me.wini) {
+          me.onCreateWin();
+        }
+        me.wini.setTitle('Добавить');
+        me.wini.setActiveRecord(rec);
+        me.wini.show(me);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          region: 'center',
+          itemId: 'grid',
+          xtype: 'clikgrid',
+          store: 'storeClientIK'
+        }]
+      });
+
+    });
+  </script>
+}

@@ -1,0 +1,84 @@
+﻿@{
+  ViewBag.Title = "Список";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+      //Layout = "_Layout.cshtml";
+}
+<div style="padding: 30px; display: block">
+  <hgroup class="title">
+    <h1>@ViewBag.Title</h1>
+  </hgroup>
+  <div class="row">
+    <div class="col-md-6">
+      <div style="padding-left: -10px">
+        <ul class="a_report">
+          <li>@Html.ActionLink("Клиентский отчет", "RepParam/2")</li>
+          <li>@Html.ActionLink("Отчет", "RepParam/3")</li>
+          <li>@Html.ActionLink("Отчет Управляющего", "RepParam/2")</li>
+          <li>@Html.ActionLink("Список паев", "PIFerRest")</li>
+          <li>@Html.ActionLink("Список паев 2", "PIFRests")</li>
+          <li>@Html.ActionLink("Отчет по остаткам на договорах ДУ", "RepDURests")</li>
+          <li>@Html.ActionLink("Статистика по остаткам паёв", "PIFRestStat")</li>
+          <li>@Html.ActionLink("Данные по портфелю РББ УралСиб", "RepPIFOrders")</li>
+          <li>@Html.ActionLink("Акт сверки ДУ Банк", "RepDUBank")</li>
+          <li>@Html.ActionLink("Акт сверки ДУ Банк+УСЖ", "RepDUBankCh")</li>
+          <li>@Html.ActionLink("Акт сверки ДУ Все", "RepDU")</li>
+          <li>@Html.ActionLink("Покупки ПИФ Банк", "RepPifBankBuy")</li>
+          <li>@Html.ActionLink("Погашения ПИФ", "RepPifRepmnt")</li>
+          <li>@Html.ActionLink("Отчет по пайщикам ЧБ", "RepParam/17")</li>
+          <li>@Html.ActionLink("Статистика по заявкам на покупку ПИФ", "RepPIFOrderStat")</li>
+          <li>@Html.ActionLink("Статистика по заявкам на вывод из ПИФов", "RepPIFOrderOutStat")</li>
+          <li>@Html.ActionLink("Статистика ПИФ+Вклад", "PIFDepStat")</li>
+          <li>@Html.ActionLink("Отчет размещение", "PIFStat")</li>
+          <li>@Html.ActionLink("КМ Статус/Приоритет", "RepKM1")</li>
+          <li>@Html.ActionLink("ЕНО БКС Реестр", "Rep4BCS1")</li>
+          <li>@Html.ActionLink("ЕНО БКС Остатки", "Rep4BCS2")</li>
+          <li>@Html.ActionLink("ЕНО БКС Притоки и оттоки", "Rep4BCS3")</li>
+          <li>@Html.ActionLink("ЕНО БКС Начисленные комиссии", "Rep4BCS4")</li>
+          <li>@Html.ActionLink("ЕНО БКС Продажи", "Rep4BCS5")</li>
+          <li>@Html.ActionLink("ЕНО БКС Продажи 2", "Rep4BCS_2")</li>
+          <li>@Html.ActionLink("График выплаты купонов по договору", "cp", "ob", new { area = "code" }, new { })</li>
+          <li class="accordion panel-group1" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel1 panel-default1">
+              <div class="panel-heading1" role="tab" id="headingOne">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Отчеты по фондам</a>
+              </div>
+              <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                <ul class="a_report">
+                  <li>@Html.ActionLink("Отчет Уралсиб Фонд Первый", "RepParam/4")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Фонд Отраслевых Инвестиций", "RepParam/5")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Фонд Перспективных вложений", "RepParam/6")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Фонд Консервативный", "RepParam/7")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Фонд Профессиональный", "RepParam/8")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Энергетическая перспектива", "RepParam/9")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Металлы России", "RepParam/10")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Нефть и Газ", "RepParam/11")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Российские финансы", "RepParam/12")</li>
+                  <li>@Html.ActionLink("Отчет Уралсиб Связь и Информационные технологии", "RepParam/13")</li>
+                  <li>@Html.ActionLink("Отчет Fixed Income", "RepParam/14")</li>
+                  <li>@Html.ActionLink("Отчет Extra Return", "RepParam/16")</li>
+                  <li>@Html.ActionLink("Отчет РСМС", "RepParam/15")</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <ul class="a_report">
+          <li>@Html.ActionLink("Отчет по доходам MF банка", "BankPIFIncome")</li>
+          <li>@Html.ActionLink("Отчет по доходам MF банка ЛК", "BankPIFIncomeLK")</li>
+          <li>@Html.ActionLink("Отчет по скидкам-надбавкам банка", "RepUralsibCommis")</li>
+          <li>@Html.ActionLink("Отчет по скидкам-надбавкам банка ЛК", "RepUralsibCommisLK")</li>
+          <li>@Html.ActionLink("Отчет по притокам-оттокам банка", "RepUralsibInOut")</li>
+      </ul>
+    </div>
+  </div>
+</div>
+@section css {
+  @Styles.Render("~/Content/bootstrap")
+}
+
+@section scripts {
+  @Scripts.Render("~/bundles/bootstrap")
+}

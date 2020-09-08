@@ -1,0 +1,4443 @@
+﻿@{
+  ViewBag.Title = "РАСКРЫТИЕ И ПРЕДОСТАВЛЕНИЕ ИНФОРМАЦИИ";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .icon-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .gray-row .x-grid-cell {
+      text-decoration: line-through;
+      color: gray;
+  }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      /*border: 1px solid #fff;*/
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/GridFilters.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setConfig({ enabled: true });
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.grid.*',
+      'Ext.data.*',
+      'Ext.toolbar.Paging',
+      'Ext.ux.grid.FiltersFeature'
+    ]);
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = field.ownerCt.getComponent(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = field.ownerCt.getComponent(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+    Ext.apply(Ext.util.Format, {
+      thousandSeparator: ' ',
+      decimalSeparator: '.'
+    });
+
+    Ext.define('Envoi', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'TypeInf', 'SrokRask', 'Mesto', 'Osnovan', 'EmailTo', 'EmailCc', 'EmailToName', 'EmailCcName', 'PoryadPredst', 'Periodich', 'PeriodichID', 'VidAktiv', 'SrokRass', 'IsAuto', { name: 'IsEnabled', type: 'bool' }, 'TypeID'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEnvoiList")',
+          create: '@Url.Action("addEnvoi")',
+          update: '@Url.Action("updEnvoi")',
+          destroy: '@Url.Action("delEnvoi")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('EnvoiExec', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: [
+        { name: 'id' },
+        { name: 'EnvoiID' },
+        { name: 'Date1', type: 'date', dateFormat: "c" },
+        { name: 'Date2', type: 'date', dateFormat: "c" },
+        { name: 'Comment' },
+        { name: 'TypeInf', persist: false },
+        { name: 'Osnovan', persist: false },
+        { name: 'Mesto', persist: false },
+        { name: 'PoryadPredst', persist: false },
+        { name: 'Periodich', persist: false },
+        { name: 'PeriodichID', persist: false },
+        { name: 'SrokRask', persist: false },
+        { name: 'EmailTo', persist: false },
+        { name: 'EmailCc', persist: false },
+        { name: 'IsAuto', persist: false },
+        { name: 'IsEnabled', type: 'bool', persist: false }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEnvoiExecList")',
+          create: '@Url.Action("addEnvoiExec")',
+          update: '@Url.Action("updEnvoiExec")',
+          destroy: '@Url.Action("delEnvoiExec")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('CbModel', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name']
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storePeriod',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent")' + '/26178',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storea',
+      model: 'Envoi'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storem',
+      model: 'Envoi'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeri',
+      model: 'Envoi'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeEE',
+      model: 'EnvoiExec'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeeeri',
+      model: 'EnvoiExec'
+    });
+
+    Ext.define('Conseil', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'Violation', 'Conseil', { name: 'Terme', type: 'date', dateFormat: 'c' }, { name: 'Prolongation', type: 'date', dateFormat: 'c' }, { name: 'ExecDate', type: 'date', dateFormat: 'c' }, 'EmailTo', 'EmailCc', 'Possesseur', 'Commentaire', { name: 'IsEnabled', type: 'bool' }, { name: 'PrononceDate', type: 'date', dateFormat: 'c' }, 'Priorite', 'PrioriteNom', 'MinNomRiskPrice', 'MaxNomRiskPrice'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getConseilList")',
+          create: '@Url.Action("addConseil")',
+          update: '@Url.Action("updConseil")',
+          destroy: '@Url.Action("delConseil")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeConseil',
+      model: 'Conseil'
+    });
+
+    Ext.define('EMail', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name', 'email']
+    });
+
+    Ext.define('EnvoiHoraire', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'EnvoiID', 'EnvoiHoraireType', 'EnvoiHoraireTypeID', 'Mode', 'ModeID', 'Day', 'Month', 'Comment'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEnvoiHoraire")',
+          create: '@Url.Action("addEnvoiHoraire")',
+          update: '@Url.Action("updEnvoiHoraire")',
+          destroy: '@Url.Action("delEnvoiHoraire")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('ConseilHoraire', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'ConseilID', 'EnvoiHoraireType', 'EnvoiHoraireTypeID', 'Day', 'Month'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getConseilHoraire")',
+          create: '@Url.Action("addConseilHoraire")',
+          update: '@Url.Action("updConseilHoraire")',
+          destroy: '@Url.Action("delConseilHoraire")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeCPriorite',
+      remoteSort: true,
+      autoLoad: true,
+      fields: ['Text', 'Value'],
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("getCPriorite")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('RiskMapHoraire', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'RiskMapID', 'EnvoiHoraireType', 'EnvoiHoraireTypeID', 'Day', 'Month'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getRiskMapHoraire")',
+          create: '@Url.Action("addRiskMapHoraire")',
+          update: '@Url.Action("updRiskMapHoraire")',
+          destroy: '@Url.Action("delRiskMapHoraire")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    var storeEMail = Ext.create('Ext.data.Store', {
+      //storeId: 'storeEMail',
+      remoteSort: true,
+      model: 'EMail',
+      autoLoad: true,
+      proxy: {
+        actionMethods: { read: 'POST' },
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEMailList")'
+        },
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('EMailList', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name', 'email', { name: 'ui', type: 'bool' }]
+    });
+
+    var storeEMailTo = Ext.create('Ext.data.Store', {
+      model: 'EMailList'
+    });
+
+    var storeEMailCc = Ext.create('Ext.data.Store', {
+      model: 'EMailList'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeEnvoiHoraire',
+      model: 'EnvoiHoraire'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeConseilHoraire',
+      model: 'ConseilHoraire'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeRiskMapHoraire',
+      model: 'RiskMapHoraire'
+    });
+
+    Ext.define('EnvoiHoraireType', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'Name']
+    });
+
+    Ext.create('Ext.data.Store', {
+      model: 'EnvoiHoraireType',
+      storeId: 'storeEnvoiHoraireType',
+      autoLoad: true,
+      actionMethods: { read: 'POST' },
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("getEnvoiHoraireType")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.define('RiskMap', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['id', 'BisProc', 'But', 'Control', 'ControlForce', 'EmailTo', 'EmailCc', 'Dep', 'EssentielRisk', 'Influence', 'JurPersonne', 'NumRisk', 'PossesseurBut', 'PossesseurControl', 'Probabilite', 'RiskName', 'InfluenceName', 'ProbabiliteName', 'ControlForceName', { name: 'IsEnabled', type: 'bool' }, 'TotalName'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getRiskMapList")',
+          create: '@Url.Action("addRiskMap")',
+          update: '@Url.Action("updRiskMap")',
+          destroy: '@Url.Action("delRiskMap")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeRiskMap',
+      model: 'RiskMap'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeRMLevel',
+      remoteSort: true,
+      autoLoad: true,
+      fields: ['Text', 'Value'],
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("getRMLevel")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('Envoi.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.envoiwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'top',
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'tabpanel',
+              itemId: 'tp',
+              anchor: '100%',
+              //plain: false,
+              border: false,
+              height: 560,
+              //flex: 1,
+              border: false,
+              items: [{
+                tag: 0,
+                title: 'Параметры',
+                bodyPadding: 10,
+                layout: 'anchor',
+                border: false,
+                defaultType: 'textfield',
+                defaults: { anchor: '100%' },
+                items: [{
+                  xtype: 'textareafield',
+                  grow: true,
+                  growMax: 100,
+                  name: 'TypeInf',
+                  fieldLabel: 'Вид отчетности'
+                }, {
+                  xtype: 'textareafield',
+                  grow: true,
+                  growMax: 100,
+                  name: 'SrokRask',
+                  fieldLabel: 'Срок направления'
+                }, {
+                  name: 'Mesto',
+                  fieldLabel: 'Место предоставления'
+                }, {
+                  name: 'Osnovan',
+                  fieldLabel: 'Основание'
+                }, {
+                  name: 'PoryadPredst',
+                  fieldLabel: 'Порядок предоставления'
+                }, {
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  defaultType: 'textfield',
+                  items: [{
+                    xtype: 'combo',
+                    fieldLabel: 'Периодичность',
+                    store: 'storePeriod',
+                    displayField: 'name',
+                    emptyText: '*',
+                    valueField: 'id',
+                    typeAhead: true,
+                    queryMode: 'local',
+                    selectOnFocus: true,
+                    name: 'PeriodichID',
+                    width: '50%',
+                    margin: '0 5 0 0'
+                  }, {
+                    name: 'VidAktiv',
+                    fieldLabel: 'Вид активов',
+                    width: '50%',
+                    margin: '0 0 0 5'
+                  }]
+                }, {
+                  name: 'SrokRass',
+                  fieldLabel: 'Срок рассылки для напоминаний'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'IsEnabled',
+                  fieldLabel: 'Активна?',
+                  labelAlign: 'right',
+                  labelWidth: 50,
+                  inputValue: 1,
+                  uncheckedValue: 0
+                }, {
+                  name: 'TypeID',
+                  xtype: 'hidden'
+                }, {
+                  name: 'IsAuto',
+                  xtype: 'hidden'
+                }, {
+                  itemId: 'EmailTo',
+                  name: 'EmailTo',
+                  xtype: 'hidden'
+                }, {
+                  itemId: 'EmailCc',
+                  name: 'EmailCc',
+                  xtype: 'hidden'
+                }]
+              }, {
+                tag: 1,
+                title: 'Адресаты',
+                layout: 'anchor',
+                defaults: { anchor: '100%' },
+                border: false,
+                flex: 1,
+                items: [{
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gTo',
+                  anchor: '100% 50%',
+                  title: 'Кому',
+                  store: storeEMailTo,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }, {
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gCc',
+                  anchor: '100% 50%',
+                  title: 'Копия',
+                  store: storeEMailCc,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.items.items[0].getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.items.items[0].getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailTo.removeAll();
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('EnvoiRi.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.envoiriwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'top',
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'tabpanel',
+              itemId: 'tp',
+              anchor: '100%',
+              border: false,
+              height: 560,
+              border: false,
+              items: [{
+                tag: 0,
+                title: 'Параметры',
+                bodyPadding: 10,
+                layout: 'anchor',
+                border: false,
+                defaultType: 'textfield',
+                defaults: { anchor: '100%' },
+                items: [{
+                  xtype: 'textareafield',
+                  grow: true,
+                  growMax: 100,
+                  name: 'TypeInf',
+                  fieldLabel: 'Вид раскрываемой информации'
+                }, {
+                  name: 'Osnovan',
+                  fieldLabel: 'Основание'
+                }, {
+                  xtype: 'combo',
+                  fieldLabel: 'Периодичность',
+                  store: 'storePeriod',
+                  displayField: 'name',
+                  emptyText: '*',
+                  valueField: 'id',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  selectOnFocus: true,
+                  name: 'PeriodichID',
+                  width: '50%',
+                  margin: '0 5 0 0'
+                }, {
+                  xtype: 'textareafield',
+                  grow: true,
+                  growMax: 100,
+                  name: 'SrokRask',
+                  fieldLabel: 'Срок раскрытия'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'IsEnabled',
+                  fieldLabel: 'Активна?',
+                  labelAlign: 'right',
+                  labelWidth: 50,
+                  inputValue: 1,
+                  uncheckedValue: 0
+                }, {
+                  name: 'TypeID',
+                  xtype: 'hidden'
+                }, {
+                  name: 'IsAuto',
+                  xtype: 'hidden'
+                }, {
+                  itemId: 'EmailTo',
+                  name: 'EmailTo',
+                  xtype: 'hidden'
+                }, {
+                  itemId: 'EmailCc',
+                  name: 'EmailCc',
+                  xtype: 'hidden'
+                }]
+              }, {
+                tag: 1,
+                title: 'Адресаты',
+                layout: 'anchor',
+                defaults: { anchor: '100%' },
+                border: false,
+                flex: 1,
+                items: [{
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gTo',
+                  anchor: '100% 50%',
+                  title: 'Кому',
+                  store: storeEMailTo,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }, {
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gCc',
+                  anchor: '100% 50%',
+                  title: 'Копия',
+                  store: storeEMailCc,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.items.items[0].getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.items.items[0].getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailTo.removeAll();
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('EnvoiExec.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.envoiexecwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            //height: 300,
+            defaults: { anchor: '100%' },
+            bodyPadding: 10,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'top',
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'displayfield',
+              name: 'TypeInf',
+              //height: 230,
+              autoScroll: true,
+              fieldLabel: 'Вид отчетности'
+            }, {
+              xtype: 'textareafield',
+              grow: true,
+              growMax: 100,
+              name: 'Comment',
+              fieldLabel: 'Примечание'
+            }, {
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              defaultType: 'textfield',
+              items: [{
+                itemId: 'Date1',
+                xtype: 'datefield',
+                name: 'Date1',
+                fieldLabel: 'Дата',
+                startDay: 1,
+                format: 'd.m.Y',
+                margin: '0 5 0 0',
+                allowBlank: false
+              }, {
+                itemId: 'Date2',
+                xtype: 'datefield',
+                name: 'Date2',
+                fieldLabel: 'Дата факт. направ.',
+                startDay: 1,
+                format: 'd.m.Y',
+                margin: '0 0 0 5'
+              }]
+            }, {
+              name: 'EnvoiID',
+              xtype: 'hidden'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Horraire.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.horraire',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        this.addEvents('delete');
+        Ext.apply(this, {
+          width: 600,
+          height: 500,
+          layout: 'fit',
+          closeAction: 'hide',
+          modal: true,
+          activeRecord: null,
+          plain: true,
+          buttonAlign: 'center',
+          title: 'Расписание',
+          items: [{
+            xtype: 'form',
+            itemId: 'pnl',
+            layout: {
+              type: 'vbox',
+              align: 'stretch'
+            },
+            anchor: '100%',
+            plain: false,
+            border: false,
+            bodyPadding: 10,
+            layout: 'anchor',
+            border: false,
+            defaultType: 'textfield',
+            defaults: { anchor: '100%' },
+            items: [{
+              xtype: 'combobox',
+              name: 'EnvoiHoraireTypeID',
+              fieldLabel: 'Срок рассылки',
+              displayField: 'Name',
+              valueField: 'id',
+              typeAhead: false,
+              queryMode: 'local',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              store: 'storeEnvoiHoraireType',
+              listeners: {
+                //scope: this,
+                select: function () {
+                  if (this.getValue() == 1)
+                    this.up('form').down('#fMonth').show();
+                  else {
+                    this.up('form').down('#fMonth').hide();
+                    this.up('form').down('#fMonth').setValue(null);
+                  }
+                  if (this.getValue() >= 5 && this.getValue() <= 10) {
+                    this.up('form').down('#fDay').hide();
+                    this.up('form').down('#fDay').setValue(null);
+                  }
+                  else
+                    this.up('form').down('#fDay').show();
+
+                  //if (this.getValue() == 1)
+                  //  this.up('form').down('#fc').show();
+                  //else
+                  //  this.up('form').down('#fc').hide();
+                  this.up('form').down('#EnvoiHoraireType').setValue(this.getRawValue());
+                }
+              }
+            }, {
+              xtype: 'combobox',
+              name: 'ModeID',
+              fieldLabel: 'Вид',
+              displayField: 'value',
+              valueField: 'id',
+              typeAhead: false,
+              queryMode: 'local',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              store: Ext.create('Ext.data.ArrayStore', {
+                fields: ['id', 'value'],
+                data: [[0, 'Напоминание'], [1, 'Срок направления']]
+              })
+            }, {
+              xtype: 'fieldcontainer',
+              itemId: 'fc',
+              layout: 'hbox',
+              defaultType: 'textfield',
+              fieldDefaults: { labelWidth: 50, labelAlign: 'right' },
+              items: [{
+                name: 'Day',
+                fieldLabel: 'День',
+                width: 80,
+                itemId: 'fDay',
+                regex: /[0-9]*[1-9][0-9]*/
+              }, {
+                name: 'Month',
+                fieldLabel: 'Месяц',
+                width: 80,
+                itemId: 'fMonth'
+              }]
+            }, {
+              name: 'Comment',
+              fieldLabel: 'Примечание'
+            }, {
+              name: 'EnvoiID',
+              xtype: 'hidden'
+            }, {
+              name: 'ConseilID',
+              xtype: 'hidden'
+            }, {
+              name: 'RiskMapID',
+              xtype: 'hidden'
+            }, {
+              name: 'EnvoiHoraireType',
+              itemId: 'EnvoiHoraireType',
+              xtype: 'hidden'
+            }]
+          }],
+
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record.data.EnvoiHoraireTypeID == 1)
+          this.down('#fMonth').show()
+        else
+          this.down('#fMonth').hide()
+        if (record.data.EnvoiHoraireTypeID >= 5 && record.data.EnvoiHoraireTypeID <= 10)
+          this.down('#fDay').hide()
+        else
+          this.down('#fDay').show()
+
+        //if (record.data.EnvoiHoraireTypeID == 1)
+        //  this.down('#fc').show();
+        //else
+        //  this.down('#fc').hide();
+
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Envoi.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.envoigrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Вид отчетности',
+            dataIndex: 'TypeInf',
+            //width: 200,
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок направления',
+            dataIndex: 'SrokRask',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Место предоставления',
+            dataIndex: 'Mesto',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Основание',
+            dataIndex: 'Osnovan',
+            width: 120,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailToName',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCcName',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Порядок предоставления',
+            dataIndex: 'PoryadPredst',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'Periodich',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Вид активов',
+            dataIndex: 'VidAktiv',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок рассылки для напоминаний',
+            dataIndex: 'SrokRass',
+            width: 130,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, ' Действующие: ', {
+              xtype: 'checkbox',
+              itemId: 'cbIsActive'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'ar.xml'
+            }, {
+              iconCls: 'icon-add',
+              itemId: 'addexec',
+              text: 'Добавить в журнал',
+              disabled: true,
+              scope: this,
+              handler: this.onAddExecClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("envoyerCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { isAuto: this.up('panel').tag == 1, TypeID: this.up('panel').TypeID, IsActive: this.down('#cbIsActive').getValue() };
+        this.store.load();
+        var o = this.up('panel').down('#horraire');
+        if (o) o.down('#create').setDisabled(true);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Envoi.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new Envoi({ IsAuto: this.up('panel').tag == 1, TypeID: this.up('panel').TypeID });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        this.down('#addexec').setDisabled(selections.length === 0);
+        var grid = this.up('panel').down('#horraire');
+        if (grid) {
+          if (selections.length === 0) {
+            grid.down('#create').setDisabled(true);
+          }
+          else {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onAddExecClick: function () {
+        var rec = new EnvoiExec({ Date1: Ext.Date.clearTime(new Date(), false), EnvoiID: this.getView().getSelectionModel().getSelection()[0].data.id, TypeInf: this.getView().getSelectionModel().getSelection()[0].data.TypeInf });
+        var gr = this.up('tabpanel').down('#tcJourEE').down('grid');
+        if (!gr.wini)
+          gr.onCreateWin();
+        gr.wini.setTitle('Добавить');
+        gr.wini.setActiveRecord(rec);
+        gr.wini.show(this);
+
+        //if (!this.winie) {
+        //  this.onCreateWin();
+        //}
+        //this.wini.setTitle('Добавить');
+        //this.wini.setActiveRecord(rec);
+        //this.wini.show(this);
+      }
+
+    });
+
+    Ext.define('EnvoiRi.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.envoirigrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Вид раскрываемой информации',
+            dataIndex: 'TypeInf',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Основание',
+            dataIndex: 'Osnovan',
+            width: 400,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'Periodich',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок раскрытия',
+            dataIndex: 'SrokRask',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ОЛ за представление инфо-и',
+            dataIndex: 'EmailToName',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ОЛ за раскрытие инфо-и',
+            dataIndex: 'EmailCcName',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'ar.xml'
+            }, {
+              iconCls: 'icon-add',
+              itemId: 'addexec',
+              text: 'Добавить в журнал',
+              disabled: true,
+              scope: this,
+              handler: this.onAddExecClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onSendEmailClick: function () {
+        return
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("envoyerCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { isAuto: this.up('panel').tag == 1, TypeID: this.up('panel').TypeID };
+        this.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('EnvoiRi.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new Envoi({ IsAuto: this.up('panel').tag == 1, TypeID: this.up('panel').TypeID });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        this.down('#addexec').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onAddExecClick: function () {
+        var rec = new EnvoiExec({ Date1: Ext.Date.clearTime(new Date(), false), EnvoiID: this.getView().getSelectionModel().getSelection()[0].data.id, TypeInf: this.getView().getSelectionModel().getSelection()[0].data.TypeInf });
+        var gr = this.up('tabpanel').down('#tcJourRi').down('grid');
+        if (!gr.wini)
+          gr.onCreateWin();
+        gr.wini.setTitle('Добавить');
+        gr.wini.setActiveRecord(rec);
+        gr.wini.show(this);
+      }
+
+    });
+
+    Ext.define('EnvoiExec.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.envoiexecgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled') || record.get('Date2') != null)
+                return 'gray-row';
+            },
+            listeners: {
+              render: function (view) {
+                view.tip = Ext.create('Ext.tip.ToolTip', {
+                  target: view.el,
+                  delegate: view.itemSelector,
+                  trackMouse: true,
+                  renderTo: Ext.getBody(),
+                  listeners: {
+                    beforeshow: function (tip) {
+                      var tooltip = view.getRecord(tip.triggerElement).get('Comment');
+                      tip.update(tooltip);
+                      if (!tooltip) {
+                        tip.on('show', function () {
+                          Ext.defer(tip.hide, 10, tip);
+                        }, tip, { single: true });
+                      }
+                    }
+                  }
+                });
+              }
+            }
+          },
+          columns: [{
+            header: 'Дата, не позднее',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'Date1',
+            width: 80
+          }, {
+            header: 'Дата факт. направ.',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'Date2',
+            width: 80
+          }, {
+            header: 'Вид отчетности',
+            dataIndex: 'TypeInf',
+            //width: 200,
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Основание',
+            dataIndex: 'Osnovan',
+            width: 120,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Место предоставления',
+            dataIndex: 'Mesto',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Порядок предоставления',
+            dataIndex: 'PoryadPredst',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'Periodich',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок направления',
+            dataIndex: 'SrokRask',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.YEAR, 1), Ext.Date.DAY, -Ext.Date.getDayOfYear(Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.YEAR, 1))),
+              width: 100,
+              margin: '0 5 0 0'
+            }, ' Не исполнено: ', {
+              xtype: 'checkbox',
+              itemId: 'cbIsExec'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'ar.xml'
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("envoiExecCourriel")',
+            timeout: 60000,
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), TypeID: this.up('panel').TypeID, IsExec: me.down('#cbIsExec').getValue() };
+        me.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('EnvoiExec.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new EnvoiExec({ Date1: Ext.Date.clearTime(new Date(), false) });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+
+    });
+
+    Ext.define('EnvoiExecRi.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.envoiexecrigrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled') || record.get('Date2') != null)
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Дата, не позднее',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'Date1',
+            width: 80
+          }, {
+            header: 'Дата факт. раскрытия',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'Date2',
+            width: 80
+          }, {
+            header: 'Вид раскрываемой информации',
+            dataIndex: 'TypeInf',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Основание',
+            dataIndex: 'Osnovan',
+            width: 400,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Периодичность',
+            dataIndex: 'Periodich',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок раскрытия',
+            dataIndex: 'SrokRask',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ОЛ за представление инфо-и',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ОЛ за раскрытие инфо-и',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.YEAR, 1), Ext.Date.DAY, -Ext.Date.getDayOfYear(Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.YEAR, 1))),
+              width: 100,
+              margin: '0 5 0 0'
+            }, ' Не исполнено: ', {
+              xtype: 'checkbox',
+              itemId: 'cbIsExec'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'ar.xml'
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("envoiExecRiCourriel")',
+            timeout: 60000,
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), TypeID: this.up('panel').TypeID, IsExec: me.down('#cbIsExec').getValue() };
+        me.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('EnvoiExec.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new EnvoiExec({ Date1: Ext.Date.clearTime(new Date(), false) });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+
+    });
+
+    Ext.define('Horraire.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.horrairegrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          title: 'Расписание',
+          defaultType: 'textfield',
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true
+          },
+          columns: [{
+            header: 'Тип',
+            dataIndex: 'EnvoiHoraireType',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Вид',
+            dataIndex: 'Mode',
+            flex: 2,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Примечание',
+            dataIndex: 'Comment',
+            flex: 3,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'День',
+            dataIndex: 'Day',
+            width: 50,
+            tdCls: 'wrap-text',
+            hidden: false
+          }, {
+            header: 'Месяц',
+            dataIndex: 'Month',
+            width: 50,
+            tdCls: 'wrap-text',
+            hidden: false
+          }, {
+            header: 'ConseilID',
+            dataIndex: 'ConseilID',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'EnvoiID',
+            dataIndex: 'EnvoiID',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'RiskMapID',
+            dataIndex: 'RiskMapID',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }, {
+            header: 'ID',
+            dataIndex: 'id',
+            width: 30,
+            tdCls: 'wrap-text',
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              disabled: true,
+              itemId: 'create',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        this.store.proxy.extraParams = { isAuto: this.up('panel').tag == 1 };
+        this.store.load();
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Horraire.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec;
+        if (this.store.storeId == 'storeConseilHoraire')
+          rec = new ConseilHoraire({ ConseilID: this.store.proxy.extraParams.id, EnvoiHoraireTypeID: 1 });
+        else if (this.store.storeId == 'storeRiskMapHoraire')
+          rec = new RiskMapHoraire({ RiskMapID: this.store.proxy.extraParams.id, EnvoiHoraireTypeID: 1 });
+        else
+          rec = new EnvoiHoraire({ EnvoiID: this.store.proxy.extraParams.id, EnvoiHoraireTypeID: 1 });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+    });
+
+    Ext.define('Conseil.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.conseilwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'tabpanel',
+            itemId: 'tp',
+            anchor: '100%',
+            //plain: false,
+            border: false,
+            //flex: 1,
+            height: 580,
+            border: false,
+            items: [{
+              xtype: 'form',
+              tag: 0,
+              title: 'Параметры',
+              bodyPadding: 10,
+              activeRecord: null,
+              border: false,
+              defaultType: 'textfield',
+              defaults: { anchor: '100%' },
+              layout: 'anchor',
+              fieldDefaults: {
+                labelAlign: 'top',
+                msgTarget: 'side'
+              },
+              items: [{
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'Violation',
+                fieldLabel: 'Содержание недостатка/нарушения'
+              }, {
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'Conseil',
+                fieldLabel: 'Рекомендация'
+              }, {
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                items: [{
+                  xtype: 'datefield',
+                  format: 'd.m.Y',
+                  flex: 1,
+                  name: 'PrononceDate',
+                  fieldLabel: 'Дата вынесение',
+                  margin: '0 15 0 0'
+                }, {
+                  xtype: 'datefield',
+                  flex: 1,
+                  format: 'd.m.Y',
+                  name: 'Terme',
+                  fieldLabel: 'Срок выполнения',
+                  margin: '0 15 0 0'
+                }, {
+                  xtype: 'datefield',
+                  format: 'd.m.Y',
+                  flex: 1,
+                  name: 'Prolongation',
+                  fieldLabel: 'Продление',
+                  margin: '0 15 0 0'
+                }, {
+                  xtype: 'datefield',
+                  flex: 1,
+                  format: 'd.m.Y',
+                  name: 'ExecDate',
+                  fieldLabel: 'Дата выполнения'
+                }]
+              }, {
+                name: 'Priorite',
+                fieldLabel: 'Приоритетность',
+                xtype: 'combo',
+                store: 'storeCPriorite',
+                displayField: 'Text',
+                valueField: 'Value',
+                typeAhead: true,
+                queryMode: 'local',
+                emptyText: '*',
+                selectOnFocus: true
+              }, {
+                name: 'Possesseur',
+                fieldLabel: 'Владелец'
+              }, {
+                name: 'Commentaire',
+                fieldLabel: 'Комментарии'
+              }, {
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                items: [{
+                  xtype: 'customnumber',
+                  name: 'MinNomRiskPrice',
+                  fieldLabel: 'Мин. номинальная стоимость риска',
+                  allowDecimals: false,
+                  decimalPrecision: 0,
+                  anchor: '50%',
+                  hideTrigger: true,
+                  keyNavEnabled: false,
+                  mouseWheelEnabled: false,
+                  autoStripChars: true,
+                  margin: '0 15 0 0'
+                }, {
+                  xtype: 'customnumber',
+                  name: 'MaxNomRiskPrice',
+                  fieldLabel: 'Макс. номинальная стоимость риска',
+                  allowDecimals: false,
+                  decimalPrecision: 0,
+                  anchor: '50%',
+                  hideTrigger: true,
+                  keyNavEnabled: false,
+                  mouseWheelEnabled: false,
+                  autoStripChars: true,
+                  margin: '0 15 0 0'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'IsEnabled',
+                  fieldLabel: 'Активна?',
+                  labelAlign: 'right',
+                  inputValue: 1,
+                  uncheckedValue: 0
+                }]
+              }, {
+                itemId: 'EmailTo',
+                name: 'EmailTo',
+                xtype: 'hidden'
+              }, {
+                itemId: 'EmailCc',
+                name: 'EmailCc',
+                xtype: 'hidden'
+              }]
+            }, {
+              tag: 1,
+              title: 'Адресаты',
+              layout: 'anchor',
+              defaults: { anchor: '100%' },
+              border: false,
+              items: [{
+                xtype: 'grid',
+                border: false,
+                itemId: 'gTo',
+                anchor: '100% 50%',
+                title: 'Кому',
+                store: storeEMailTo,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }, {
+                xtype: 'grid',
+                border: false,
+                itemId: 'gCc',
+                anchor: '100% 50%',
+                title: 'Копия',
+                store: storeEMailCc,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailTo.removeAll();
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Conseil.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.conseilgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          columns: [{
+            header: 'Содержание недостатка/нарушения',
+            dataIndex: 'Violation',
+            //width: 200,
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Рекомендация',
+            dataIndex: 'Conseil',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Приоритетность',
+            dataIndex: 'PrioriteNom',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Мин. номинальная стоимость риска',
+            dataIndex: 'MinNomRiskPrice',
+            width: 100,
+            tdCls: 'wrap-text',
+            align: 'right'
+          }, {
+            header: 'Макс. номинальная стоимость риска',
+            dataIndex: 'MaxNomRiskPrice',
+            xtype: '',
+            width: 100,
+            tdCls: 'wrap-text',
+            align: 'right'
+          }, {
+            header: 'Дата вынесения',
+            dataIndex: 'PrononceDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Срок выполнения',
+            dataIndex: 'Terme',
+            width: 70,
+            xtype: 'datecolumn',
+            renderer: function (val) {
+              return '<span style="color:' + (val >= Ext.Date.clearTime(new Date(), false) ? '#73b51e' : '#cf4c35') + ';">' + Ext.util.Format.dateRenderer('d.m.Y')(val) + '</span>';
+            }
+          }, {
+            header: 'Продление',
+            dataIndex: 'Prolongation',
+            width: 70,
+            xtype: 'datecolumn',
+            renderer: function (val) {
+              return '<span style="color:' + (val >= Ext.Date.clearTime(new Date(), false) ? '#73b51e' : '#cf4c35') + ';">' + Ext.util.Format.dateRenderer('d.m.Y')(val) + '</span>';
+            }
+          }, {
+            header: 'Дата выполнения',
+            dataIndex: 'ExecDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Владелец',
+            dataIndex: 'Possesseur',
+            width: 120,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Комментарии',
+            dataIndex: 'Commentaire',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Активна',
+            dataIndex: 'IsEnabled',
+            xtype: 'checkcolumn',
+            width: 20
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, Ext.create('Ext.form.field.ComboBox', {
+              itemId: 'cbType',
+              store: Ext.create('Ext.data.Store', {
+                fields: ['id', 'value'],
+                data: [
+                    { id: 0, value: 'Дата вынесения' },
+                    { id: 1, value: 'Срок выполнения' },
+                    { id: 2, value: 'Дата выполнения' }
+                ]
+              }),
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              valueField: 'id',
+              selectOnFocus: true,
+              width: 120,
+              listeners: {
+                beforerender: function () { this.setValue(0, false); }
+              }
+            }), ' Незакрытые: ', {
+              xtype: 'checkbox',
+              checked: true,
+              itemId: 'cbOpen',
+              scope: this,
+              handler: this.onOpenClick
+            }, {
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Рекомендации.xml'
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("conseilCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), type: me.down('#cbType').getValue(), nopen: me.down('#cbOpen').getValue() };
+        me.store.load();
+        var o = me.up('panel').down('#horraire');
+        if (o) o.down('#create').setDisabled(true);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Conseil.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new Conseil();
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        var grid = this.up('panel').down('#horraire');
+        if (grid) {
+          if (selections.length === 0)
+            grid.down('#create').setDisabled(true);
+          else {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+
+    });
+
+    Ext.define('RiskMap.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.riskmapwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          border: false,
+          resizable: false,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'tabpanel',
+            itemId: 'tp',
+            anchor: '100%',
+            border: false,
+            //height: 530,
+            maxHeight: 1000,
+            border: false,
+            items: [{
+              xtype: 'form',
+              tag: 0,
+              title: 'Параметры',
+              bodyPadding: 10,
+              activeRecord: null,
+              border: false,
+              defaultType: 'textfield',
+              defaults: { anchor: '100%' },
+              layout: 'anchor',
+              fieldDefaults: {
+                labelAlign: 'top',
+                msgTarget: 'side',
+                labelWidth: 150
+              },
+              items: [{
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                defaultType: 'textfield',
+                items: [{
+                  name: 'JurPersonne',
+                  fieldLabel: 'Юр. лицо',
+                  width: '50%',
+                  margin: '0 5 0 0'
+                }, {
+                  name: 'Dep',
+                  fieldLabel: 'Структурное подразделение',
+                  width: '50%',
+                  margin: '0 0 0 5'
+                }]
+              }, {
+                name: 'BisProc',
+                fieldLabel: 'Бизнес процесс'
+              }, {
+                name: 'NumRisk',
+                fieldLabel: '№ Риск',
+                maskRe: /[\d]/
+              }, {
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'RiskName',
+                fieldLabel: 'Риск наименование'
+              }, {
+                xtype: 'fieldcontainer',
+                layout: 'hbox',
+                items: [{
+                  name: 'Influence',
+                  fieldLabel: 'Влияние',
+                  xtype: 'combo',
+                  store: 'storeRMLevel',
+                  displayField: 'Text',
+                  valueField: 'Value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  margin: '0 5 0 0',
+                  width: '33%'
+                }, {
+                  name: 'Probabilite',
+                  fieldLabel: 'Вероятность',
+                  xtype: 'combo',
+                  store: 'storeRMLevel',
+                  displayField: 'Text',
+                  valueField: 'Value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  margin: '0 5 0 5',
+                  width: '33.5%'
+                }, {
+                  name: 'ControlForce',
+                  fieldLabel: 'Сила контроля',
+                  xtype: 'combo',
+                  store: 'storeRMLevel',
+                  displayField: 'Text',
+                  valueField: 'Value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  margin: '0 0 0 5',
+                  width: '33%'
+                }]
+              }, {
+                xtype: 'checkboxfield',
+                name: 'EssentielRisk',
+                fieldLabel: 'Существенный риск',
+                labelAlign: 'left',
+                labelWidth: 130,
+                inputValue: 1,
+                uncheckedValue: 0
+              }, {
+                name: 'But',
+                fieldLabel: 'Цель'
+              }, {
+                name: 'PossesseurBut',
+                fieldLabel: 'Владелец Цели'
+              }, {
+                xtype: 'textareafield',
+                grow: true,
+                growMin: 50,
+                growMax: 120,
+                name: 'Control',
+                fieldLabel: 'Контроль'
+              }, {
+                name: 'PossesseurControl',
+                fieldLabel: 'Владелец контроля'
+              }, {
+                xtype: 'checkboxfield',
+                name: 'IsEnabled',
+                fieldLabel: 'Активна?',
+                labelAlign: 'left',
+                labelWidth: 130,
+                inputValue: 1,
+                uncheckedValue: 0
+              }, {
+                itemId: 'EmailTo',
+                name: 'EmailTo',
+                xtype: 'hidden'
+              }, {
+                itemId: 'EmailCc',
+                name: 'EmailCc',
+                xtype: 'hidden'
+              }]
+            }, {
+              tag: 1,
+              title: 'Адресаты',
+              layout: 'anchor',
+              defaults: { anchor: '100%' },
+              border: false,
+              items: [{
+                xtype: 'grid',
+                height: 350,
+                border: false,
+                itemId: 'gTo',
+                anchor: '100% 50%',
+                title: 'Кому',
+                store: storeEMailTo,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }, {
+                xtype: 'grid',
+                height: 350,
+                border: false,
+                itemId: 'gCc',
+                anchor: '100% 50%',
+                title: 'Копия',
+                store: storeEMailCc,
+                columns: [{
+                  xtype: 'checkcolumn',
+                  dataIndex: 'ui',
+                  width: 30
+                }, {
+                  header: "Имя",
+                  dataIndex: 'name',
+                  width: 240
+                }, {
+                  header: "EMail",
+                  dataIndex: 'email',
+                  flex: 1
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailTo.removeAll();
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    var filters = {
+      ftype: 'filters',
+      encode: true,
+      local: true,
+      autoReload: false,
+      menuFilterText: 'Фильтр'
+    };
+
+    Ext.define('RiskMap.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.riskmapgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (!record.get('IsEnabled'))
+                return 'gray-row';
+            }
+          },
+          features: [filters],
+          columns: [{
+            header: 'Юр. лицо',
+            dataIndex: 'JurPersonne',
+            width: 60,
+            //flex: 1,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Структурное подразделение',
+            dataIndex: 'Dep',
+            width: 60,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Бизнес процесс',
+            dataIndex: 'BisProc',
+            width: 80,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: '№ Риск',
+            dataIndex: 'NumRisk',
+            width: 30,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Риск наименование',
+            dataIndex: 'RiskName',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Влияние',
+            dataIndex: 'InfluenceName',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Вероятность',
+            dataIndex: 'ProbabiliteName',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Сила контроля',
+            dataIndex: 'ControlForceName',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Итоговая оценка',
+            dataIndex: 'TotalName',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Существенный риск',
+            dataIndex: 'EssentielRisk',
+            width: 40,
+            xtype: 'checkcolumn',
+            tdCls: 'wrap-text',
+            listeners: {
+              beforecheckchange: function (e) {
+                return false;
+              }
+            }
+          }, {
+            header: 'Цель',
+            dataIndex: 'But',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Владелец Цели',
+            dataIndex: 'PossesseurBut',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Контроль',
+            dataIndex: 'Control',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Владелец контроля',
+            dataIndex: 'PossesseurControl',
+            width: 90,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей',
+            dataIndex: 'EmailTo',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Список получателей в копии',
+            dataIndex: 'EmailCc',
+            width: 140,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'RiskMap.xml'
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.store.on('load', function () {
+          this.filters.createFilters();
+        }, this);
+
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("riskMapCourriel")',
+            timeout: 60000,
+            params: {
+              id: [this.getView().getSelectionModel().getSelection()[0].data.id]
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        this.store.load();
+        var o = this.up('panel').down('#horraire');
+        if (o) o.down('#create').setDisabled(true);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('RiskMap.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new RiskMap();
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+        var grid = this.up('panel').down('#horraire');
+        if (grid) {
+          if (selections.length === 0)
+            grid.down('#create').setDisabled(true);
+          else {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].data.id };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+          }
+        }
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+    });
+
+    Ext.define('CbModel', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name']
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storeKV',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent")' + '/6261',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storeMR',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent")' + '/6255',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storePR',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent")' + '/6250',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.define('DeclViol', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'id',
+      fields: ['ID', { name: 'DDate', type: 'date', dateFormat: "c" }, 'FinInstID', 'InvestDeclID', 'InvestDeclWhereID', 'FLAG_Group', 'IssuerID', 'MinValue', 'MaxValue', 'Value', 'Descr', 'Reason', 'MethodRemoval', 'PeriodRemoval', 'KindViolation', 'LastValue', { name: 'EndDate', type: 'date', dateFormat: "c" }, { name: 'TermDate', type: 'date', dateFormat: "c" }, 'kvName', 'mrName', 'prName', 'fiBrief', 'fisBrief', 'NameWhere', 'ocName'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDeclViolList")',
+          create: '@Url.Action("addDeclViol")',
+          update: '@Url.Action("updDeclViol")',
+          destroy: '@Url.Action("delDeclViol")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeDeclViol',
+      model: 'DeclViol'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeGetTermDate',
+      autoLoad: false,
+      fields: [{ name: 'TermDate', type: 'date', dateFormat: "c" }],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("GetTermDate")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('DeclViol.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.declviolwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 700,
+          closeAction: 'hide',
+          layout: 'fit',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'tabpanel',
+            itemId: 'tp',
+            anchor: '100%',
+            border: false,
+            //height: 530,
+            maxHeight: 1000,
+            border: false,
+            items: [{
+              xtype: 'form',
+              tag: 0,
+              title: 'Параметры',
+              bodyPadding: 10,
+              activeRecord: null,
+              border: false,
+              defaultType: 'textfield',
+              defaults: { anchor: '100%' },
+
+              fieldDefaults: {
+                labelAlign: 'right',
+                msgTarget: 'side',
+                labelWidth: 190
+              },
+              items: [{
+                itemId: 'DDate',
+                xtype: 'datefield',
+                name: 'DDate',
+                fieldLabel: 'Дата возникновения нарушения',
+                anchor: '50%',
+                startDay: 1,
+                allowBlank: false,
+                format: 'd.m.Y'
+              }, {
+                xtype: 'combo',
+                itemId: 'FinInstID',
+                fieldLabel: 'Портфель',
+                store: Ext.create('Ext.data.Store', {
+                  idProperty: 'id',
+                  fields: ['id', 'name', 'brief'],
+                  proxy: {
+                    type: 'ajax',
+                    actionMethods: { read: 'POST' },
+                    url: '@Url.Action("GetFI")',
+                    reader: {
+                      type: 'json',
+                      root: 'data'
+                    }
+                  }
+                }),
+                valueField: 'id',
+                name: 'FinInstID',
+                displayField: 'brief',
+                typeAhead: false,
+                queryDelay: 1000,
+                width: 570,
+                hideTrigger: true,
+                forceSelection: true,
+                anchor: '100%',
+                minChars: 2,
+                listConfig: {
+                  getInnerTpl: function () {
+                    return '<div class="search-item"><strong>{brief}</strong><br>{name}</div>';
+                  }
+                },
+                allowBlank: false,
+                listeners: {
+                  select: function (combo, record, index) {
+                    var store = this.ownerCt.getComponent('InvestDeclID').store;
+                    store.proxy.extraParams = { id: this.getValue() };
+                    store.load();
+                    this.ownerCt.getComponent('InvestDeclWhereID').store.removeAll();
+                    this.ownerCt.getComponent('InvestDeclWhereID').clearValue();
+                  }
+                }
+              }, {
+                itemId: 'InvestDeclID',
+                xtype: 'combo',
+                store: Ext.create('Ext.data.Store', {
+                  autoLoad: false,
+                  idProperty: 'InvestDeclID',
+                  fields: ['InvestDeclID', 'Name'],
+                  proxy: {
+                    type: 'ajax',
+                    actionMethods: { read: 'POST' },
+                    url: '@Url.Action("GetDeclByInstID")',
+                    reader: {
+                      type: 'json',
+                      root: 'data'
+                    }
+                  }
+                }),
+                displayField: 'Name',
+                valueField: 'InvestDeclID',
+                typeAhead: false,
+                queryMode: 'local',
+                fieldLabel: 'Декларация',
+                forceSelection: true,
+                triggerAction: 'all',
+                selectOnFocus: true,
+                width: 135,
+                name: 'InvestDeclID',
+                emptyText: '*',
+                submitValue: false,
+                listeners: {
+                  select: function (combo, record, index) {
+                    var store = this.ownerCt.getComponent('InvestDeclWhereID').store;
+                    store.load({ params: { id: this.getValue() } });
+                  }
+                }
+              }, {
+                itemId: 'InvestDeclWhereID',
+                xtype: 'combo',
+                store: Ext.create('Ext.data.Store', {
+                  autoLoad: false,
+                  idProperty: 'id',
+                  fields: ['id', 'Name', 'StartValue', 'StopValue', 'FLAG_Group'],
+                  proxy: {
+                    type: 'ajax',
+                    actionMethods: { read: 'POST' },
+                    url: '@Url.Action("GetDeclWhereByDeclID")',
+                    reader: {
+                      type: 'json',
+                      root: 'data'
+                    }
+                  }
+                }),
+                displayField: 'Name',
+                emptyText: '*',
+                valueField: 'id',
+                typeAhead: false,
+                queryMode: 'local',
+                fieldLabel: 'Условие декларации',
+                forceSelection: true,
+                triggerAction: 'all',
+                selectOnFocus: true,
+                width: 135,
+                name: 'InvestDeclWhereID',
+                allowBlank: true,
+                listeners: {
+                  select: function (combo, record, index) {
+                    var me = this;
+                    me.ownerCt.getComponent('MaxValue').setValue(record[0].data.StopValue);
+                    var c = me.ownerCt.getComponent('IssuerID');
+                    if (record[0].data.FLAG_Group == 4 || record[0].data.FLAG_Group == 18) {
+                      c.store.load({ params: { id: me.ownerCt.getComponent('FinInstID').getValue(), d: me.ownerCt.getComponent('DDate').getValue() } });
+                      c.setDisabled(false);
+                    }
+                    else {
+                      c.clearValue();
+                      c.store.removeAll();
+                      c.setDisabled(true);
+                    }
+                  }
+                }
+              }, {
+                itemId: 'IssuerID',
+                xtype: 'combo',
+                store: Ext.create('Ext.data.Store', {
+                  autoLoad: false,
+                  idProperty: 'id',
+                  fields: ['id', 'name'],
+                  proxy: {
+                    type: 'ajax',
+                    actionMethods: { read: 'POST' },
+                    url: '@Url.Action("GetIssuers")',
+                    reader: {
+                      type: 'json',
+                      root: 'data'
+                    }
+                  }
+                }),
+                displayField: 'name',
+                emptyText: '*',
+                valueField: 'id',
+                typeAhead: false,
+                queryMode: 'local',
+                fieldLabel: 'Эмитент',
+                forceSelection: true,
+                triggerAction: 'all',
+                selectOnFocus: true,
+                width: 135,
+                name: 'IssuerID',
+                allowBlank: true,
+                listeners: {
+                }
+              }, {
+                name: 'Descr',
+                fieldLabel: 'Описание нарушения'
+              }, {
+                xtype: 'customnumber',
+                itemId: 'MaxValue',
+                name: 'MaxValue',
+                fieldLabel: 'Предельное значение',
+                allowDecimals: true,
+                decimalPrecision: 2,
+                anchor: '50%',
+                hideTrigger: true,
+                keyNavEnabled: false,
+                mouseWheelEnabled: false,
+                autoStripChars: true
+              }, {
+                xtype: 'customnumber',
+                name: 'Value',
+                fieldLabel: 'Фактическое значение',
+                allowDecimals: true,
+                decimalPrecision: 2,
+                anchor: '50%',
+                hideTrigger: true,
+                keyNavEnabled: false,
+                mouseWheelEnabled: false,
+                autoStripChars: true
+              }, {
+                name: 'Reason',
+                fieldLabel: 'Причина возникновения нарушения'
+              }, {
+                xtype: 'combo',
+                fieldLabel: 'Способ устранения',
+                store: 'storeMR',
+                displayField: 'name',
+                emptyText: '*',
+                valueField: 'id',
+                typeAhead: true,
+                queryMode: 'local',
+                selectOnFocus: true,
+                name: 'MethodRemoval'
+              }, {
+                itemId: 'PeriodRemoval',
+                xtype: 'combo',
+                fieldLabel: 'Срок на устранение',
+                store: 'storePR',
+                displayField: 'name',
+                emptyText: '*',
+                valueField: 'id',
+                typeAhead: true,
+                queryMode: 'local',
+                selectOnFocus: true,
+                name: 'PeriodRemoval',
+                listeners: {
+                  select: function (combo, record, index) {
+                    var me = this;
+                    Ext.Ajax.request({
+                      url: '@Url.Action("GetTermDate")',
+                      timeout: 60000,
+                      params: {
+                        d: me.down('#DDate').value, prid: me.down('#PeriodRemoval').value
+                      },
+                      success: function (response) {
+                        me.down('#TermDate').setValue(Ext.decode(response.responseText).success);
+                      },
+                      failure: function (response) {
+                        var text = response.responseText;
+                        alert('Ошибка!');
+                      }
+                    });
+
+
+                    //var store = Ext.StoreManager.lookup('storeGetTermDate');
+                    //store.on('load', function (r) {
+                    //  me.down('#TermDate').setValue();
+                    //  store.un('load', l);
+                    //});
+                    //store.load({params: { d: me.down('#DDate').value, prid: me.down('#PeriodRemoval').value}});
+                  },
+                  scope: this
+                }
+              }, {
+                itemId: 'TermDate',
+                xtype: 'datefield',
+                name: 'TermDate',
+                fieldLabel: 'Устранить до',
+                anchor: '50%',
+                startDay: 1,
+                format: 'd.m.Y'
+              }, {
+                xtype: 'datefield',
+                name: 'EndDate',
+                fieldLabel: 'Дата устранения',
+                anchor: '50%',
+                startDay: 1,
+                format: 'd.m.Y'
+              }, {
+                xtype: 'combo',
+                fieldLabel: 'Вид нарушений',
+                store: 'storeKV',
+                displayField: 'name',
+                emptyText: '*',
+                valueField: 'id',
+                typeAhead: true,
+                queryMode: 'local',
+                selectOnFocus: true,
+                name: 'KindViolation'
+              }]
+            }, {
+              tag: 1,
+              title: 'Адресаты',
+              layout: 'anchor',
+              defaults: { anchor: '100%' },
+              border: false,
+              items: []
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        me.activeRecord = record;
+        if (record) {
+          me.down('#save').enable();
+
+          if (record.data.InvestDeclWhereID) {
+            me.down('#InvestDeclWhereID').store.load({ params: { wid: record.data.InvestDeclWhereID } });
+          }
+          else {
+            me.down('#InvestDeclID').clearValue();
+            me.down('#InvestDeclWhereID').store.removeAll();
+          }
+
+          if (record.data.FinInstID) {
+            me.down('#FinInstID').store.load({ params: { id: record.data.FinInstID } });
+            me.down('#InvestDeclID').store.load({ params: { id: record.data.FinInstID } });
+            if (record.data.FLAG_Group == 4 || record.data.FLAG_Group == 18) {
+              me.down('#IssuerID').store.load({ params: { id: record.data.FinInstID, d: record.data.DDate } });
+              me.down('#IssuerID').setDisabled(false);
+            }
+            else {
+              me.down('#IssuerID').clearValue();
+              me.down('#IssuerID').setDisabled(true);
+            }
+          }
+          else {
+            me.down('#FinInstID').clearValue();
+            me.down('#InvestDeclID').store.removeAll();
+          }
+
+          me.down('form').getForm().loadRecord(record);
+        } else {
+          me.down('#save').disable();
+          me.down('form').getForm().reset();
+        }
+        me.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('DeclViol.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.declviolgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (record.get('EndDate') != null)
+                return 'gray-row';
+            }
+          },
+          features: [filters],
+          columns: [{
+            header: 'Тип клиента',
+            dataIndex: 'ocName',
+            width: 90,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Название портфеля',
+            dataIndex: 'fiBrief',
+            width: 120,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Дата возникновения нарушения',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'DDate',
+            width: 80
+          }, {
+            header: 'Условие декларации',
+            dataIndex: 'NameWhere',
+            width: 150,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Эмитент',
+            dataIndex: 'fisBrief',
+            width: 120,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Описание нарушения',
+            dataIndex: 'Descr',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Предельное значение',
+            dataIndex: 'MaxValue',
+            width: 70,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Фактическое значение',
+            dataIndex: 'Value',
+            width: 70,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Причина возникновения нарушения',
+            dataIndex: 'Reason',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок на устранение',
+            dataIndex: 'prName',
+            width: 80,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Устранить до',
+            dataIndex: 'TermDate',
+            width: 80,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Дата устранения',
+            dataIndex: 'EndDate',
+            width: 80,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Способ устранения',
+            dataIndex: 'mrName',
+            width: 150@*,
+            tdCls: 'wrap-text'*@
+          }, {
+            header: 'Вид нарушений',
+            dataIndex: 'kvName',
+            width: 120,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'id',
+            dataIndex: 'ID',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -8),
+              width: 100,
+              disabled: true
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0',
+              disabled: true
+            }, ' Незакрытые: ', {
+              xtype: 'checkbox',
+              checked: true,
+              itemId: 'cbOpen',
+              scope: this,
+              handler: this.onOpenClick
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'DeclViol.xml'
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.store.on('load', function () {
+          this.filters.createFilters();
+        }, this);
+
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("DeclViolCourriel")',
+            timeout: 60000,
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onOpenClick: function () {
+        var me = this;
+        me.down('#d1').setDisabled(me.down('#cbOpen').checked);
+        me.down('#d2').setDisabled(me.down('#cbOpen').checked);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), op: me.down('#cbOpen').checked };
+        me.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        //this.down('#sendEmail').setDisabled(selections.length === 0);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('DeclViol.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var rec = new DeclViol({ DDate: Ext.Date.clearTime(new Date(), false), PeriodRemoval: 6251 });
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Добавить');
+        this.wini.setActiveRecord(rec);
+        this.wini.show(this);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+
+    });
+
+    Ext.onReady(function () {
+
+      Ext.tip.QuickTipManager.init();
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          id: 'tp',
+          xtype: 'tabpanel',
+          tabPosition: 'top',
+          region: 'center',
+          activeTab: 0,
+          frame: false,
+          items: [{
+            itemId: 'tcAuto',
+            tag: 1,
+            TypeID: 1,
+            title: 'Авто-рассылка',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoigrid',
+              store: 'storea'
+            }, {
+              region: 'south',
+              height: '20%',
+              itemId: 'horraire',
+              border: false,
+              xtype: 'horrairegrid',
+              store: 'storeEnvoiHoraire',
+              split: true
+            }]
+          }, {
+            itemId: 'tcManuel',
+            tag: 0,
+            TypeID: 1,
+            title: 'Ручная рассылка',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoigrid',
+              store: 'storem'
+            }]
+          }, {
+            itemId: 'tcJourEE',
+            tag: 5,
+            TypeID: 1,
+            title: 'Журнал ПО',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoiexecgrid',
+              store: 'storeEE'
+            }]
+          }, {
+            itemId: 'tcEnvoiRi',
+            tag: 0,
+            TypeID: 2,
+            title: 'Раскрытие информации',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoirigrid',
+              store: 'storeri'
+            }]
+          }, {
+            itemId: 'tcJourRi',
+            tag: 5,
+            TypeID: 2,
+            title: 'Журнал РИ',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'envoiexecrigrid',
+              store: 'storeeeri'
+            }]
+          }, {
+            itemId: 'tcConseil',
+            tag: 2,
+            title: 'Рекомендации',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'conseilgrid',
+              store: 'storeConseil'
+            }, Ext.create('Horraire.Grid', {
+              region: 'south',
+              height: '20%',
+              itemId: 'horraire',
+              border: false,
+              //xtype: 'horrairegrid',
+              store: 'storeConseilHoraire',
+              split: true
+            })]
+          }, {
+            itemId: 'tcRiskMap',
+            tag: 3,
+            title: 'Карта рисков',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'riskmapgrid',
+              store: 'storeRiskMap'
+            }, Ext.create('Horraire.Grid', {
+              region: 'south',
+              height: '20%',
+              itemId: 'horraire',
+              border: false,
+              //xtype: 'horrairegrid',
+              store: 'storeRiskMapHoraire',
+              split: true
+            })]
+          }, {
+            itemId: 'tcDeclViol',
+            tag: 3,
+            title: 'Журнал нарушений',
+            autoScroll: true,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              border: false,
+              xtype: 'declviolgrid',
+              store: 'storeDeclViol'
+            }]
+          }]
+        }]
+      });
+
+    });
+  </script>
+}

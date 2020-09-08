@@ -1,0 +1,97 @@
+﻿@model dynamic
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+
+  foreach (var q1 in Model)
+  {
+  <div class="container">
+    <div class="row">
+      <p></p>
+      @if (ViewBag.t == q1.t)
+      {
+        <p>
+          Уважаемый коллега,<br>
+          просим подтвердить распоряжение клиента по <strong>@Html.ActionLink("ссылке", "confirmEnrDet", "CorpEvents", new { area = "code", id = q1.id, t = (int)ViewBag.t, a = ViewBag.a }, new { })</strong>
+        </p>
+      }
+      <table class="table table-striped table-bordered table-hover table-condensed">
+        <tr>
+          <th>Номер распоряжения</th>
+          <td>@q1.Num</td>
+        </tr>
+        <tr>
+          <th>Клиент</th>
+          <td>@q1.ClientName</td>
+        </tr>
+        <tr>
+          <th>Код клиента</th>
+          <td>@q1.ClientCode</td>
+        </tr>
+        <tr>
+          <th>№ Договора</th>
+          <td>@q1.trNameBrief</td>
+        </tr>
+        <tr>
+          <th>Дата договора</th>
+          <td>@q1.DateStart.ToString("dd.MM.yy")</td>
+        </tr>
+        <tr>
+          <th>Документ</th>
+          <td>@q1.DTName</td>
+        </tr>
+        <tr>
+          <th>Оригинал</th>
+          <td>@(q1.Original ?? false ? "Да" : "Нет")</td>
+        </tr>
+        <tr>
+          <th>Клиентский</th>
+          <td>@q1.ClnManager</td>
+        </tr>
+@*        <tr>
+          <th>Управляющий</th>
+          <td>@q1.StrategyUser</td>
+        </tr>*@
+        <tr>
+          <th colspan="2">Сроки исполнения (Дата исполнения)</th>
+        </tr>
+        <tr>
+          <th>По договору</th>
+          <td>@q1.DaysDog дн. (@q1.DateDog.ToString("dd.MM.yy"))</td>
+        </tr>
+        <tr>
+          <th>По документу</th>
+          <td>@q1.DaysDoc дн. (@q1.DateDoc.ToString("dd.MM.yy"))</td>
+        </tr>
+        <tr>
+          <th>Сумма</th>
+          <td>@(q1.Qty == null ? "" : string.Format("{0:N2}", q1.Qty))</td>
+        </tr>
+        <tr>
+          <th>Примечание</th>
+          <td>@q1.Remarque&nbsp;</td>
+        </tr>
+      </table>
+      @if (ViewBag.t != MO.Areas.Code.Models.numDep.IsKM && ViewBag.t == q1.t)
+      {
+        <p>в случае невозможности исполнения распоряжения просьба перейти<a href='/code/CorpEvents/refusalEnrDet?id=@q1.id&t=@((int)ViewBag.t)&a=@ViewBag.a'><strong> по ссылке отказа и объяснить причину ОТКАЗа</strong></a></p>
+        <br />
+      }
+    </div>
+  </div>
+  }
+}
+
+@section css
+{
+  <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+}
+
+@section scripts {
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+  <script src="~/Scripts/bootstrap.min.js"></script>
+}

@@ -1,0 +1,51 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>@ViewBag.Title</title>
+  <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <base href="/"/>
+  @Styles.Render("~/Content/css")
+  @RenderSection("css", required: false)
+  <script src="~/Scripts/json2.js"></script>
+  @Scripts.Render("~/bundles/modernizr")
+  @Scripts.Render("~/bundles/jquery")
+  @RenderSection("scripts", required: false)
+</head>
+<body>
+  <header>
+    <div id="header" style="background-image:url(@Href("~/Content/Images/header-bg.png"));height:80px">
+      <div class="float-left">
+      <a href="@Url.Action("Index", "Home", new { area = "" })">
+        <img alt="" border="0" src="~/Content/Images/logo2.png" style="padding-top:0px;padding-left:20px;" /></a>
+        </div>
+      <div class="float-right">
+        <section id="login">
+          Логин: <span class="username">@User.Identity.Name</span>
+        </section>
+        <nav>
+          <ul id="menu">
+            <li>@Html.ActionLink("Отчеты", "Index", "Report", new { area = "" }, new { })</li>
+            @if (User.IsInRole("Admin"))
+            {
+              <li>@Html.ActionLink("Админ", "Index", "Admin", new { area = "" }, new { })</li>
+            }
+            <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { })</li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <div id="body">
+    @RenderSection("featured", required: false)
+    <section class="content-wrapper main-content clear-fix">
+      @RenderBody()
+    </section>
+  </div>
+  <footer>
+  </footer>
+</body>
+</html>

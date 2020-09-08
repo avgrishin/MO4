@@ -1,0 +1,78 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public string host { get; set; }
+  public dynamic q1 { get; set; }
+  public dynamic em { get; set; }
+  public string nb { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+    border: 1px solid gray;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+
+  .em {
+    color: #fff;
+    font-size: .7em;
+  }
+
+  .r {
+    text-align: right;
+  }
+</style>
+<table>
+  <tr>
+    <th>П/п</th>
+    <th>Клиент</th>
+    <th>Номер</th>
+    <th>Стратегия</th>
+    <th>Тип документа</th>
+    <th>Примечание</th>
+    <th>Дата получения</th>
+    <th>Дата расторжения</th>
+    <th>Сумма</th>
+    <th>КМ</th>
+    <th>УА</th>
+    <th>БУ</th>
+    <th>РЦ</th>
+  </tr>
+  @{
+    foreach (var r in q1)
+    {
+    <tr>
+      <td><a href='http://@host/code/CorpEvents/getEnreg?id=@r.PID&t=@((int)r.t)&a=@nb'>@r.Num</a></td>
+      <td>@r.ClientName</td>
+      <td>@r.Portal</td>
+      <td>@r.Strategy@(!string.IsNullOrEmpty(r.StrategyP) ? (" (" + r.StrategyP + ")") : "")</td>
+      <td>@r.DTName</td>
+      <td>@r.Remarque&nbsp;</td>
+      <td>@(r.RecuDate == null ? "&nbsp;" : r.RecuDate.ToString("dd.MM.yyyy"))</td>
+      <td>@(r.CancelDate == null ? "&nbsp;" : r.CancelDate.ToString("dd.MM.yyyy"))</td>
+      <td class="r">@(r.Qty == null ? "&nbsp;" : string.Format("{0:N2}", r.Qty))</td>
+      <td>&nbsp;&nbsp;@r.IsKM&nbsp;&nbsp;</td>
+      <td>&nbsp;&nbsp;@r.IsUA&nbsp;&nbsp;</td>
+      <td>&nbsp;&nbsp;@r.IsBU&nbsp;&nbsp;</td>
+      <td>&nbsp;&nbsp;@r.IsRC&nbsp;&nbsp;</td>
+    </tr>
+    }
+  }
+</table>
+<br>
+<span class="em">@em</span>

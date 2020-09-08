@@ -1,0 +1,179 @@
+﻿@{
+  ViewBag.Title = "График выплаты кпонов";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS71/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .search-item
+    {
+      /*padding: 5px 0px 5px 0px;*/
+      border-bottom: 1px solid #f0f0f0;
+      white-space: normal;
+      color: #222;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-crisp/theme-crisp.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+
+  <script type="text/javascript">
+
+    Ext.define('DogNumber', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      idProperty: 'Number',
+      fields: [
+        { name: 'Number', type: 'string' },
+        { name: 'TreatyID', type: 'int' },
+        { name: 'Portal', type: 'string' }
+      ],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("getDogNumber")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storedg',
+      model: 'DogNumber'
+    });
+
+    Ext.define('CouponPays.Form', {
+      extend: 'Ext.form.Panel',
+      xtype: 'cpform',
+      initComponent: function () {
+        Ext.apply(this, {
+          defaultType: 'textfield',
+          bodyPadding: 10,
+          frame: true,
+          border: true,
+          fieldDefaults: {
+            labelAlign: 'right',
+            msgTarget: 'under',
+            anchor: '100%'
+          },
+          title: 'Договор ДУ',
+          items: [{
+            xtype: 'combo',
+            store: 'storedg',
+            displayField: 'Number',
+            valueField: 'TreatyID',
+            queryParam: 'q',
+            queryMode: 'remote',
+            fieldLabel: 'Договор',
+            typeAhead: false,
+            queryDelay: 1000,
+            width: 570,
+            hideTrigger: true,
+            forceSelection: true,
+            name: 'TreatyID',
+            allowBlank: false,
+            minChars: 2,
+            listConfig: {
+              getInnerTpl: function () {
+                return '<span>{Number}</span> <span>{Portal}</span>';
+              }
+            }
+          }, {
+            xtype: 'fieldcontainer',
+            layout: 'hbox',
+            items: [{
+              xtype: 'datefield',
+              name: 'd',
+              fieldLabel: 'Дата',
+              allowBlank: 'false',
+              format: 'd.m.Y',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -1),
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'add',
+              text: 'Выполнить',
+              disabled: true,
+              scope: this,
+              handler: this.onExec,
+              formBind: true
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onExec: function () {
+        var me = this;
+        var form = Ext.getDom('export');
+        form.TreatyID.value = me.getForm().findField('TreatyID').getValue();
+        form.d.value = me.getForm().findField('d').rawValue;
+        form.submit();
+      }
+
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      var main = Ext.create('Ext.container.Container', {
+        padding: '20 20 20 20',
+        width: 500,
+        renderTo: 'f1',
+        layout: {
+          type: 'vbox',
+          align: 'stretch'
+        },
+        items: [{
+          itemId: 'form',
+          xtype: 'cpform',
+          //manageHeight: false,
+          margin: '0 0 20 0',
+          listeners: {
+          }
+        }]
+      });
+    });
+  </script>
+}
+<div id="f1">
+</div>
+<form id="export" method="POST" style="display: none;">
+  <input type="hidden" name="TreatyID" />
+  <input type="hidden" name="d" />
+</form>

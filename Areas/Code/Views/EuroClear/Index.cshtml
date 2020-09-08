@@ -1,0 +1,387 @@
+﻿@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  ViewBag.Title = "EuroClear";
+}
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 5px; 
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+
+    .search-item span
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+    
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-material/resources/theme-material-all.css" />
+  <style type="text/css">
+    @@-ms-viewport {
+      width: auto!important;
+    }
+
+    x-field-focus .x-form-item-label,
+    .not-empty .x-form-item-label {
+      font-size: 12px;
+      -webkit-transform: translateY(0px);
+      -moz-transform: translateY(0px);
+      -ms-transform: translateY(0px);
+      -o-transform: translateY(0px);
+      transform: translateY(0px);
+    }
+  </style>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-material/theme-material.js"></script>
+  <script type="text/javascript">
+    Ext.require([
+      'Ext.form.*',
+      'Ext.layout.container.Column',
+      'Ext.tab.Panel'
+    ]);
+
+    Ext.define('Step2', {
+      extend: 'Ext.data.Model',
+      fields: [{ name: 'FirstClosingDate', type: 'date', dateFormat: 'c' }, 'Instrument', 'ISIN', 'IssueName', 'IssuerCity', 'IssuerCountry', 'IssuerName', 'IssuerCategory', { name: 'MaturityDate', type: 'date', dateFormat: 'c' }, 'Nominal', 'NominalCurrency', 'SecurityShortName', 'SecurityName', 'Volume', 'BaseSecQty', 'additionalspecificationname', 'Ticker', 'BaseID', 'IsETF', 'CFI'],
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("Search")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+      @{var r = ModelMetadata.FromLambdaExpression(m => m, ViewData).Properties.ToList();}
+
+      var fp = Ext.create('Ext.panel.Panel', {
+        activeItem: 0,
+        title: '@ViewBag.Title',
+        frame: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 600,
+        defaultType: 'textfield',
+        layoutConfig: { labelSeparator: '' },
+        layout: 'anchor',
+        border: false,
+        items: [{
+          xtype: 'form',
+          itemId: 'step1',
+          border: false,
+          baseCls: 'x-plain',
+          //XS1759801720
+          bodyPadding: 10,
+          fieldDefaults: { labelWidth: 70, labelAlign: 'right' },
+          items: [{
+            xtype: 'fieldcontainer',
+            layout: 'hbox',
+            items: [{
+              xtype: 'textfield',
+              labelWidth: 40,
+              itemId: 'ISIN',
+              name: 'ISIN',
+              fieldLabel: 'ISIN',
+              allowBlank: false,
+              flex: 1,
+              margin: '0 10 0 0',
+              regex: /^[0-9A-Z]{12}$/
+            }, {
+              xtype: 'button',
+              text: 'Найти',
+              handler: function () {
+                var me = this.up('form');
+                if (me.getForm().isValid()) {
+                  if (!me.storeStep2)
+                    me.storeStep2 = Ext.create('Ext.data.Store', {
+                      model: 'Step2',
+                      listeners: {
+                        scope: me,
+                        'load': function () {
+                          Ext.getBody().unmask();
+                          if (me.storeStep2.data.length > 0) {
+                            var f2 = fp.down('#step2');
+                            var b1 = me.storeStep2.data.items[0].data.Instrument == 'STOCK';
+                            var b2 = me.storeStep2.data.items[0].data.Instrument == 'DR';
+
+                            Ext.Array.forEach(f2.query('#Ticker'), function (field) {
+                              field.setDisabled(!(b1 || b2));
+                              field.setVisible(b1 || b2);
+                              field.allowBlank = !(b1 || b2);
+                              field.clearInvalid();
+                            });
+
+                            Ext.Array.forEach(f2.query('#BaseID'), function (field) {
+                              field.setDisabled(!b2);
+                              field.setVisible(b2);
+                              field.allowBlank = !b2;
+                              field.clearInvalid();
+                            });
+
+                            Ext.Array.forEach(f2.query('#IsETF'), function (field) {
+                              field.setDisabled(!b1);
+                              field.setVisible(b1);
+                              field.allowBlank = !b1;
+                              field.clearInvalid();
+                            });
+
+                            Ext.Array.forEach(f2.query('#Category'), function (field) {
+                              field.setDisabled(!b1 || me.storeStep2.data.items[0].data.IsETF);
+                              field.setVisible(b1);
+                              field.allowBlank = !b1;
+                              field.clearInvalid();
+                            });
+
+                            f2.setVisible(true);
+                            f2.loadRecord(me.storeStep2.data.items[0]);
+
+                          } else {
+                            Ext.Msg.alert('Error', 'Бумага не найдена.');
+                          }
+                        }
+                      }
+                    });
+                  Ext.getBody().mask('Поиск...');
+                  fp.down('#step2').setVisible(false);
+                  me.storeStep2.removeAll();
+                  me.storeStep2.proxy.extraParams = { ISIN: me.down('#ISIN').getValue() };
+                  me.storeStep2.load();
+                }
+              },
+              formBind: true
+            }],
+          }]
+        }, {
+          xtype: 'form',
+          itemId: 'step2',
+          hidden: true,
+          border: false,
+          fieldDefaults: {
+            msgTarget: 'side',
+            labelWidth: 110,
+            labelAlign: 'right'
+          },
+          //defaults: { anchor: '100%' },
+          defaultType: 'textfield',
+          bodyPadding: '0 25',
+          items: [{
+            name: 'Instrument',
+            fieldLabel: 'Тип',
+            submitValue: true,
+            readOnly: true
+          }, {
+            name: 'ISIN',
+            fieldLabel: 'ISIN',
+            submitValue: true,
+            readOnly: true
+          }, {
+            itemId: 'SecurityShortName',
+            name: 'SecurityShortName',
+            fieldLabel: 'ShortName',
+            maxLength: 25,
+            anchor: '100%'
+          }, {
+            itemId: 'SecurityName',
+            name: 'SecurityName',
+            fieldLabel: 'Security Name',
+            anchor: '100%'
+          }, {
+            itemId: 'IssuerName',
+            name: 'IssuerName',
+            fieldLabel: 'IssuerName',
+            anchor: '100%'
+          }, {
+            itemId: 'IssuerCountry',
+            name: 'IssuerCountry',
+            fieldLabel: 'IssuerCountry'
+          }, {
+            itemId: 'IssuerCity',
+            name: 'IssuerCity',
+            fieldLabel: 'IssuerCity'
+          }, {
+            name: 'IssuerCategory',
+            fieldLabel: 'IssuerCategory',
+            submitValue: true,
+            readOnly: true,
+            anchor: '100%'
+          }, {
+            xtype: 'datefield',
+            labelWidth: 110,
+            format: 'd.m.Y',
+            itemId: 'FirstClosingDate',
+            name: 'FirstClosingDate',
+            fieldLabel: 'FirstClosingDate',
+            startDay: 1
+          }, {
+            xtype: 'datefield',
+            format: 'd.m.Y',
+            itemId: 'MaturityDate',
+            name: 'MaturityDate',
+            fieldLabel: 'MaturityDate',
+            startDay: 1
+          }, {
+            itemId: 'NominalCurrency',
+            name: 'NominalCurrency',
+            fieldLabel: 'NominalCurrency'
+          }, {
+            itemId: 'Nominal',
+            name: 'Nominal',
+            fieldLabel: 'Nominal'
+          }, {
+            itemId: 'Volume',
+            name: 'Volume',
+            fieldLabel: 'Volume',
+            readOnly: true
+          }, {
+            itemId: 'BaseSecQty',
+            name: 'BaseSecQty',
+            fieldLabel: 'BaseSecQty'
+          }, {
+            name: 'additionalspecificationname',
+            fieldLabel: 'addspecification'
+          }, {
+            itemId: 'Ticker',
+            name: 'Ticker',
+            fieldLabel: 'Ticker',
+            allowBlank: false
+          }, {
+            xtype: 'combo',
+            store: Ext.create('Ext.data.Store', {
+              idProperty: 'id',
+              fields: ['id', 'name', 'brief', 'isin'],
+              proxy: {
+                type: 'ajax',
+                url: '@Url.Action("GetSec")',
+                actionMethods: { read: 'POST' },
+                reader: {
+                  type: 'json',
+                  rootProperty: 'data'
+                }
+              }
+            }),
+            valueField: 'id',
+            itemId: 'BaseID',
+            name: 'BaseID',
+            displayField: 'brief',
+            typeAhead: false,
+            queryDelay: 1000,
+            hideTrigger: true,
+            forceSelection: true,
+            fieldLabel: 'База',
+            minChars: 2,
+            listConfig: {
+              getInnerTpl: function () {
+                return '<div class="search-item"><span>{brief}</span>{name}<br>{isin}</div>';
+              }
+            },
+            itemSelector: 'div.search-item',
+            allowBlank: false
+          }, {
+            itemId: 'IsETF',
+            name: 'IsETF',
+            fieldLabel: 'ETF',
+            xtype: 'checkboxfield',
+            handler: function () {
+              this.up('form').down('#Category').setDisabled(this.value);
+            }
+          }, {
+            xtype: 'combobox',
+            itemId: 'Category',
+            name: 'Category',
+            displayField: 'name',
+            valueField: 'value',
+            queryMode: 'local',
+            fieldLabel: 'Тип',
+            emptyText: '*',
+            store: new Ext.data.Store({
+              fields: ['name', 'value'],
+              data: (function () {
+                var data = [];
+                data[0] = { name: 'АО', value: 10000000003 };
+                data[1] = { name: 'АП', value: 10000000004 };
+                return data;
+              })()
+            }),
+            width: 208,
+            allowBlank: false,
+            forceSelection: true
+          }, {
+            itemId: 'CFI',
+            name: 'CFI',
+            fieldLabel: 'Код CFI'
+          }, {
+            xtype: 'combobox',
+            itemId: 'TrSys',
+            name: 'TrSys',
+            displayField: 'name',
+            valueField: 'value',
+            queryMode: 'local',
+            fieldLabel: 'Листинг на ЗП',
+            emptyText: '*',
+            store: new Ext.data.Store({
+              fields: ['name', 'value'],
+              data: (function () {
+                var data = [];
+                data[0] = { name: 'NYSE', value: 20000059989 };
+                data[1] = { name: 'LSE', value: 20000059990 };
+                data[2] = { name: 'Xetra', value: 20000059991 };
+                data[3] = { name: 'NASDAQ', value: 20000102681 };
+                return data;
+              })()
+            }),
+            width: 208,
+            forceSelection: true
+          }, {
+            xtype: 'checkbox',
+            fieldLabel: 'Котировка по сделкам покупки',
+            name: 'DealRate',
+            itemId: 'DealRate'
+          }],
+          buttons: [{
+            text: 'Загрузить',
+            handler: function () {
+              var me = this.up('form');
+              if (me.getForm().isValid()) {
+                Ext.getBody().mask('Выполнение...');
+                me.getForm().submit({
+                  jsonSubmit: true,
+                  url: '@Url.Action("LoadSec")',
+                  success: function (f, a) { Ext.getBody().unmask(); Ext.Msg.alert('Info', 'ЦБ загружена в Diasoft'); },
+                  failure: function (f, a) { Ext.getBody().unmask(); Ext.Msg.alert('Error', a == undefined ? "" : a.result == undefined ? "" : a.result.message); }
+                });
+              }
+            },
+            formBind: true
+          }]
+        }]
+      });
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>

@@ -1,0 +1,141 @@
+﻿@{
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 0px 0px 0px 0px /*border: 1px solid #fff;
+      border-bottom: 1px solid #eeeeee;*/
+      white-space: normal;
+      color: #555;
+    }
+
+    .search-item span
+    {
+      padding-top: 5px;
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-triton/resources/theme-triton-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-triton/theme-triton.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+
+  <script type="text/javascript">
+
+    Ext.define('CbModel', {
+      extend: 'Ext.data.Model',
+      //idProperty: 'Value',
+      fields: ['Text', 'Value']
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeFI',
+      model: 'CbModel',
+      autoLoad: true,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetPlatList")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+
+      var fp = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        standardSubmit: true,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          labelWidth: '140',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: '@ViewBag.Title',
+        frame: true,
+        autoHeight: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 440,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        layout: 'anchor',
+        items: [{
+          xtype: 'datefield',
+          name: 'de',
+          fieldLabel: 'Дата',
+          allowBlank: false,
+          format: 'd.m.Y',
+          startDay: 1,
+          value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -new Date().getDate())
+        }, {
+          itemId: 'withDog',
+          name: 'withDog',
+          boxLabel: 'Разрез по договорам',
+          hideLabel: true,
+          xtype: 'checkbox'
+        }, {
+          xtype: 'tagfield',
+          name: 'FinInstID',
+          store: 'storeFI',
+          fieldLabel: 'Плательщик',
+          displayField: 'Text',
+          valueField: 'Value',
+          //typeAhead: true,
+          queryMode: 'local',
+          emptyText: '*',
+          selectOnFocus: true,
+          width: 415,
+          filterPickList: true
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              var form = Ext.getDom('export');
+              form.de.value = fp.getForm().findField('de').rawValue;
+              form.withDog.value = fp.getForm().findField('withDog').rawValue;
+              form.FinInstID.value = fp.getForm().findField('FinInstID').value;
+              form.submit();
+            }
+          },
+          formBind: true
+        }]
+      });
+
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>
+<form id="export" method="POST" style="display: none;">
+  <input type="hidden" name="de" />
+  <input type="hidden" name="withDog" />
+  <input type="hidden" name="FinInstID" />
+</form>

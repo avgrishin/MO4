@@ -1,0 +1,98 @@
+﻿@{
+  //ViewBag.Title = "Данные по портфелю РББ УралСиб";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Url.Content("~/Content/images/user_add.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/images/default/grid/refresh.gif")) !important;
+    }
+    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 0px 0px 0px 0px /*border: 1px solid #fff;
+      border-bottom: 1px solid #eeeeee;*/
+      white-space: normal;
+      color: #555;
+    }
+
+    .search-item span
+    {
+      padding-top: 5px;
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="@Url.Content("~/Scripts/ExtJS41/ext-lang-ru.js")" type="text/javascript"></script>
+  <script type="text/javascript">
+    Ext.onReady(function () {
+      Ext.QuickTips.init();
+
+      Ext.define('CbModel', {
+        extend: 'Ext.data.Model',
+        idProperty: 'id',
+        fields: ['id', 'name', 'brief']
+      });
+
+      var fp = Ext.create('Ext.form.Panel', {
+        activeItem: 0,
+        standardSubmit: true,
+        fieldDefaults: {
+          labelAlign: 'top',
+          labelSeparator: '',
+          msgTarget: 'side',
+          emptyText: 'Не указан'
+        },
+        border: true,
+        title: '@ViewBag.Title',
+        frame: true,
+        renderTo: 'f',
+        autoHeight: true,
+        width: 600,
+        bodyStyle: 'padding:5px 10px 0',
+        defaultType: 'textfield',
+        items: [{
+          xtype: 'datefield',
+          name: 'd',
+          fieldLabel: 'Дата',
+          allowBlank: false,
+          format: 'd.m.Y',
+          startDay: 1,
+          value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -1)
+        }],
+        buttonAlign: 'left',
+        buttons: [{
+          text: 'Выполнить',
+          handler: function () {
+            if (fp.form.isValid()) {
+              var form = Ext.getDom('export');
+              form.d.value = fp.getForm().findField('d').rawValue;
+              form.submit();
+            }
+          },
+          formBind: true
+        }]
+      });
+
+    });
+  </script>
+}
+<div id="f" style="padding: 30px">
+</div>
+<form id="export" method="POST" style="display: none;">
+  <input type="hidden" name="d" />
+</form>

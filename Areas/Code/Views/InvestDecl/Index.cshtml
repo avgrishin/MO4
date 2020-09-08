@@ -1,0 +1,767 @@
+﻿@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  ViewBag.Title = "Инвестиционные декларации";
+}
+@section scripts {
+
+  <style type="text/css">
+    .icon-refresh
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS62/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+    /*    .x-selectable, .x-selectable *
+    {
+      -moz-user-select: text !important;
+      -khtml-user-select: text !important;
+    }*/
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS62/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  @*<script type="text/javascript" src="~/Scripts/ExtJS62/ext-bootstrap.js"></script>*@
+  <script type="text/javascript" src="~/Scripts/ExtJS62/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS62/build/classic/theme-crisp/theme-crisp.js"></script>
+  <script type="text/javascript">
+    Ext.override(Ext.form.field.ComboBox, {
+      assertValue: function () {
+        var me = this,
+            value = me.getRawValue(),
+            rec;
+
+        if (me.multiSelect) {
+          // For multiselect, check that the current displayed value matches the current
+          // selection, if it does not then revert to the most recent selection.
+          if (value !== me.getDisplayValue()) {
+            me.setValue(me.lastSelection);
+          }
+        } else {
+          // For single-select, match the displayed value to a record and select it,
+          // If no value and we're allowing blank, clear the current value.
+          // if it does not match a record then revert to the most recent selection.
+          if (!value.length && me.allowBlank) {
+            me.setValue(null);
+          } else {
+            rec = me.findRecordByDisplay(value);
+            if (rec) {
+              me.select(rec);
+            } else {
+              me.setValue(me.lastSelection);
+            }
+          }
+        }
+        me.collapse();
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      Ext.define('TFModel', {
+        extend: 'Ext.data.Model',
+        fields: ['value']
+      });
+
+      Ext.define('IDModel', {
+        extend: 'Ext.data.Model'
+      });
+
+      var storeTF = Ext.create('Ext.data.Store', {
+        fields: ['value'],
+        data: [{ value: 'T' }, { value: 'F' }],
+        idProperty: 'value'
+      });
+
+      var storeSecGroup = Ext.create('Ext.data.Store', {
+        pageSize: 50,
+        remoteSort: true,
+        idProperty: 'SecID',
+        fields: ['SecurityID', 'SecurityGroupID', 'Enb', 'Auto_Enb', 'OnLine', 'SecName',
+                  { name: 'CreateDate', type: 'date', dateFormat: "MS" },
+                  { name: 'StartDate', type: 'date', dateFormat: "MS" },
+                  { name: 'FinishDate', type: 'date', dateFormat: "MS" }
+        ],
+        proxy: {
+          type: 'ajax',
+          actionMethods: { read: 'POST' },
+          url: '/Code/InvestDecl/SecGroup',
+          reader: {
+            type: 'json',
+            root: 'data',
+            totalProperty: 'totalCount'
+          },
+          simpleSortMode: true
+        }
+      });
+
+      var tabs = Ext.create('Ext.tab.Panel', {
+        id: 'tp',
+        //renderTo: Ext.getBody(),
+        region: 'center',
+        activeTab: 0,
+        //margins: '10 10 10 10',
+        frame: false,
+        //border: false,
+        //plain: true,
+        //defaults: { autoHeight: true },
+        //margins: '10 10',
+        items: [{
+          id: 'tcDecls',
+          tag: 1,
+          title: 'Список',
+          autoScroll: true,
+          border: false,
+          layout: 'fit',
+          items: [
+            Ext.create('Ext.grid.GridPanel', {
+              border: false,
+              store: Ext.create('Ext.data.Store', {
+                pageSize: 500,
+                remoteSort: true,
+                autoLoad: false,
+                idProperty: 'InvestDeclID',
+                fields: ['InvestDeclID', 'Name', 'Enb', 'IDType',
+                  { name: 'CreateDate', type: 'date', dateFormat: "MS" },
+                  { name: 'ModifyDate', type: 'date', dateFormat: "MS" },
+                  'Type'
+                ],
+                proxy: {
+                  type: 'ajax',
+                  actionMethods: { read: 'POST' },
+                  url: '@Url.Action("InvestDeclList")',
+                  reader: {
+                    type: 'json',
+                    root: 'data',
+                    totalProperty: 'totalCount'
+                  },
+                  simpleSortMode: true
+                }
+              }),
+              loadMask: true,
+              columns: [{
+                header: "Наименование",
+                dataIndex: 'Name',
+                width: 500,
+                sortable: true
+              }, {
+                header: 'Enb',
+                dataIndex: 'Enb',
+                width: 50,
+                sortable: true
+              }, {
+                header: "Тип",
+                dataIndex: 'Type',
+                width: 160,
+                sortable: true
+              }, {
+                header: "Создана",
+                dataIndex: 'CreateDate',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }, {
+                header: "Изменена",
+                dataIndex: 'ModifyDate',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }, {
+                header: "ИД",
+                dataIndex: 'InvestDeclID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }],
+              dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [{
+                  xtype: 'tbtext', text: ' Enb: '
+                }, Ext.create('Ext.form.field.ComboBox', {
+                  id: 'cbEnb',
+                  store: storeTF,
+                  displayField: 'value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  width: 45,
+                  listeners: {
+                    beforerender: function () { this.setValue('T', false); }
+                  }
+                }), '-', ' Тип: ',
+                Ext.create('Ext.form.field.ComboBox', {
+                  id: 'cbType',
+                  store: Ext.create('Ext.data.Store', {
+                    remoteSort: true,
+                    autoLoad: true,
+                    fields: ['Text', 'Value'],
+                    proxy: {
+                      type: 'ajax',
+                      actionMethods: { read: 'POST' },
+                      url: '@Url.Action("InvestDeclTypeList")',
+                      reader: {
+                        type: 'json',
+                        root: 'data'
+                      },
+                      simpleSortMode: true
+                    }
+                  }),
+                  displayField: 'Text',
+                  valueField: 'Value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  width: 180
+                }), ' ', {
+                  iconCls: 'icon-refresh',
+                  text: 'Обновить',
+                  handler: function () {
+                    var store = this.ownerCt.ownerCt.store;
+                    store.proxy.extraParams = { enb: Ext.getCmp('cbEnb').value, type: Ext.getCmp('cbType').value };
+                    store.load();
+                  }
+                }, '->',
+                  @Html.Partial("MenuAdmin")
+                ]
+              }/*, {
+                xtype: 'pagingtoolbar',
+                dock: 'bottom',
+                displayInfo: true,
+                listeners: {
+                  beforerender: function () { this.child('#refresh').hide(); this.bindStore(this.ownerCt.store); }
+                }
+              }*/],
+              viewConfig: {
+                enableTextSelection: true,
+                listeners: {
+                  beforerender: function () {
+                    this.store.proxy.extraParams = { enb: Ext.getCmp('cbEnb').value, type: Ext.getCmp('cbType').value };
+                    this.store.load();
+                  },
+                  itemdblclick: function (view, record, item, index, e) {
+                    var tab = Ext.getCmp('tcDecl');
+                    var g = tab.items.items[0];
+                    g.store.proxy.extraParams = { id: record.data.InvestDeclID, enb: Ext.getCmp('cbEnb2').value };
+                    g.store.load();
+                    tab.tab.show();
+                    tabs.setActiveTab(tab);
+                    g.setTitle(record.data.Name);
+                  }
+                }
+              }
+            })
+          ]
+        }, {
+          id: 'tcDecl',
+          tag: 2,
+          title: 'Декларация',
+          autoScroll: true,
+          layout: 'fit',
+          items: [
+            Ext.create('Ext.grid.GridPanel', {
+              border: false,
+              title: '&nbsp;',
+              store: Ext.create('Ext.data.Store', {
+                remoteSort: true,
+                idProperty: 'InvestDeclWhereID',
+                fields: ['InvestDeclID', 'InvestDeclWhereID', 'Name', 'NameDecl', 'Enb', 'StartValue', 'StopValue', 'FLAG_Calculation',
+                      'FLAG_Group', 'FLAG_Type', 'FLAG_Long'],
+                proxy: {
+                  type: 'ajax',
+                  actionMethods: { read: 'POST' },
+                  url: '@Url.Action("InvestDeclWhere")',
+                  reader: {
+                    type: 'json',
+                    root: 'data',
+                    totalProperty: 'totalCount'
+                  },
+                  simpleSortMode: true
+                }
+              }),
+              loadMask: true,
+              columns: [{
+                header: "Наименование",
+                dataIndex: 'Name',
+                width: 600,
+                sortable: true
+              }, {
+                header: 'Enb',
+                dataIndex: 'Enb',
+                width: 50,
+                sortable: true
+              }, {
+                header: "Start",
+                dataIndex: 'StartValue',
+                width: 70,
+                align: 'right',
+                sortable: true
+              }, {
+                header: "Stop",
+                dataIndex: 'StopValue',
+                width: 70,
+                align: 'right',
+                sortable: true
+              }, {
+                header: "Flag Calc",
+                dataIndex: 'FLAG_Calculation',
+                align: 'right',
+                width: 60,
+                sortable: true
+              }, {
+                header: "Flag Group",
+                dataIndex: 'FLAG_Group',
+                align: 'right',
+                width: 60,
+                sortable: true
+              }, {
+                header: "Flag Type",
+                dataIndex: 'FLAG_Type',
+                align: 'right',
+                width: 60,
+                sortable: true
+              }, {
+                header: "Flag Long",
+                dataIndex: 'FLAG_Long',
+                align: 'right',
+                width: 60,
+                sortable: true
+              }, {
+                header: "ИД",
+                dataIndex: 'InvestDeclWhereID',
+                width: 50,
+                align: 'right',
+                sortable: true
+              }],
+              dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [' Enb: ',
+                Ext.create('Ext.form.field.ComboBox', {
+                  id: 'cbEnb2',
+                  store: storeTF,
+                  displayField: 'value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  emptyText: '*',
+                  selectOnFocus: true,
+                  width: 45
+                }), ' ', {
+                  iconCls: 'icon-refresh',
+                  text: 'Обновить',
+                  handler: function () {
+                    var store = this.ownerCt.ownerCt.store;
+                    store.proxy.extraParams.enb = Ext.getCmp('cbEnb2').value;
+                    store.load();
+                  }
+                }]
+              }],
+              viewConfig: {
+                enableTextSelection: true,
+                listeners: {
+                  itemdblclick: function (view, record, item, index, e) {
+                    var tab = Ext.getCmp('tcDeclSec');
+                    var g = tab.items.items[0];
+                    g.store.proxy.extraParams = { id: record.data.InvestDeclWhereID, enb: Ext.getCmp('cbDiv1').value };
+                    g.store.load();
+                    tab.tab.show();
+                    tabs.setActiveTab(tab);
+                    g.setTitle(view.panel.title + '/' + record.data.Name);
+                  }
+                }
+              }
+            })
+          ]
+        }, {
+          id: 'tcDeclSec',
+          tag: 3,
+          title: 'Группа',
+          autoScroll: true,
+          layout: 'fit',
+          items: [
+            Ext.create('Ext.grid.GridPanel', {
+              border: false,
+              title: '&nbsp;',
+              store: Ext.create('Ext.data.Store', {
+                remoteSort: true,
+                idProperty: 'InvestDeclSecID',
+                fields: ['InvestDeclSecID', 'InvestDeclWhereID', 'Name', 'Number', 'FLAG_Div', 'FLAG_Not', 'ObjClassifierID', 'SecurityGroupID',
+                  'SecurityID', 'FinancialInstitutionID'],
+                proxy: {
+                  type: 'ajax',
+                  actionMethods: { read: 'POST' },
+                  url: '@Url.Action("InvestDeclSec")',
+                  reader: {
+                    type: 'json',
+                    root: 'data',
+                    totalProperty: 'totalCount'
+                  },
+                  simpleSortMode: true
+                }
+              }),
+              loadMask: true,
+              columns: [{
+                header: 'Number',
+                dataIndex: 'Number',
+                width: 80,
+                sortable: true
+              }, {
+                header: 'FLAG_Div',
+                dataIndex: 'FLAG_Div',
+                width: 120,
+                renderer: function (val) { return val == 0 ? 'Числитель' : val == 1 ? 'Знаменатель' : 'Error'; },
+                sortable: true
+              }, {
+                header: 'FLAG_Not',
+                dataIndex: 'FLAG_Not',
+                width: 80,
+                align: 'right',
+                renderer: function (val) { return val == 0 ? '-' : val == 1 ? '+' : 'Err'; },
+                sortable: true
+              }, {
+                header: 'SecID',
+                dataIndex: 'SecurityID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }, {
+                header: 'SG',
+                dataIndex: 'SecurityGroupID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }, {
+                header: 'FI',
+                dataIndex: 'FinancialInstitutionID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }, {
+                header: 'OC',
+                dataIndex: 'ObjClassifierID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }, {
+                header: "Наименование",
+                dataIndex: 'Name',
+                width: 500,
+                sortable: true
+              }, {
+                header: "ИД",
+                dataIndex: 'InvestDeclSecID',
+                width: 60,
+                align: 'right',
+                sortable: true
+              }],
+              dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [' Div: ',
+                Ext.create('Ext.form.field.ComboBox', {
+                  id: 'cbDiv1',
+                  store: new Ext.data.ArrayStore({
+                    autoDestroy: true,
+                    //id: 0,
+                    fields: ['value', 'text'],
+                    data: [[0, 'Числитель'], [1, 'Знаменатель']]
+                  }),
+                  valueField: 'value',
+                  displayField: 'text',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  forceSelection: true,
+                  triggerAction: 'all',
+                  emptyText: '*',
+                  width: 120
+                }), ' ', {
+                  iconCls: 'icon-refresh',
+                  text: 'Обновить',
+                  handler: function () {
+                    var store = this.ownerCt.ownerCt.store;
+                    store.proxy.extraParams.div = Ext.getCmp('cbDiv1').value;
+                    store.load();
+                  }
+                }]
+              }],
+              viewConfig: {
+                enableTextSelection: true,
+                listeners: {
+                  itemdblclick: function (view, record, item, index, e) {
+                    if (record.data.SecurityGroupID > 0) {
+                      var tab = Ext.getCmp('tcSecGroup');
+                      var g = tab.items.items[0];
+                      tab.tab.show();
+                      tabs.setActiveTab(tab);
+                      g.setTitle(record.data.Name);
+                      g.store.proxy.extraParams = { id: record.data.SecurityGroupID, enb: Ext.getCmp('cbEnb3').value, n: Ext.getCmp('tfName3').getValue() };
+                      g.store.currentPage = 1;
+                      g.store.load();
+                    }
+                    else if (record.data.ObjClassifierID > 0) {
+                      var tab = Ext.getCmp('tcObjClsRel');
+                      var g = tab.items.items[0];
+                      g.store.proxy.extraParams = { id: record.data.ObjClassifierID };
+                      g.store.currentPage = 1;
+                      g.store.load();
+                      tab.tab.show();
+                      tabs.setActiveTab(tab);
+                      g.setTitle(record.data.Name);
+                    }
+                  }
+                }
+              }
+            })
+          ]
+        }, {
+          id: 'tcSecGroup',
+          tag: 4,
+          title: 'Группа бумаг',
+          autoScroll: true,
+          layout: 'fit',
+          items: [
+            Ext.create('Ext.grid.GridPanel', {
+              border: false,
+              title: '&nbsp;',
+              store: Ext.create('Ext.data.Store', {
+                pageSize: 50,
+                remoteSort: true,
+                idProperty: 'SecID',
+                fields: ['SecurityID', 'SecurityGroupID', 'Enb', 'Auto_Enb', 'OnLine', 'SecName',
+                  { name: 'CreateDate', type: 'date', dateFormat: "MS" },
+                  { name: 'StartDate', type: 'date', dateFormat: "MS" },
+                  { name: 'FinishDate', type: 'date', dateFormat: "MS" }
+                ],
+                proxy: {
+                  type: 'ajax',
+                  actionMethods: { read: 'POST' },
+                  url: '@Url.Action("SecGroup")',
+                  reader: {
+                    type: 'json',
+                    root: 'data',
+                    totalProperty: 'totalCount'
+                  },
+                  simpleSortMode: true
+                }
+              }),
+              loadMask: true,
+              columns: [{
+                header: 'Наименование',
+                dataIndex: 'SecName',
+                width: 500,
+                sortable: true
+              }, {
+                header: 'Enb',
+                dataIndex: 'Enb',
+                width: 50,
+                sortable: true
+              }, {
+                header: 'Auto_Enb',
+                dataIndex: 'Auto_Enb',
+                width: 60,
+                sortable: true
+              }, {
+                header: 'SecID',
+                dataIndex: 'SecurityID',
+                width: 80,
+                align: 'right',
+                sortable: true
+              }, {
+                header: 'Start Date',
+                dataIndex: 'StartDate',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }, {
+                header: 'Finish Date',
+                dataIndex: 'FinishDate',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }, {
+                header: 'Create Date',
+                dataIndex: 'CreateDate',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }, {
+                header: "OnLine",
+                dataIndex: 'OnLine',
+                width: 70,
+                align: 'right',
+                sortable: true
+              }],
+              dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [' Enb: ',
+                Ext.create('Ext.form.field.ComboBox', {
+                  id: 'cbEnb3',
+                  store: storeTF,
+                  displayField: 'value',
+                  typeAhead: true,
+                  queryMode: 'local',
+                  forceSelection: true,
+                  triggerAction: 'all',
+                  emptyText: '*',
+                  width: 45
+                }), ' Наименование: ',
+                new Ext.form.TextField({
+                  id: 'tfName3',
+                  width: 120
+                }), ' ', {
+                  iconCls: 'icon-refresh',
+                  text: 'Обновить',
+                  handler: function () {
+                    var store = this.ownerCt.ownerCt.store;
+                    store.proxy.extraParams.enb = Ext.getCmp('cbEnb3').value;
+                    store.proxy.extraParams.n = Ext.getCmp('tfName3').getValue();
+                    store.load();
+                  }
+                }]
+              }, {
+                xtype: 'pagingtoolbar',
+                dock: 'bottom',
+                displayInfo: true,
+                listeners: {
+                  beforerender: function () { this.child('#refresh').hide(); this.bindStore(this.ownerCt.store); }
+                }
+              }],
+              viewConfig: {
+                enableTextSelection: true,
+                listeners: {
+                  itemdblclick: function (view, record, item, index, e) {
+                  }
+                }
+              }
+            })
+          ]
+        }, {
+          id: 'tcObjClsRel',
+          tag: 4,
+          title: 'Классификатор',
+          autoScroll: true,
+          layout: 'fit',
+          items: [
+            Ext.create('Ext.grid.GridPanel', {
+              border: false,
+              title: '&nbsp;',
+              store: Ext.create('Ext.data.Store', {
+                pageSize: 50,
+                remoteSort: true,
+                idProperty: 'ObjClsRelationID',
+                fields: ['ObjClsRelationID', 'ObjClassifierID', 'ObjectID', 'UserName', 'Comment', 'Value', 'Obj', 'UserName',
+                  { name: 'OnDate', type: 'date', dateFormat: "MS" },
+                  { name: 'InDateTime', type: 'date', dateFormat: "MS" }
+                ],
+                proxy: {
+                  type: 'ajax',
+                  actionMethods: { read: 'POST' },
+                  url: '@Url.Action("ObjClsRel")',
+                  reader: {
+                    type: 'json',
+                    root: 'data',
+                    totalProperty: 'totalCount'
+                  },
+                  simpleSortMode: true
+                }
+              }),
+              loadMask: true,
+              columns: [{
+                header: "ObjectID",
+                dataIndex: 'ObjectID',
+                align: 'right',
+                width: 70,
+                sortable: true
+              }, {
+                header: 'Объект',
+                dataIndex: 'Obj',
+                width: 400,
+                sortable: true
+              }, {
+                header: 'Comment',
+                dataIndex: 'Comment',
+                width: 400,
+                sortable: true
+              }, {
+                header: 'Value',
+                dataIndex: 'Value',
+                align: 'right',
+                width: 80,
+                sortable: true
+              }, {
+                header: 'OnDate',
+                dataIndex: 'OnDate',
+                width: 120,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+                sortable: true
+              }, {
+                header: "ObjClsRelationID",
+                dataIndex: 'ObjClsRelationID',
+                align: 'right',
+                width: 70,
+                sortable: true
+              }, {
+                header: "UserName",
+                dataIndex: 'UserName',
+                width: 150,
+                sortable: true
+              }, {
+                header: "InDateTime",
+                dataIndex: 'InDateTime',
+                width: 130,
+                renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+                sortable: true
+              }],
+              viewConfig: {
+                enableTextSelection: true
+              },
+              dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [{
+                  iconCls: 'icon-refresh',
+                  text: 'Обновить',
+                  handler: function () {
+                    var store = this.ownerCt.ownerCt.store;
+                    store.proxy.extraParams.enb = Ext.getCmp('cbEnb3').value;
+                    store.proxy.extraParams.n = Ext.getCmp('tfName3').getValue();
+                    store.load();
+                  }
+                }]
+              }, {
+                xtype: 'pagingtoolbar',
+                dock: 'bottom',
+                displayInfo: true,
+                listeners: {
+                  beforerender: function () { this.child('#refresh').hide(); this.bindStore(this.ownerCt.store); }
+                }
+              }]
+            })
+          ]
+        }],
+        listeners: {
+          beforetabchange: function (tp, newTab, currentTab) {
+            for (var i = 0; i < tp.items.length; i++) {
+              if (newTab.tag < tp.items.items[i].tag)
+                tp.items.items[i].tab.hide();
+            }
+          },
+          render: function (tp) {
+            for (var i = 1; i < tp.items.length; i++)
+              tp.items.items[i].tab.hide();
+          }
+        }
+      });
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        },
+          tabs
+        ]
+      });
+    });
+  </script>
+}

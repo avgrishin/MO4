@@ -1,0 +1,1812 @@
+﻿@{
+  ViewBag.Title = "Журнал дивидендов";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .green-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: green;
+    }
+    .red-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: red;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      @*border: 1px solid #fff;*@
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      margin: 0 0;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/GridFilters.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/RangeMenu.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.ux.grid.FiltersFeature'
+    ]);
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = field.ownerCt.getComponent(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = field.ownerCt.getComponent(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+
+    Ext.util.Format.renderFile = function (value) {
+      if (!value) return '';
+      return Ext.String.format('<a href="@Url.Action("GetFile")?data={1}" target="_blank">{0}</a>', value, encodeURIComponent(value));
+    };
+
+    Ext.define('Div', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'FundID', { name: 'RDate', type: 'date', dateFormat: 'c' }, { name: 'XDate', type: 'date', dateFormat: 'c' }, { name: 'PayDate', type: 'date', dateFormat: 'c' }, 'SecurityID', 'SecBrief', 'SecName', 'Category', 'SecGroup', 'Fund', 'ISIN', 'Value', 'INN', 'ValueDiv', 'CountDiv', 'QtyPayed', 'CountPayed', 'PercPayed',
+        {
+          name: 'Payed',
+          convert: function (v, record) {
+            if ((record.get('CountPayed') >= record.get('CountDiv') && record.get('CountPayed') > 0 && record.get('CountDiv') > 0) || record.get('ValueDiv') == 0)
+              return 'Выплачено';
+            else
+              return 'Не выплачено';
+          },
+        }, { name: 'CheckKD', type: 'bool' }, { name: 'CheckPayed', type: 'bool' }],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv")',
+          create: '@Url.Action("addDiv")',
+          update: '@Url.Action("updDiv")',
+          destroy: '@Url.Action("delDiv")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv',
+      model: 'Div'
+    });
+
+    Ext.define('Div2', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['SecurityID', 'SecBrief', 'SecName', 'ISIN', 'TreatyID', 'TreatyName', 'ClientName', { name: 'dt', type: 'date', dateFormat: 'c' },
+        'Rest', 'ValueDiv', 'Fund', 'QtyPayed', 'Stavka', 'PercPayed', 'INN'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv2")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv2',
+      model: 'Div2'
+    });
+
+    Ext.define('Div3', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'SecurityID', 'SecBrief', 'SecName', 'ISIN', 'TreatyID', 'TreatyName', 'ClientName', { name: 'dt', type: 'date', dateFormat: 'c' }, { name: 'vd', type: 'date', dateFormat: 'c' }, 'Qty', 'QtyPayed', 'Fund', 'Comment', 'RelId', 'INN'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv3")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv3',
+      model: 'Div3'
+    });
+
+    Ext.define('Div4', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'SecurityID', 'SecBrief', 'SecName', 'ISIN', 'TreatyID', 'TreatyName', 'ClientName', { name: 'dt', type: 'date', dateFormat: 'c' }, { name: 'vdt', type: 'date', dateFormat: 'c' }, 'Qty', 'QtyPayed', 'Fund', 'Comment', 'RelId'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv4")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv4',
+      model: 'Div4'
+    });
+
+    Ext.define('Div5', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'FundID', { name: 'RDate', type: 'date', dateFormat: 'c' }, { name: 'XDate', type: 'date', dateFormat: 'c' }, 'SecurityID', 'SecBrief', 'SecName', 'Category', 'SecGroup', 'Fund', 'ISIN', 'Value', 'RelId'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv5")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv5',
+      model: 'Div5'
+    });
+
+    Ext.define('Div7', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'trBrief', 'fiName', 'fiBrief'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv7")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv7',
+      model: 'Div7'
+    });
+
+    Ext.define('Div8', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'FundID', { name: 'RDate', type: 'date', dateFormat: 'c' }, { name: 'PayDate', type: 'date', dateFormat: 'c' }, 'SecurityID', 'SecBrief', 'SecName', 'Category', 'SecGroup', 'Fund', 'ISIN', 'Value', 'INN', 'ValueDiv', 'QtyPayed', 'PercPayed', 'Rest'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv8")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv8',
+      model: 'Div8'
+    });
+
+@*    Ext.define('Div9', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      fields: ['id', 'SecurityID', 'SecBrief', 'SecName', 'ISIN', 'TreatyID', 'TreatyName', 'ClientName', { name: 'dt', type: 'date', dateFormat: 'c' }, { name: 'vd', type: 'date', dateFormat: 'c' }, 'Qty', 'QtyPayed', 'Fund', 'Comment', 'RelId', 'INN'],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getDiv9")',
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });*@
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storediv9',
+      model: 'Div3'
+    });
+
+    Ext.define('Fund', {
+      extend: 'Ext.data.Model',
+      autoLoad: true,
+      remoteSort: true,
+      fields: ['id', 'name', 'brief'],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("GetFunds")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      storeId: 'storeFund',
+      model: 'Fund'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeSecurity',
+      fields: ['id', 'name', 'brief', 'isin', 'fundid'],
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetSec")',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.define('DivRel', {
+      extend: 'Ext.data.Model',
+      fields: ['Id', 'DivId', 'DiasoftDealID'],
+      idProperty: 'Id',
+      proxy: {
+        type: 'ajax',
+        api: {
+          create: '@Url.Action("addDivRel")'
+        },
+        actionMethods: { read: 'POST' },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeDivRel',
+      model: 'DivRel',
+      autoLoad: false
+    });
+
+    Ext.define('Div.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.divwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          layout: 'fit',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            bodyPadding: 10,
+            defaults: { anchor: '100%' },
+            defaultType: 'textfield',
+            fieldDefaults: {
+              labelAlign: 'left',
+              labelWidth: 200,
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'combo',
+              name: 'SecurityID',
+              store: 'storeSecurity',
+              valueField: 'id',
+              displayField: 'name',
+              typeAhead: true,
+              queryDelay: 500,
+              hideTrigger: true,
+              forceSelection: true,
+              fieldLabel: 'ЦБ',
+              minChars: 2,
+              allowBlank: false,
+              tpl: Ext.create('Ext.XTemplate',
+                '<ul class="x-list-plain"><tpl for=".">',
+                '<li role="option" class="x-boundlist-item">{name}<br/>{brief}<br/><i style="color:#555">{isin}</i></li>',
+                '</tpl></ul>'
+              ),
+              displayTpl: Ext.create('Ext.XTemplate',
+                '<tpl for=".">',
+                '{brief} {name}',
+                '</tpl>'
+              ),
+              listeners: {
+                'select': this.onSecuritySelect
+              }
+            }, {
+              name: 'Value',
+              fieldLabel: 'Ставка',
+              allowBlank: false,
+              anchor: '60%',
+              maskRe: /[\d\.]/
+            }, {
+              xtype: 'datefield',
+              name: 'RDate',
+              fieldLabel: 'Дата среза',
+              anchor: '60%',
+              startDay: 1,
+              allowBlank: false,
+              format: 'd.m.Y'
+            }, {
+              xtype: 'datefield',
+              name: 'XDate',
+              fieldLabel: 'XDate',
+              anchor: '60%',
+              startDay: 1,
+              allowBlank: true,
+              format: 'd.m.Y'
+            }, {
+              xtype: 'combo',
+              store: 'storeFund',
+              displayField: 'brief',
+              valueField: 'id',
+              typeAhead: false,
+              queryMode: 'local',
+              fieldLabel: 'Валюта',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              width: 135,
+              name: 'FundID',
+              allowBlank: false,
+              listConfig: {
+                getInnerTpl: function () {
+                  return '<div class="search-item"><h3>{brief}</h3>{name}</div>';
+                }
+              }
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onSecuritySelect: function (e, r) {
+        var dr = this.up('form').getForm().findField('FundID');
+        if (dr && r.length > 0)
+          dr.setValue(r[0].get('fundid'));
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        var form = me.down('form').getForm();
+        me.activeRecord = record;
+        if (record) {
+          me.down('#save').enable();
+          form.loadRecord(record);
+          var c = form.findField('SecurityID');
+          var f = record.get('SecurityID');
+          if (f !== null) {
+            var l = function (r) {
+              c.setValue(f);
+              c.store.un('load', l);
+            };
+            c.store.on('load', l);
+            c.store.load({ params: { id: f } });
+          }
+        } else {
+          this.down('#save').disable();
+          form.reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    var filters = {
+      ftype: 'filters',
+      encode: true,
+      local: true,
+      autoReload: false,
+      menuFilterText: 'Фильтр'
+    };
+
+    Ext.define('Div.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.divgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (record.get('Payed') === 'Выплачено')
+                //if (record.get('CountPayed') === record.get('CountDiv') && record.get('CountPayed') > 0 && record.get('CountDiv') > 0)
+                return 'green-row';
+              else if (record.get('PayDate') < Ext.Date.clearTime(new Date(), false))
+                return 'red-row';
+            }
+          },
+          features: [filters],
+          columns: [{
+            header: 'Дата среза',
+            dataIndex: 'RDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Дата оплаты',
+            dataIndex: 'PayDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            filter: {
+              type: 'date'
+            }
+          }, {
+            header: 'XDate',
+            dataIndex: 'XDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 150,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'string'
+            }
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 240,
+            tdCls: 'wrap-text',
+            filter: {}
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95,
+            filter: {
+            }
+          }, {
+            header: 'ИНН',
+            dataIndex: 'INN',
+            width: 90,
+            filter: {}
+          }, {
+            header: 'Категория',
+            dataIndex: 'Category',
+            width: 100,
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Группа',
+            dataIndex: 'SecGroup',
+            width: 100,
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Ставка',
+            dataIndex: 'Value',
+            width: 120,
+            align: 'right',
+            filter: {}
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 40,
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Выплачено',
+            dataIndex: 'Payed',
+            width: 100,
+            filter: {}
+          }, {
+            header: 'Оплачено, %',
+            dataIndex: 'PercPayed',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn',
+            filter: {
+              type: 'numeric'
+            }
+          }, {
+            header: 'Проверка КД',
+            dataIndex: 'CheckKD',
+            xtype: 'checkcolumn',
+            width: 100,
+            listeners: {
+              checkchange: function (e) {
+                Ext.Msg.show({
+                  msg: "Поменять статус Проверки КД?",
+                  modal: true,
+                  buttons: Ext.MessageBox.YESNO,
+                  icon: Ext.MessageBox.QUESTION,
+                  fn: function (btn, text) {
+                    if (btn == 'yes') {
+                      this.up('grid').store.sync();
+                    } else {
+                      this.up('grid').store.rejectChanges();
+                    }
+                  },
+                  scope: this
+                });
+              }
+            },
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Проверка выплаты',
+            dataIndex: 'CheckPayed',
+            xtype: 'checkcolumn',
+            width: 100,
+            listeners: {
+              checkchange: function (e) {
+                Ext.Msg.show({
+                  msg: "Поменять статус Проверки выплаты?",
+                  modal: true,
+                  buttons: Ext.MessageBox.YESNO,
+                  icon: Ext.MessageBox.QUESTION,
+                  fn: function (btn, text) {
+                    if (btn == 'yes') {
+                      this.up('grid').store.sync();
+                    } else {
+                      this.up('grid').store.rejectChanges();
+                    }
+                  },
+                  scope: this
+                });
+              }
+            },
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'id',
+            dataIndex: 'id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, '-', {
+              xtype: 'tbtext', text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfName',
+              width: 100
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Поручения.xml'
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }, '->', @Html.Partial("MenuCorp"), ' ']
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.store.on('load', function () {
+          this.filters.createFilters();
+        }, this);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), n: me.down('#tfName').getValue() };
+        me.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        if (!(selections.length === 0)) {
+          var grid = this.up('viewport').down('#div2');
+          if (grid) {
+            grid.store.proxy.extraParams = { id: this.getView().getSelectionModel().getSelection()[0].get('id') };
+            grid.store.load();
+          }
+          grid = this.up('viewport').down('#div3');
+          if (grid) {
+            grid.store.removeAll(false);
+          }
+        }
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('Div.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var me = this;
+        var rec = Ext.create('Div', { 'RDate': Ext.Date.clearTime(new Date(), false), FundID: null, SecurityID: null });
+        if (!me.wini) {
+          me.onCreateWin();
+        }
+        me.wini.setTitle('Добавить');
+        me.wini.setActiveRecord(rec);
+        me.wini.show(me);
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+    });
+
+    Ext.define('Div2.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div2grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          loadMask: true,
+          columns: [{
+            header: 'Дата среза',
+            dataIndex: 'dt',
+            width: 75,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Клиент',
+            dataIndex: 'ClientName',
+            width: 140
+          }, {
+            header: 'Договор',
+            dataIndex: 'TreatyName',
+            width: 100
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95
+          }, {
+            header: 'ИНН',
+            dataIndex: 'INN',
+            width: 90
+          }, {
+            header: 'Кол-во ЦБ',
+            dataIndex: 'Rest',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn',
+            format: '0,000'
+          }, {
+            header: 'Ставка',
+            dataIndex: 'Stavka',
+            width: 70,
+            align: 'right'
+          }, {
+            header: 'Величина див.',
+            dataIndex: 'ValueDiv',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 50
+          }, {
+            header: 'Выплачено',
+            dataIndex: 'QtyPayed',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Выплачено, %',
+            dataIndex: 'PercPayed',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }],
+          viewConfig: {
+            enableTextSelection: true,
+            trackOver: false,
+            listeners: {
+              itemclick: this.onItemClick
+            }
+          },
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Dividends.xml'
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onItemClick: function (view, record, item, index, e) {
+        var g = this.up('viewport').down('#div3');
+        g.store.proxy.extraParams = { id: this.store.proxy.extraParams.id, TreatyID: record.get('TreatyID') };
+        g.store.load();
+      }
+    });
+
+    Ext.define('Div3.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div3grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          loadMask: true,
+          invalidateScrollerOnRefresh: false,
+          columns: [{
+            header: 'Дата операции',
+            dataIndex: 'dt',
+            width: 75,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Дата выплаты',
+            dataIndex: 'vd',
+            width: 75,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Клиент',
+            dataIndex: 'ClientName',
+            width: 140
+          }, {
+            header: 'Договор',
+            dataIndex: 'TreatyName',
+            width: 100
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95
+          }, {
+            header: 'ИНН',
+            dataIndex: 'INN',
+            width: 90
+          }, {
+            header: 'Сумма',
+            dataIndex: 'Qty',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Выплачено',
+            dataIndex: 'QtyPayed',
+            width: 90,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 50
+          }, {
+            header: 'Примечание',
+            dataIndex: 'Comment',
+            flex: 1,
+            tdCls: 'wrap-text',
+          }],
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (record.get('RelId') != null)
+                return 'green-row';
+            },
+            listeners: {
+              //itemclick: this.onItemClick
+            }
+          },
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Dividends.xml'
+            }]
+          }]
+        });
+        this.callParent();
+      }
+
+    });
+
+    Ext.define('Div4.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div4grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          loadMask: true,
+          invalidateScrollerOnRefresh: false,
+          selModel: Ext.create('Ext.selection.CheckboxModel', {
+            checkOnly: true,
+            listeners: {
+              selectionchange: function (sm, selections) {
+              }
+            }
+          }),
+          features: [filters],
+          columns: [{
+            header: 'Дата операции',
+            dataIndex: 'dt',
+            width: 75,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Дата выплаты',
+            dataIndex: 'vdt',
+            width: 75,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Клиент',
+            dataIndex: 'ClientName',
+            width: 110,
+            filter: {}
+          }, {
+            header: 'Договор',
+            dataIndex: 'TreatyName',
+            width: 100,
+            filter: {}
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 110,
+            tdCls: 'wrap-text',
+            filter: {}
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 240,
+            tdCls: 'wrap-text',
+            filter: {}
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95,
+            filter: {}
+          }, {
+            header: 'Сумма',
+            dataIndex: 'Qty',
+            width: 90,
+            align: 'right',
+            xtype: 'numbercolumn',
+            filter: {}
+          }, {
+            header: 'Выплачено',
+            dataIndex: 'QtyPayed',
+            width: 90,
+            align: 'right',
+            xtype: 'numbercolumn',
+            filter: {}
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 40,
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Примечание',
+            dataIndex: 'Comment',
+            flex: 1,
+            tdCls: 'wrap-text',
+            filter: {}
+          }],
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (record.get('RelId') != null)
+                return 'green-row';
+            },
+            listeners: {
+              itemclick: this.onItemClick,
+              itemdblclick: this.onItemDblClick
+            }
+          },
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, '-', {
+              xtype: 'tbtext', text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfName',
+              width: 100
+            }, '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Dividends.xml'
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }, '->', @Html.Partial("MenuCorp"), ' ']
+          }]
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), n: me.down('#tfName').getValue() };
+        me.store.load();
+      },
+
+      onItemDblClick: function (view, record, item, index, e) {
+        var sm = view.getSelectionModel();
+        sm.select(index);
+        for (i = 0; i < record.store.data.items.length; i++) {
+          if (i != index && record.store.data.items[i].get('SecurityID') == record.get('SecurityID') && record.store.data.items[i].get('dt').getTime() == record.get('dt').getTime())
+            sm.select(i, true);
+        }
+      },
+
+      onItemClick: function (view, record, item, index, e) {
+        var g = this.up('tabpanel').down('#div5');
+        g.store.proxy.extraParams = { id: record.get('id') };
+        g.store.load();
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+
+    });
+
+    Ext.define('Div5.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div5grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          features: [filters],
+          columns: [{
+            header: 'Дата среза',
+            dataIndex: 'RDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'XDate',
+            dataIndex: 'XDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 110,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 240,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95
+          }, {
+            header: 'Категория',
+            dataIndex: 'Category',
+            width: 100
+          }, {
+            header: 'Группа',
+            dataIndex: 'SecGroup',
+            width: 100
+          }, {
+            header: 'Ставка',
+            dataIndex: 'Value',
+            width: 80,
+            align: 'right'
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 40
+          }, {
+            header: 'id',
+            dataIndex: 'Id',
+            width: 30,
+            hidden: true
+          }],
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            trackOver: false,
+            getRowClass: function (record) {
+              if (record.get('RelId') != null)
+                return 'green-row';
+            },
+            listeners: {
+            }
+          },
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Дивиденд5.xml'
+            }, '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              text: 'Привязать',
+              itemId: 'LinkDiv',
+              disabled: true,
+              scope: this,
+              handler: this.onLinkDivClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+      },
+
+      onLinkDivClick: function () {
+        var sel = this.getSelectionModel().getSelection()[0];
+        Ext.Msg.show({
+          msg: "Привязать операции к дивиденду " + sel.get('SecName') + " дата среза " + sel.get('RDate').toLocaleDateString() + "?",
+          buttons: Ext.MessageBox.YESNO,
+          icon: Ext.MessageBox.QUESTION,
+          fn: function (btn, text) {
+            if (btn == 'yes') {
+              var store = Ext.StoreManager.lookup('storeDivRel'), i
+              //store.removeAll();
+              store.data.clear();
+              var sm = this.up('tabpanel').down('#div4').getSelectionModel().selected.getRange();
+              for (i = 0; i < sm.length; i++) {
+                var r = new DivRel({
+                  DiasoftDealID: sm[i].get('id'),
+                  DivId: sel.get('id')
+                });
+                store.add(r);
+              }
+              store.sync({
+                success: function () {
+                  this.up('tabpanel').down('#div4').store.reload();
+                },
+                scope: this
+              });
+            }
+          },
+          scope: this
+        });
+
+      },
+
+      onRefreshClick: function () {
+        this.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#LinkDiv').setDisabled(selections.length === 0);
+      }
+
+    });
+
+    Ext.define('Div7.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div7grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          loadMask: true,
+          invalidateScrollerOnRefresh: false,
+          features: [filters],
+          columns: [{
+            header: 'Договор',
+            dataIndex: 'trBrief',
+            width: 150,
+            filter: {}
+          }, {
+            header: 'Клиент',
+            dataIndex: 'fiBrief',
+            width: 150,
+            filter: {}
+          }, {
+            header: 'Наименование',
+            dataIndex: 'fiName',
+            flex: 1,
+            tdCls: 'wrap-text',
+            filter: {}
+          }],
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            listeners: {
+              itemclick: this.onItemClick,
+              scope: this,
+            }
+          },
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, '-', {
+              xtype: 'tbtext', text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfName',
+              width: 100
+            }, '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Dividends.xml'
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }, '->', @Html.Partial("MenuCorp"), ' ']
+          }]
+        });
+        this.callParent();
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), n: me.down('#tfName').getValue() };
+        me.store.load();
+      },
+
+      onItemClick: function (view, record, item, index, e) {
+        var me = this;
+        var g = this.up('tabpanel').down('#div8');
+        g.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), tid: record.get('id'), n: g.down('#tfName').getValue() };
+        g.store.load();
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+    });
+
+    Ext.define('Div.Grid8', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.div8grid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            listeners: {
+              itemclick: this.onItemClick
+            },
+            getRowClass: function (record) {
+              if (record.get('PercPayed') > 0) {
+                return 'green-row';
+              }
+              else if (record.get('PayDate') < Ext.Date.clearTime(new Date(), false))
+                return 'red-row';
+            }
+          },
+          features: [filters],
+          columns: [{
+            header: 'Дата среза',
+            dataIndex: 'RDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'Дата оплаты',
+            dataIndex: 'PayDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'XDate',
+            dataIndex: 'XDate',
+            width: 70,
+            xtype: 'datecolumn',
+            format: 'd.m.Y'
+          }, {
+            header: 'ЦБ',
+            dataIndex: 'SecBrief',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Наименование',
+            dataIndex: 'SecName',
+            width: 240,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ISIN',
+            dataIndex: 'ISIN',
+            width: 95
+          }, {
+            header: 'ИНН',
+            dataIndex: 'INN',
+            width: 90
+          }, {
+            header: 'Категория',
+            dataIndex: 'Category',
+            width: 100
+          }, {
+            header: 'Группа',
+            dataIndex: 'SecGroup',
+            width: 100
+          }, {
+            header: 'Кол-во ЦБ',
+            dataIndex: 'Rest',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn',
+            format: '0,000'
+          }, {
+            header: 'Ставка',
+            dataIndex: 'Value',
+            width: 120,
+            align: 'right'
+          }, {
+            header: 'Величина див.',
+            dataIndex: 'ValueDiv',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Вал.',
+            dataIndex: 'Fund',
+            width: 40
+          }, {
+            header: 'Выплачено',
+            dataIndex: 'QtyPayed',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'Выплачено, %',
+            dataIndex: 'PercPayed',
+            width: 100,
+            align: 'right',
+            xtype: 'numbercolumn'
+          }, {
+            header: 'id',
+            dataIndex: 'Id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfName',
+              width: 100
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Поручения.xml'
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.store.on('load', function () {
+          this.filters.createFilters();
+        }, this);
+      },
+
+      onItemClick: function (view, record, item, index, e) {
+        var g = this.up('viewport').down('#div9');
+        g.store.proxy.extraParams = { id: record.get('id'), TreatyID: this.store.proxy.extraParams.tid };
+        g.store.load();
+      },
+
+      onRefreshClick: function () {
+      },
+
+      onSelectChange: function (selModel, selections) {
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          xtype: 'tabpanel',
+          tabPosition: 'top',
+          region: 'center',
+          activeTab: 0,
+          border: false,
+          items: [{
+            itemId: 'tcDiv',
+            title: 'Эмитент',
+            autoScroll: true,
+            border: false,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'grid',
+              xtype: 'divgrid',
+              store: 'storediv'
+            }, {
+              region: 'south',
+              split: true,
+              layout: 'border',
+              border: false,
+              height: '66%',
+              items: [{
+                region: 'center',
+                xtype: 'div2grid',
+                itemId: 'div2',
+                store: 'storediv2'
+              }, {
+                region: 'south',
+                xtype: 'div3grid',
+                itemId: 'div3',
+                store: 'storediv3',
+                height: '33%',
+                split: true
+              }]
+            }]
+          }, {
+            itemId: 'tcDivCln',
+            title: 'Клиент',
+            autoScroll: true,
+            border: false,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'div7',
+              xtype: 'div7grid',
+              store: 'storediv7'
+            }, {
+              region: 'south',
+              split: true,
+              layout: 'border',
+              border: false,
+              height: '66%',
+              items: [{
+                region: 'center',
+                xtype: 'div8grid',
+                itemId: 'div8',
+                store: 'storediv8'
+              }, {
+                region: 'south',
+                xtype: 'div3grid',
+                itemId: 'div9',
+                store: 'storediv9',
+                height: '33%',
+                split: true
+              }],
+            }]
+          }, {
+            itemId: 'tcDivPay',
+            title: 'Платежи',
+            autoScroll: true,
+            border: false,
+            layout: 'border',
+            items: [{
+              region: 'center',
+              itemId: 'div4',
+              xtype: 'div4grid',
+              store: 'storediv4'
+            }, {
+              region: 'south',
+              xtype: 'div5grid',
+              itemId: 'div5',
+              store: 'storediv5',
+              height: '40%',
+              split: true
+            }]
+          }]
+        }]
+      });
+
+    });
+  </script>
+}

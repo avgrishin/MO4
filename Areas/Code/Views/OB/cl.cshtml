@@ -1,0 +1,1223 @@
+﻿@{
+  ViewBag.Title = "Клиенты";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS62/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .green-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: green;
+    }
+    .red-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: red;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      @*border: 1px solid #fff;*@
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      margin: 0 0;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS62/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS62/ext-bootstrap.js"></script>
+  <script src="~/Scripts/ExtJS5/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS62/build/classic/locale/locale-ru.js"></script>
+  <script type="text/javascript">
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = field.ownerCt.getComponent(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = field.ownerCt.getComponent(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+    Ext.define('Ext.ux.CustomNumber', {
+      extend: 'Ext.form.field.Number',
+      alias: 'widget.customnumber',
+
+      rawToValue: function (rawValue) {
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+          value = rawValue || null;
+        }
+        return value + '';
+      }
+    });
+
+    Ext.define('Client', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoLoad: false,
+      idProperty: 'ID',
+      fields: [
+        { name: 'ID', type: 'int' },
+        { name: 'FIO', type: 'string' },
+        { name: 'BirthDay', type: 'date', dateFormat: 'c' },
+        { name: 'AddressTown', type: 'string' },
+        { name: 'Address', type: 'string' },
+        { name: 'Phone1', type: 'string' },
+        { name: 'Phone2', type: 'string' },
+        { name: 'Phone3', type: 'string' },
+        { name: 'Email', type: 'string' },
+        { name: 'Passport', type: 'string' },
+        { name: 'KindActivity', type: 'string' },
+        { name: 'Position', type: 'string' },
+        { name: 'ActiveID', type: 'int' },
+        { name: 'RiskProfil', type: 'string' },
+        { name: 'KM', type: 'string' },
+        { name: 'Potential', type: 'number', allowNull: true },
+        { name: 'Active', calculate: function (data) { return data.ActiveID == 1 ? 'Действующий' : data.ActiveID == 2 ? 'Потенциальный' : '' } },
+        { name: 'IsUL', type: 'boolean' },
+        { name: 'ULFL', calculate: function (data) { return data.IsUL == true ? 'ЮЛ' : data.IsUL == false ? 'ФЛ' : '' } }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getClientList")',
+          create: '@Url.Action("addClient")',
+          update: '@Url.Action("updClient")',
+          destroy: '@Url.Action("delClient")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          rootProperty: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeClient',
+      model: 'Client'
+    });
+
+    Ext.define('ClientAct', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoLoad: false,
+      idProperty: 'ID',
+      fields: [
+        { name: 'ID', type: 'int' },
+        { name: 'ClientID', type: 'int' },
+        { name: 'DateC', type: 'date', dateFormat: 'c' },
+        { name: 'KindID', type: 'int' },
+        { name: 'KindS', type: 'string', persist: false },
+        { name: 'Result', type: 'string' },
+        { name: 'DateN', type: 'date', dateFormat: 'c' },
+        { name: 'IsDeal', type: 'bool' },
+        { name: 'Qty', type: 'number', allowNull: true },
+        { name: 'Product', type: 'string' }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getClientActList")',
+          create: '@Url.Action("addClientAct")',
+          update: '@Url.Action("updClientAct")',
+          destroy: '@Url.Action("delClientAct")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          rootProperty: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeClientAct',
+      model: 'ClientAct'
+    });
+
+    Ext.define('CbModel', {
+      extend: 'Ext.data.Model',
+      idProperty: 'Value',
+      fields: ['Text', 'Value']
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeKind',
+      model: 'CbModel',
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetKind")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      }
+    });
+
+    var KM = '@ViewBag.KM';
+
+    Ext.define('ClientFl.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.clientflwin',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'destroy',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            defaults: { anchor: '100%' },
+            bodyPadding: 10,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'right',
+              msgTarget: 'qtip',
+            },
+            defaultType: 'textfield',
+            items: [{
+              name: 'FIO',
+              fieldLabel: 'ФИО',
+              allowBlank: false
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              fieldDefaults: {
+                labelWidth: 40,
+              },
+              items: [{
+                xtype: 'datefield',
+                name: 'BirthDay',
+                labelWidth: 100,
+                fieldLabel: 'Дата рождения',
+                startDay: 1,
+                allowBlank: true,
+                format: 'd.m.Y',
+                width: 240
+              }, {
+                xtype: 'combo',
+                store: {
+                  xtype: 'store',
+                  fields: ['Text', 'Value'],
+                  data: [['Действующий', 1], ['Потенциальный', 2]]
+                },
+                displayField: 'Text',
+                valueField: 'Value',
+                typeAhead: false,
+                queryMode: 'local',
+                fieldLabel: 'Тип',
+                forceSelection: true,
+                triggerAction: 'all',
+                selectOnFocus: true,
+                name: 'ActiveID',
+                allowBlank: false,
+                flex: 1,
+                listeners: {
+                  change: 'onActiveChange',
+                  scope: this
+                }
+              }]
+            }, {
+              name: 'AddressTown',
+              fieldLabel: 'Город'
+            }, {
+              name: 'Address',
+              fieldLabel: 'Адрес'
+            }, {
+              xtype: 'fieldcontainer',
+              fieldLabel: 'Телефон',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              labelWidth: 55,
+              fieldDefaults: {
+                labelWidth: 40,
+              },
+              items: [{
+                name: 'Phone1',
+                fieldLabel: 'моб',
+                allowBlank: false,
+                flex: 1,
+                placeholder: '+7(xxx) xxx-xxxx',
+                inputMask: '+7(999) 999-9999'
+              }, {
+                name: 'Phone2',
+                fieldLabel: 'дом',
+                flex: 1,
+                placeholder: '+7(xxx) xxx-xxxx',
+                inputMask: '+7(999) 999-9999'
+              }, {
+                name: 'Phone3',
+                fieldLabel: 'раб',
+                flex: 1,
+                placeholder: '+7(xxx) xxx-xxxx',
+                inputMask: '+7(999) 999-9999'
+              }]
+            }, {
+              name: 'Email',
+              fieldLabel: 'Email'
+            }, {
+              name: 'Passport',
+              fieldLabel: 'Паспорт'
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              items: [{
+                name: 'Position',
+                fieldLabel: 'Должность',
+                flex: 1
+              }, {
+                name: 'KindActivity',
+                fieldLabel: 'Род деятельности',
+                labelWidth: 120,
+                flex: 1
+              }]
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              items: [{
+                name: 'RiskProfil',
+                fieldLabel: 'Риск профиль',
+                disabled: true,
+                flex: 1
+              }, {
+                name: 'KM',
+                fieldLabel: 'КМ',
+                labelWidth: 120,
+                flex: 1,
+                allowBlank: false
+              }]
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'anchor',
+              align: 'right',
+              items: [{
+                name: 'Potential',
+                fieldLabel: 'Потенциал (в руб.)',
+                xtype: 'numberfield',
+                labelWidth: 120,
+                anchor: '50%'
+              }]
+            }, {
+              xtype: 'hidden',
+              name: 'IsUL'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onActiveChange: function () {
+        this.down('form').getForm().findField('RiskProfil').setDisabled(this.down('form').getForm().findField('ActiveID').getValue() != 1);
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        this.onActiveChange();
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.close();
+        }
+      },
+
+      onCancel: function () {
+        this.close();
+      }
+    });
+
+
+    Ext.define('ClientUl.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.clientulwin',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'destroy',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            defaults: { anchor: '100%' },
+            bodyPadding: 10,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'right',
+              msgTarget: 'qtip',
+            },
+            defaultType: 'textfield',
+            items: [{
+              name: 'FIO',
+              fieldLabel: 'Наименование',
+              allowBlank: false
+            }, {
+              xtype: 'combo',
+              store: {
+                xtype: 'store',
+                fields: ['Text', 'Value'],
+                data: [['Действующий', 1], ['Потенциальный', 2]]
+              },
+              displayField: 'Text',
+              valueField: 'Value',
+              typeAhead: false,
+              queryMode: 'local',
+              fieldLabel: 'Тип',
+              forceSelection: true,
+              triggerAction: 'all',
+              selectOnFocus: true,
+              name: 'ActiveID',
+              allowBlank: false,
+              flex: 1,
+              listeners: {
+                change: 'onActiveChange',
+                scope: this
+              }
+            }, {
+              name: 'AddressTown',
+              fieldLabel: 'Город'
+            }, {
+              name: 'Address',
+              fieldLabel: 'Адрес'
+            }, {
+              xtype: 'fieldcontainer',
+              fieldLabel: 'Телефон',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              labelWidth: 55,
+              fieldDefaults: {
+                labelWidth: 40,
+              },
+              items: [{
+                name: 'Phone1',
+                fieldLabel: 'моб',
+                allowBlank: false,
+                flex: 1,
+                placeholder: '+7(xxx) xxx-xxxx',
+                inputMask: '+7(999) 999-9999'
+              }, {
+                name: 'Phone3',
+                fieldLabel: 'раб',
+                flex: 1,
+                placeholder: '+7(xxx) xxx-xxxx',
+                inputMask: '+7(999) 999-9999'
+              }]
+            }, {
+              name: 'Email',
+              fieldLabel: 'Email'
+            }, {
+              name: 'Passport',
+              fieldLabel: 'Контактное лицо'
+            }, {
+              name: 'Position',
+              fieldLabel: 'Должность'
+            }, {
+              name: 'KindActivity',
+              fieldLabel: 'Род деятельности'
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'hbox',
+              items: [{
+                name: 'RiskProfil',
+                fieldLabel: 'Риск профиль',
+                disabled: true,
+                flex: 1
+              }, {
+                name: 'KM',
+                fieldLabel: 'КМ',
+                labelWidth: 120,
+                flex: 1,
+                allowBlank: false
+              }]
+            }, {
+              xtype: 'fieldcontainer',
+              defaultType: 'textfield',
+              layout: 'anchor',
+              align: 'right',
+              items: [{
+                name: 'Potential',
+                fieldLabel: 'Потенциал (в руб.)',
+                xtype: 'numberfield',
+                labelWidth: 120,
+                anchor: '50%'
+              }]
+            }, {
+              xtype: 'hidden',
+              name: 'IsUL'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onActiveChange: function () {
+        this.down('form').getForm().findField('RiskProfil').setDisabled(this.down('form').getForm().findField('ActiveID').getValue() != 1);
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        this.onActiveChange();
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.close();
+        }
+      },
+
+      onCancel: function () {
+        this.close();
+      }
+    });
+
+    Ext.define('Client.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.clientgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          columns: [{
+            header: 'Клиент',
+            dataIndex: 'FIO',
+            width: 250,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Ф/Ю',
+            dataIndex: 'ULFL',
+            width: 50
+          }, {
+            header: 'Город',
+            dataIndex: 'AddressTown',
+            width: 150,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Тел. моб.',
+            dataIndex: 'Phone1',
+            width: 130
+          }, {
+            header: 'Email',
+            dataIndex: 'Email',
+            width: 130
+          }, {
+            header: 'Род деятельности',
+            dataIndex: 'KindActivity',
+            width: 180,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Должность',
+            dataIndex: 'Position',
+            width: 160,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Тип',
+            dataIndex: 'Active',
+            width: 120
+          }, {
+            header: 'Риск-профиль',
+            dataIndex: 'RiskProfil',
+            width: 130
+          }, {
+            header: 'KM',
+            dataIndex: 'KM',
+            width: 130
+          }, {
+            header: 'Потенциал (в руб.)',
+            dataIndex: 'Potential',
+            align: 'right',
+            width: 150
+          }, {
+            header: 'ID',
+            dataIndex: 'ID',
+            width: 70,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext',
+              text: ' Поиск: '
+            }, {
+              xtype: 'textfield',
+              itemId: 'tfFind'
+            }, '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              menu: {
+                items: [{
+                  text: 'Физическое лицо',
+                  handler: this.onAddFlClick,
+                  scope: this
+                }, {
+                  text: 'Юридическое лицо',
+                  handler: this.onAddUlClick,
+                  scope: this
+                }]
+              }
+            }, {
+              text: 'Изменить',
+              handler: this.onChangeClick,
+              itemId: 'change',
+              disabled: true,
+              scope: this
+            }]
+          }],
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            listeners: {
+              scope: this,
+              beforerender: { fn: this.onRefreshClick }
+            }
+          }
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemclick', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        this.store.proxy.extraParams.filter = this.down('#tfFind').getValue()
+        me.store.load();
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onAddFlClick: function () {
+        var rec = Ext.create('Client', { IsUL: false, KM: KM });
+        var wini = this.onCreateWin('ClientFl.Win');
+        wini.setTitle('Добавить');
+        wini.setActiveRecord(rec);
+        wini.show(this);
+      },
+
+      onAddUlClick: function () {
+        var rec = Ext.create('Client', { IsUL: true, KM: KM });
+        var wini = this.onCreateWin('ClientUl.Win');
+        wini.setTitle('Добавить');
+        wini.setActiveRecord(rec);
+        wini.show(this);
+      },
+
+      onChangeClick: function () {
+        var rec = this.getSelectionModel().getSelection()[0];
+        var wini = this.onCreateWin(rec.get('IsUL') == true ? 'ClientUl.Win' : 'ClientFl.Win');
+        wini.setTitle('Изменить');
+        wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        wini.show(this);
+      },
+
+      onCreateWin: function (win) {
+        return Ext.create(win, {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#change').setDisabled(selections.length === 0);
+        var grid = this.up('viewport').down('clientactgrid');
+        if (selections.length === 0) {
+          grid.down('#create').setDisabled(true);
+          grid.down('#refresh').setDisabled(true);
+        }
+        else {
+          if (grid) {
+            grid.store.proxy.extraParams = {
+              id: this.getView().getSelectionModel().getSelection()[0].get('ID'),
+              d1: grid.down('#DateB').getValue(),
+              d2: grid.down('#DateE').getValue()
+            };
+            grid.store.load();
+            grid.down('#create').setDisabled(false);
+            grid.down('#refresh').setDisabled(false);
+          }
+        }
+      }
+
+    });
+
+    Ext.define('ClientAct.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.clientactwin',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            defaults: { anchor: '100%' },
+            bodyPadding: 10,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'right',
+              msgTarget: 'qtip',
+            },
+            defaultType: 'textfield',
+            items: [{
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                xtype: 'datefield',
+                name: 'DateC',
+                labelWidth: 100,
+                fieldLabel: 'Дата контакта',
+                startDay: 1,
+                allowBlank: false,
+                format: 'd.m.Y',
+                width: 240
+              }, {
+                xtype: 'combo',
+                store: 'storeKind',
+                displayField: 'Text',
+                valueField: 'Value',
+                typeAhead: false,
+                queryMode: 'local',
+                fieldLabel: 'Вид контакта',
+                forceSelection: true,
+                triggerAction: 'all',
+                selectOnFocus: true,
+                name: 'KindID',
+                allowBlank: false,
+                flex: 1,
+                listeners: {
+                  beforerender: function () { this.store.load(); }
+                }
+              }]
+            }, {
+              name: 'Result',
+              fieldLabel: 'Результат',
+              allowBlank: false
+            }, {
+              xtype: 'fieldcontainer',
+              layout: { type: 'vbox', align: 'end' },
+              items: [{
+                xtype: 'datefield',
+                name: 'DateN',
+                labelWidth: 240,
+                fieldLabel: 'Дата следующего контакта',
+                startDay: 1,
+                format: 'd.m.Y',
+                width: 380
+              }]
+            }, {
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                xtype: 'checkbox',
+                name: 'IsDeal',
+                boxLabel: 'Сделка?',
+                fieldLabel: ' ',
+                labelSeparator: '',
+                hideLabel: false,
+                listeners: {
+                  change: 'onDealChange',
+                  scope: this
+                }
+              }]
+            }, {
+              name: 'Product',
+              fieldLabel: 'Продукт'
+            }, {
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              items: [{
+                name: 'Qty',
+                fieldLabel: 'Сумма сделки',
+                xtype: 'numberfield'
+              }]
+            }, {
+              name: 'ClientID',
+              xtype: 'hidden'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onDealChange: function () {
+        var form = this.down('form').getForm();
+        var isDeal = form.findField('IsDeal').getValue() == 1;
+        var qty = form.findField('Qty');
+        var product = form.findField('Product');
+        qty.setDisabled(!isDeal);
+        product.setDisabled(!isDeal);
+        if (!isDeal) {
+          qty.setValue(null);
+          product.setValue(null);
+        }
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        this.onDealChange();
+        if (record) {
+          this.down('#save').enable();
+          this.down('form').getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.close();
+        }
+      },
+
+      onCancel: function () {
+        this.close();
+      }
+    });
+
+    Ext.define('ClientAct.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.clientactgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true
+          },
+          columns: [{
+            header: 'Дата контакта',
+            dataIndex: 'DateC',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            width: 88
+          }, {
+            header: 'Вид контакта',
+            dataIndex: 'KindS',
+            width: 150
+          }, {
+            header: 'Результат',
+            dataIndex: 'Result',
+            width: 300,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Дата сл контакта',
+            dataIndex: 'DateN',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            width: 88
+          }, {
+            header: 'Сделка',
+            dataIndex: 'IsDeal',
+            xtype: 'checkcolumn',
+            readOnly: true,
+            width: 70,
+            listeners: {
+              beforecheckchange: function () { return false; }
+            }
+          }, {
+            header: 'Сумма сделки',
+            dataIndex: 'Qty',
+            align: 'right',
+            width: 130
+          }, {
+            header: 'Продукт',
+            dataIndex: 'Product',
+            flex: 1,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'ID',
+            dataIndex: 'ID',
+            width: 70,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'datefield',
+              id: 'DateB',
+              itemId: 'DateB',
+              name: 'DateB',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'DateE',
+              startDay: 1,
+              width: 100,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -365)
+            }, {
+              xtype: 'datefield',
+              id: 'DateE',
+              itemId: 'DateE',
+              name: 'DateE',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'DateB',
+              startDay: 1,
+              width: 100,
+              margin: '0 5 0 0',
+              value: Ext.Date.clearTime(new Date(), false)
+            }, , '-', {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              itemId: 'refresh',
+              scope: this,
+              disabled: true,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              itemId: 'create',
+              handler: this.onAddClick,
+              disabled: true,
+              scope: this
+            }, {
+              text: 'Изменить',
+              handler: this.onChangeClick,
+              itemId: 'change',
+              disabled: true,
+              scope: this
+            }, {
+              text: 'Удалить',
+              handler: this.onDeleteClick,
+              itemId: 'delete',
+              disabled: true,
+              scope: this
+            }, {
+              text: 'Отчеты',
+              xtype: 'button',
+              menu: {
+                items:[{
+                  handler: this.onReportClick,
+                  text: 'Общий за период',
+                  scope: this
+                }, {
+                  handler: this.onReport2Click,
+                  text: 'Сумма баллов за неделю',
+                  scope: this
+                }]
+              }
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams.d1 = me.down('#DateB').getValue();
+        me.store.proxy.extraParams.d2 = me.down('#DateE').getValue();
+        me.store.load();
+      },
+
+      onAddClick: function () {
+        var rec = Ext.create('ClientAct', { ClientID: this.store.proxy.extraParams.id, DateC: Ext.Date.clearTime(new Date(), false) });
+        var wini = this.onCreateWin();
+        wini.setTitle('Добавить');
+        wini.setActiveRecord(rec);
+        wini.show(this);
+      },
+
+      onChangeClick: function () {
+        var wini = this.onCreateWin();
+        wini.setTitle('Изменить');
+        wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        wini.show(this);
+      },
+
+      onCreateWin: function () {
+        return Ext.create('ClientAct.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#delete').setDisabled(selections.length === 0);
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.store.sync();
+          }
+        }
+      },
+
+      onReportClick: function () {
+        var form = Ext.getDom('report');
+        form.d1.value = this.down('#DateB').rawValue;
+        form.d2.value = this.down('#DateE').rawValue;
+        form.submit();
+      },
+
+      onReport2Click: function () {
+        var form = Ext.getDom('report2');
+        form.d2.value = this.down('#DateE').rawValue;
+        form.submit();
+      }
+
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          region: 'center',
+          xtype: 'tabpanel',
+          items: [{
+            title: 'Клиенты',
+            layout: 'border',
+            autoScroll: true,
+            items: [{
+              xtype: 'clientgrid',
+              store: 'storeClient',
+              region: 'center',
+              border: false
+            }, {
+              xtype: 'clientactgrid',
+              store: 'storeClientAct',
+              region: 'south',
+              height: '30%',
+              border: false,
+              split: true
+            }]
+          }],
+          listeners: {
+          }
+        }]
+      });
+    });
+  </script>
+}
+<form id="report" action="@Url.Action("repClient")" method="POST" style="display: none;">
+  <input type="hidden" name="d1" />
+  <input type="hidden" name="d2" />
+</form>
+
+<form id="report2" action="@Url.Action("RepClientBalls")" method="POST" style="display: none;">
+  <input type="hidden" name="d2" />
+</form>

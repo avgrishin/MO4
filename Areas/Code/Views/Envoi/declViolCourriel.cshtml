@@ -1,0 +1,58 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public DateTime dt { get; set; }
+  public dynamic q { get; set; }
+}
+
+<style>
+  table
+  {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th
+  {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span
+  {
+    font-style: italic;
+  }
+
+  th
+  {
+    font-size: .7em;
+  }
+</style>
+<h3>Нарушения в портфелях клиентов</h3>
+<h4>Отчетная дата: @dt.ToShortDateString()</h4>
+<table>
+  <tr>
+    <th>Клиент</th>
+    <th>Дата возникновения</th>
+    <th>Описание нарушения</th>
+    <th>Предельное значение</th>
+    <th>Фактическое значение</th>
+    <th>Причина</th>
+    <th>Срок</th>
+  </tr>
+  @foreach (var qq in q)
+  {
+    <tr>
+      <td>@qq.fiName</td>
+      <td>@qq.DDate.ToString("dd.MM.yy")</td>
+      <td>@qq.Descr</td>
+      <td>@qq.MaxValue</td>
+      <td>@qq.Value</td>
+      <td>@qq.Reason</td>
+      <td>@(qq.TermDate != null ? qq.TermDate.ToString("dd.MM.yy") : "")</td>
+    </tr>
+  }
+</table>
+
+

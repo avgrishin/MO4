@@ -1,0 +1,50 @@
+﻿@model dynamic
+@{
+  ViewBag.Title = "Отказ";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("form").submit(
+      function () {
+        if ($('#descr').val() == '') {
+          alert('Не заполнено поле Причины отказа');
+          return false;
+        };
+        return true;
+      }
+    )
+  }
+  );
+</script>
+
+<div style="padding-left: 10px">
+  <div class="container">
+    <div class="row">
+      <h2>@ViewBag.Title</h2>
+      <form method="post">
+        <input type="hidden" name="id" value="@Model.id" />
+        <input type="hidden" name="t" value="@Model.t" />
+        <input type="hidden" name="a" value="@Model.a" />
+        <div class="form-group">
+          <label for="dscr">Объясните причину отказа</label><br />
+          <textarea id="descr" name="descr" rows="10" class="form-control"></textarea>
+        </div>
+        <input type="submit" value="Выполнить" class="btn btn-danger" />
+      </form>
+    </div>
+  </div>
+</div>
+
+@section css
+{
+  <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+}
+
+@section scripts {
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+  <script src="~/Scripts/bootstrap.min.js"></script>
+}

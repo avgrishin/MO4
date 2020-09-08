@@ -1,0 +1,503 @@
+﻿@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  ViewBag.Title = "Классификаторы";
+}
+@section scripts {
+  <style type="text/css">
+   .icon-add { background-image: url(@Href("~/Scripts/ExtJS62/build/classic/theme-classic/resources/images/tree/drop-add.gif")) !important; }
+   .icon-del { background-image: url(@Href("~/Content/images/delete.gif")) !important; }
+   .icon-save { background-image: url(@Href("~/Content/images/save.gif")) !important; }
+   .x-selectable, .x-selectable *
+   {
+     -moz-user-select: text !important;
+     -khtml-user-select: text !important;
+   }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS62/build/classic/theme-classic/resources/theme-classic-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS62/ext-bootstrap.js"></script>
+
+  <style type="text/css">
+    .file
+    {
+      background-image: url(@Url.Content("~/Scripts/ExtJS41/resources/themes/images/default/tree/folder.gif")) !important;
+    }
+  </style>
+  <script type="text/javascript">
+    function getNodeFullText(node, i) {
+      if (node == null || node == [] || node.data.text == undefined) return '';
+      return getNodeFullText(node.parentNode, i + 1) + node.data.text + (i == 0 ? '' : '/');
+    }
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      Ext.define('OCR', {
+        extend: 'Ext.data.Model',
+        idProperty: 'ObjClsRelationID',
+        fields: ['ObjClsRelationID', 'ObjClassifierID', 'ObjectID', 'UserName', 'Comment', 'Value', 'Obj', { name: 'OnDate', type: 'date', dateFormat: 'c' }, { name: 'InDateTime', type: 'date', dateFormat: 'c' }, 'UserName']
+      });
+
+      Ext.define('ObjCls', {
+        extend: 'Ext.data.TreeModel',
+        idProperty: 'ObjClassifierID',
+        fields: ['ObjClassifierID', 'NameBrief', 'Name', 'Comment', 'ObjType', 'UniqueFlag', 'OnDateFlag', 'RequiredFlag', { name: 'InDateTime', type: 'date', dateFormat: 'c' }, 'UserName']
+      });
+
+
+      Ext.create('Ext.data.TreeStore', {
+        storeId: 'storeObjCls',
+        model: 'ObjCls',
+        nodeParam: 'id',
+        root: {
+          text: 'Классификаторы',
+          expanded: true, ObjClassifierID: '0'
+        },
+        proxy: {
+          type: 'ajax',
+          api: {
+            read: '@Url.Action("GetObjClsNodes")',
+            create: '@Url.Action("addObjCls")',
+            update: '@Url.Action("updObjCls")'
+          },
+          reader: {
+            type: 'json',
+            rootProperty: 'data'
+          },
+          writer: {
+            type: 'json',
+            writeAllFields: true,
+            allowSingle: false
+          }
+        }
+      });
+
+      Ext.define('OC.Win', {
+        extend: 'Ext.window.Window',
+        alias: 'widget.ocwin',
+
+        initComponent: function () {
+          Ext.apply(this, {
+            activeRecord: null,
+            title: 'Добавить',
+            width: 450,
+            autoHeight: true,
+            layout: 'fit',
+            closeAction: 'hide',
+            modal: true,
+            plain: true,
+            //bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            items: {
+              xtype: 'panel',
+              border: false,
+              autoHeight: true,
+              items: [{
+                xtype: 'form',
+                autoHeight: true,
+                border: true,
+                bodyPadding: 10,
+                fieldDefaults: { labelWidth: 100, labelAlign: 'right', msgTarget: 'side' },
+                defaultType: 'textfield',
+                defaults: { anchor: '100%' },
+                items: [{
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  items: []
+                }, {
+                  name: 'ObjClassifierID',
+                  fieldLabel: 'id',
+                  readOnly: true,
+                  allowBlank: false
+                }, {
+                  name: 'parentId',
+                  fieldLabel: 'ParentId',
+                  readOnly: true,
+                  allowBlank: false
+                }, {
+                  name: 'Name',
+                  fieldLabel: 'Наименование',
+                  allowBlank: false
+                }, {
+                  name: 'NameBrief',
+                  fieldLabel: 'Сокращение',
+                  allowBlank: false
+                }, {
+                  name: 'Comment',
+                  fieldLabel: 'Примечание'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'UniqueFlag',
+                  fieldLabel: 'UniqueFlag'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'RequiredFlag',
+                  fieldLabel: 'RequiredFlag'
+                }, {
+                  xtype: 'checkboxfield',
+                  name: 'OnDateFlag',
+                  fieldLabel: 'OnDateFlag'
+                }, {
+                  name: 'UserName',
+                  fieldLabel: 'UserName'
+                }]
+              }]
+            },
+            buttons: ['->', {
+              itemId: 'save',
+              iconCls: 'icon-save',
+              text: 'Сохранить',
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: function () {
+                this.hide();
+              }
+            }]
+          });
+          this.callParent();
+        },
+
+        setActiveRecord: function (record) {
+          this.activeRecord = record;
+          this.down('form').getForm().reset();
+          if (record) {
+            this.down('#save').enable();
+            this.down('form').getForm().loadRecord(record);
+          } else {
+            this.down('#save').disable();
+          }
+        },
+
+        onSave: function () {
+          var active = this.activeRecord, form = this.down('form').getForm();
+          if (!active) {
+            return;
+          }
+          if (form.isValid()) {
+            if (this.title == 'Добавить') {
+              this.fireEvent('create', this, form.getValues(false, false, true/*false*/, true));
+            }
+            else if (this.title == 'Добавить на подуровень') {
+              this.fireEvent('createsl', this, form.getValues(false, false, true/*false*/, true));
+            }
+            else {
+              form.updateRecord(active);
+              this.fireEvent('update');
+            }
+            this.hide();
+          }
+        }
+      });
+
+      Ext.define('OC.Tree', {
+        extend: 'Ext.tree.Panel',
+        alias: 'widget.octree',
+        wini: null,
+        initComponent: function () {
+          Ext.apply(this, {
+            title: 'Классификаторы',
+            margins: '0 0 0 0',
+            animate: false,
+            loadMask: false,
+            store: 'storeObjCls',
+            columns: [{
+              xtype: 'treecolumn',
+              dataIndex: 'Name',
+              flex: 1
+            }],
+            dockedItems: [{
+              xtype: 'toolbar',
+              items: [{
+                iconCls: 'icon-add',
+                itemId: 'add',
+                disabled: true,
+                xtype: 'button',
+                menu: {
+                  plain: true,
+                  items: [{
+                    text: 'Добавить',
+                    scope: this,
+                    handler: this.onAddClick
+                  }, {
+                    text: 'Добавить на подуровень',
+                    scope: this,
+                    handler: this.onAddSubLevelClick
+                  }]
+                },
+              }, {
+                itemId: 'change',
+                text: 'C',
+                scope: this,
+                handler: this.onChangeClick,
+                disabled: true
+              }, {
+                itemId: 'delete',
+                scope: this,
+                iconCls: 'icon-del',
+                disabled: true
+              }]
+            }],
+            rootVisible: false,
+            lines: true,
+            autoScroll: true,
+            listeners: {
+              render: function (tp) {
+                tp.getSelectionModel().on('select', function (tree, node) {
+                  var c = tp.up('viewport').down("#detail-grid");
+                  c.setTitle(getNodeFullText(node, 0));
+                  c.store.proxy.extraParams = { id: node.id };
+                  c.store.load(function (records, operation, success) {
+                    if (!success)
+                      console.log('Не удалось получить данные');
+                  });
+                });
+              }
+            },
+            //selModel: {
+            //  listeners: {
+            //    selectionchange: this.onSelectChange
+            //  }
+            //},
+            contextMenu: new Ext.menu.Menu({
+              items: [{
+                id: 'change-node',
+                text: 'Изменить'
+              }],
+              listeners: {
+                itemclick: function (item) {
+                  switch (item.id) {
+                    case 'change-node':
+                      var n = item.parentMenu.contextNode;
+                      alert(3);
+                      break;
+                  }
+                }
+              }
+            })
+
+          });
+          this.callParent();
+          this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        },
+
+        onSelectChange: function (selModel, selections) {
+          this.down('#add').setDisabled(selections.length === 0);
+          this.down('#change').setDisabled(selections.length === 0);
+          this.down('#delete').setDisabled(selections.length === 0);
+        },
+
+        onAddClick: function () {
+          var rec = Ext.create('ObjCls', { ObjClassifierID: null, Name: '', NameBrief: '', ObjType: 0, Comment: '', UniqueFlag: 0, OnDateFlag: 0, RequiredFlag: 0, UserName: '@User.Identity.Name', parentId: this.getSelectionModel().getSelection()[0].get('parentId') });
+          if (!this.wini) {
+            this.onCreateWin();
+          }
+          this.wini.setTitle('Добавить');
+          this.wini.setActiveRecord(rec);
+          this.wini.show(this);
+        },
+
+        onAddSubLevelClick: function () {
+          var rec = Ext.create('ObjCls', { ObjClassifierID: 0, Name: '', NameBrief: '', ObjType: 0, Comment: '', UniqueFlag: 0, OnDateFlag: 0, RequiredFlag: 0, UserName: '@User.Identity.Name', parentId: this.getSelectionModel().getSelection()[0].get('ObjClassifierID') });
+          if (!this.wini) {
+            this.onCreateWin();
+          }
+          this.wini.setTitle('Добавить');
+          this.wini.setActiveRecord(rec);
+          this.wini.show(this);
+        },
+
+        onChangeClick: function () {
+          if (!this.wini) {
+            this.onCreateWin();
+          }
+          this.wini.setTitle('Изменить');
+          this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+          this.wini.show(this);
+        },
+
+        onCreateWin: function () {
+          this.wini = Ext.create('OC.Win', {
+            scope: this,
+            listeners: {
+              scope: this,
+              create: function (form, data) {
+                var target = this.getSelectionModel().getSelection()[0];
+                var store = this.getStore()
+                var node = target.createNode(data)
+                node.phantom = true;
+                target.parentNode.appendChild(node);
+                this.getSelectionModel().select(node);
+                //this.store.getNodeById(.get('ObjClassifierID')).parentNode.appendChild(data);
+                //this.store.insert(0, data);
+                store.sync();
+              },
+              createsl: function (form, data) {
+                var target = this.getSelectionModel().getSelection()[0];
+                var store = this.getStore()
+                var node = target.createNode(data)
+                node.phantom = true;
+                target.appendChild(node);
+                this.getSelectionModel().select(node);
+                //this.store.getNodeById(.get('ObjClassifierID')).parentNode.appendChild(data);
+                //this.store.insert(0, data);
+                store.sync();
+              },
+              update: function () {
+                this.store.sync();
+              }
+            }
+          });
+        }
+
+      });
+
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          xtype: 'octree',
+          itemId: 'cls-tree',
+          region: 'west',
+          split: true,
+          width: 350,
+          minSize: 175,
+          maxSize: 800,
+          collapsible: true,
+          collapseMode: 'mini'
+        }, {
+          region: 'center',
+          margins: '0 0 0 0',
+          autoScroll: true,
+          title: '&nbsp;',
+          xtype: 'grid',
+          itemId: 'detail-grid',
+          border: true,
+          store: Ext.create('Ext.data.Store', {
+            remoteSort: true,
+            model: 'OCR',
+            autoLoad: false,
+            autoSync: true,
+            //buffered: true,
+            pageSize: 50000,
+            proxy: {
+              type: 'ajax',
+              actionMethods: { read: 'POST' },
+              //extraParams: {
+              //  total: 50000
+              //},
+              api: {
+                read: '@Url.Action("ObjClsRel")',
+                destroy: '@Url.Action("ObjClsRelDel")'
+              },
+              reader: {
+                type: 'json',
+                rootProperty: 'data',
+                messageProperty: 'msg',
+                totalProperty: 'totalCount'
+              },
+              writer: {
+                type: 'json',
+                rootProperty: 'data',
+                writeAllFields: false,
+                allowSingle: false,
+                encode: false
+              },
+              simpleSortMode: true
+            }
+          }),
+          //verticalScrollerType: 'paginggridscroller',
+          //trackMouseOver: true,
+          //disableSelection: true,
+          //invalidateScrollerOnRefresh: false,
+          loadMask: false,
+          //plugins: 'bufferedrenderer',
+          viewConfig: {
+            trackOver: false
+          },
+          selModel: Ext.create('Ext.selection.CheckboxModel', {
+            listeners: {
+              selectionchange: function (sm, selections) {
+                var c = Ext.getCmp("detail-grid");
+                c.down('#delButton').setDisabled(selections.length == 0);
+              }
+            }
+          }),
+          columns: [{
+            xtype: 'rownumberer',
+            width: 30,
+            sortable: false
+          }, {
+            text: 'ObjID',
+            dataIndex: 'ObjectID',
+            align: 'right',
+            width: 50,
+            sortable: true
+          }, {
+            text: 'Объект',
+            dataIndex: 'Obj',
+            flex: 1,
+            //width: 200,
+            sortable: true
+          }, {
+            text: 'Comment',
+            dataIndex: 'Comment',
+            width: 200,
+            sortable: true
+          }, {
+            text: 'Value',
+            dataIndex: 'Value',
+            align: 'right',
+            width: 60,
+            sortable: true
+          }, {
+            text: 'OnDate',
+            dataIndex: 'OnDate',
+            width: 70,
+            renderer: Ext.util.Format.dateRenderer('d.m.Y'),
+            sortable: true
+          }, {
+            text: "ObjClsRelationID",
+            dataIndex: 'ObjClsRelationID',
+            align: 'right',
+            width: 50,
+            sortable: true
+          }, {
+            text: "UserName",
+            dataIndex: 'UserName',
+            width: 60,
+            sortable: true
+          }, {
+            text: "InDateTime",
+            dataIndex: 'InDateTime',
+            width: 100,
+            renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+            sortable: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            items: [{
+              itemId: 'delButton',
+              text: 'Удалить',
+              iconCls: 'icon-del',
+              disabled: true,
+              handler: function (e) {
+                var g = Ext.getCmp("detail-grid");
+                var c = g.getSelectionModel().getCount();
+                if (c) {
+                  if (window.confirm('Удалить ' + (c > 1 ? ' ' + c + ' стр.' : '') + '?')) {
+                    g.store.remove(g.getSelectionModel().getSelection());
+                  }
+                }
+              }
+            }, '->', @Html.Partial("MenuAdmin")]
+          }]
+        }]
+      });
+    });
+  </script>
+}

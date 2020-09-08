@@ -1,0 +1,199 @@
+﻿body {
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    margin: 0 0;
+    line-height: 17px;
+    font-weight: 400;
+}
+
+a {
+    text-decoration: none;
+}
+
+    a:link, a:visited,
+    a:active, a:hover {
+        color: #333;
+    }
+
+    a:hover {
+        /*text-decoration: underline*/;
+    }
+
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+ul#menu {
+    font-weight: 600;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    font-size: 12pt;
+    margin: 0 10px 5px;
+    padding: 0;
+    text-align: right;
+}
+
+    ul#menu li {
+        display: inline;
+        list-style: none;
+        padding-left: 1px;
+    }
+
+        ul#menu li a {
+            background: none;
+            color: #fff;
+            text-decoration: none;
+            padding: 1px 5px 5px 5px;
+        }
+
+            ul#menu li a:hover {
+                background-color: #003374;
+                text-decoration: none;
+            }
+
+#login {
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    color: #fad81a;
+    display: block;
+    font-size: 10pt;
+    margin: 10px 15px 10px 5px;
+    text-align: right;
+    font-weight: 400;
+}
+
+    #login a {
+        background-color: #d3dce0;
+        margin-left: 10px;
+        margin-right: 3px;
+        padding: 2px 3px;
+        text-decoration: none;
+    }
+
+        #login a.username {
+            background: none;
+            margin: 0;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+    #login ul {
+        margin: 0;
+    }
+
+    #login li {
+        display: inline;
+        list-style: none;
+    }
+
+fieldset {
+    border: 1px solid #CCC;
+    margin: 1em 0;
+    padding: 1em;
+}
+
+    fieldset label {
+        display: block;
+    }
+
+    fieldset p {
+        margin: 2px 12px 10px 10px;
+    }
+
+    fieldset legend {
+        /*display: none;*/
+    }
+
+    fieldset ol {
+        padding: 0;
+        list-style: none;
+    }
+
+        fieldset ol li {
+            padding-bottom: 5px;
+        }
+
+/* styles for validation helpers */
+.field-validation-error {
+    color: #e80c4d;
+    font-weight: bold;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+input.input-validation-error {
+    border: 1px solid #e80c4d;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #e80c4d;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+
+.fp-currency thead tr td {
+    padding: 5px 10px 5px 0px;
+    color: #777;
+    font-size: 0.85em;
+}
+
+.fp-currency tbody tr td {
+    padding: 5px 10px 5px 0px;
+}
+
+.ta-r {
+    text-align: right;
+}
+
+h1, h2 {
+    font-size: 100%;
+}
+
+ul.a_report {
+    padding-left: 5px;
+    list-style: none;
+    float: left;
+}
+
+    ul.a_report li {
+        position: relative;
+        display: block;
+    }
+
+        ul.a_report li a {
+            color: #555555;
+            padding: 7px 10px 7px 15px;
+            position: relative;
+            display: block;
+        }
+
+            ul.a_report li a:hover {
+                color: #000000;
+                background-color: #eeeeee;
+                text-decoration: none;
+                border-left-style: solid;
+                border-left-color: #ff9800;
+                border-left-width: 5px;
+                padding-left:10px;
+            }
+
+            ul.a_report li a:focus {
+                text-decoration: none;
+            }
+
+/*#body {
+    background: url('https://s.rbk.ru/files_static/edd/2020/covid-19/26/images/bg_2x.png') no-repeat top right;
+    background-size: 60px 60px;
+}*/

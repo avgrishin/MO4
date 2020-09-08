@@ -1,0 +1,159 @@
+﻿@using System.Web.Optimization
+@model dynamic
+@{
+  ViewBag.Title = "Home Page";
+}
+@section css {
+  @*<link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />*@
+  @*  <style>
+    .winimg
+    {
+      height: 300px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 20px;
+    }
+  </style>*@
+}
+@section scripts {
+  @*@Scripts.Render("~/bundles/knockout")*@
+
+  <script src="~/Scripts/react.js"></script>
+  <script src="~/Scripts/react-dom.js"></script>
+  @*<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>*@
+
+  @*  <script type="text/javascript">
+    var AppViewModel = function () {
+      var self = this;
+      self.rates = ko.observableArray();
+      self.courses = ko.observableArray();
+
+      function RateViewModel(rate) {
+        var self = this;
+        self.s = rate.s;
+        self.c = rate.c;
+        self.dt = rate.dt;
+        self.y = rate.y;
+        self.y1 = ko.computed(function () {
+          return parseFloat(self.y);
+        });
+        self.dt1 = ko.computed(function () {
+          return self.dt.substr(0, 10).replace(/(\d+)-(\d+)-(\d+)/, '$3.$2.$1');
+        });
+      }
+
+      function CourseViewModel(course) {
+        var self = this;
+        self.sec = course.sec;
+        self.cc = course.cc;
+        self.cl = course.cl;
+        self.chg = course.chg;
+        self.tm = course.tm
+        self.chg1 = ko.computed(function () {
+          return parseFloat(self.chg);
+        });
+      }
+      //WithAction
+      self.refresh = function () {
+        $.getJSON('@Url.RouteUrl("DefaultApi", new { httproute = "", controller = "RepWA", id = 2 })', function (courses) {
+          self.courses.removeAll();
+          $.each(courses, function (index, course) {
+            self.courses.push(new CourseViewModel(course));
+          })
+        });
+      }
+
+      $.getJSON('@Url.RouteUrl("DefaultApi", new { httproute = "", controller = "RepWA", id = 1 })', function (rates) {
+        $.each(rates, function (index, rate) {
+          self.rates.push(new RateViewModel(rate));
+        })
+      });
+
+      $.getJSON('@Url.RouteUrl("DefaultApi", new { httproute = "", controller = "RepWA", id = 2 })', function (courses) {
+        $.each(courses, function (index, course) {
+          self.courses.push(new CourseViewModel(course));
+        })
+      });
+
+    }
+
+    //var viewModel = new AppViewModel();
+
+    $(document).ready(function () {
+      //var viewModel = new AppViewModel();
+      ko.applyBindings(new AppViewModel());
+    });
+
+    var mapping = {
+      'rates': {
+        create: function (options) {
+          return (new (function () {
+            this.y1 = ko.computed(function () {
+              return parseFloat(this.y());
+            }, this);
+            this.dt1 = ko.computed(function () {
+              return this.dt().substr(0, 10).replace(/(\d+)-(\d+)-(\d+)/, '$3.$2.$1');
+            }, this);
+            ko.mapping.fromJS(options.data, {}, this);
+          })());
+        }
+      }
+    };
+    var mapping1 = {
+      'courses': {
+        create: function (options) {
+          return (new (function () {
+            ko.mapping.fromJS(options.data, {}, this);
+          })());
+        }
+      }
+
+    }
+  </script>*@
+}
+@*<div style="margin: 30px">
+  <div>
+    <h2>Курсы валют ЦБ РФ</h2>
+    <table class="fp-currency" style="width: 300px">
+      <tbody data-bind="foreach: rates">
+        <tr>
+          <td data-bind="text: dt1()"></td>
+          <td data-bind="text: s"></td>
+          <td class="ta-r" data-bind="text: c.toFixed(4)"></td>
+          <td class="ta-r" data-bind="text: y.toFixed(4), style: { color: y < 0 ? 'red' : 'green' }"></td>
+        </tr>
+      </tbody>
+    </table>
+    
+  </div>
+  <div>
+    <h2>Курсы ЦБ</h2>
+    <table class="fp-currency">
+      <tbody data-bind="foreach: courses">
+        <tr>
+          <td data-bind="text: sec"></td>
+          <td class="ta-r" data-bind="text: cl"></td>
+          <td class="ta-r" data-bind="text: chg.toFixed(2), style: { color: chg < 0 ? 'red' : 'green' }"></td>
+          <td data-bind="text: tm"></td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="javascript:void()" data-bind="click: refresh">Обновить</a>
+  </div>
+</div>
+*@
+<div id="course" style="margin: 30px">
+  @Html.React("CourseBox", new { url = "/api/RepWA/1", pollInterval = 20000, initialData = Model.Course })
+  @Html.React("RateBox", new { url = "/api/RepWA/2", pollInterval = 20000, initialData = Model.Rate })
+</div>
+@Scripts.Render("~/bundles/main")
+@Html.ReactInitJavaScript()
+@*<script type="text/babel" src="~/Scripts/React_rate.js"></script>*@
+
+@*<div style="width: 0px; height: 0px; border-right: 10px solid #135c85; border-left: 10px solid red; border-top: 10px solid red; border-bottom: 10px solid transparent;">
+</div>*@
+@*<div class="winimg">
+  <img src="~/content/images/WhyDevelopForWindows.png" />
+</div>
+<script src="//cmsresources.windowsphone.com/devcenter/en-us/devcenter_v2/js/parallaximg.js"></script>
+<div style="height: 600px"></div>*@

@@ -1,0 +1,58 @@
+@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q { get; set; }
+  public string host { get; set; }
+}
+
+<style>
+  table
+  {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th
+  {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span
+  {
+    font-style: italic;
+  }
+
+  th
+  {
+    font-size: .7em;
+  }
+</style>
+<h3>Доверенности, истекающие через неделю и менее</h3>
+<table width="100%">
+  <tr>
+    <th>Номер</th>
+    <th>Дата выдачи</th>
+    <th>Доверитель</th>
+    <th>Поверенный</th>
+    <th>Место предоставления</th>
+    <th>Функции</th>
+    <th>Срок действия</th>
+    <th>Действие</th>
+  </tr>
+  @foreach (var qq in q)
+  {
+    <tr>
+      <td>@qq.Nomer</td>
+      <td>@qq.DateB.ToString("dd.MM.yy")</td>
+      <td>@qq.Confidant</td>
+      <td>@qq.Principal</td>
+      <td>@qq.Place</td>
+      <td>@qq.Functions</td>
+      <td>@(qq.DateE != null ? qq.DateE.ToString("dd.MM.yy") : "")</td>
+      <td><a href='http://@host/code/jur/confirmCloseWarrant?id=@qq.ID'>Закрыть</a></td>
+    </tr>
+  }
+</table>
+

@@ -1,0 +1,1020 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 13.25, 69" name="MiddleOffice">
+  <DataContextMoniker Name="/MiddleOfficeDataContext" />
+  <nestedChildShapes>
+    <classShape Id="64481d32-3cb0-4c83-a27d-04c0b0531fd9" isExpanded="false" absoluteBounds="0.5, 5.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tExchangeIndex" />
+      <nestedChildShapes>
+        <elementListCompartment Id="fce0644b-97dd-4e2d-a7fb-9cd9aded7a19" absoluteBounds="0.51500000000000012, 5.835, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0ee9b75f-1b3c-4282-88fb-a6e92b9233fd" isExpanded="false" absoluteBounds="5.5, 0.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tTreatyTreatyType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="74265b23-1c60-4c40-8661-bc18f1bb66f6" absoluteBounds="5.515, 0.96, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="5874d979-cd83-4045-867d-2769e2487585" isExpanded="false" absoluteBounds="2.75, 5.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tObjClsRelation" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4a4e19a2-ab95-468e-9380-8282e396b749" absoluteBounds="2.765, 5.585, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="bc25797c-49f8-4985-a43e-bf4a59d3f3d2" isExpanded="false" absoluteBounds="5.25, 3.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tObjClassifier" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7873652e-e15b-42d8-9b19-538a08e7cf83" absoluteBounds="5.265, 3.585, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.71875 : 3.575); (5.71875 : 5.35); (5.13232833333333 : 5.35 : JumpStart); (4.83854166666667 : 5.35 : JumpEnd); (4.75 : 5.35)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tObjClassifier/tObjClassifier_tObjClsRelation" />
+      <nodes>
+        <classShapeMoniker Id="bc25797c-49f8-4985-a43e-bf4a59d3f3d2" />
+        <classShapeMoniker Id="5874d979-cd83-4045-867d-2769e2487585" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="014012cc-bdaa-4b1d-bab4-360a80df8b6c" isExpanded="false" absoluteBounds="2.625, 2.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tAccount" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e95a3ad6-7fdd-42ed-9b07-cc407b9317b8" absoluteBounds="2.64, 2.585, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="5d5f23dc-4a5f-4701-b8c5-e08e5986b1df" isExpanded="false" absoluteBounds="0.5, 4.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tTreatyType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8beb84d3-f927-46c0-9e70-4aea6698b2ea" absoluteBounds="0.51500000000000012, 5.085, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="15f4d485-1e33-4bfd-b863-4192d15472ee" isExpanded="false" absoluteBounds="5.125, 8.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecurityGroup" />
+      <nestedChildShapes>
+        <elementListCompartment Id="46ef6a8d-c53a-4f7d-803c-573a3e18bde9" absoluteBounds="5.14, 8.585, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" isExpanded="false" absoluteBounds="2.75, 6.25, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclaration" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7b9a53af-00d3-438e-ae6b-d13751c50d2b" absoluteBounds="2.765, 6.71, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="940e2e35-0d2b-4822-b70d-b96543705f3d" isExpanded="false" absoluteBounds="5.125, 6.25, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="394ecff5-c063-4a75-8d64-8516be15d94c" absoluteBounds="5.14, 6.71, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.125 : 6.475); (5.11458333333333 : 6.475 : JumpStart); (4.83854166666667 : 6.475 : JumpEnd); (4.75 : 6.475)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationType/sInvestmentDeclarationType_sInvestmentDeclaration" />
+      <nodes>
+        <classShapeMoniker Id="940e2e35-0d2b-4822-b70d-b96543705f3d" />
+        <classShapeMoniker Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="dc2c458b-7b5e-42d1-b12d-9d069edc9082" isExpanded="false" absoluteBounds="0.5, 2.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="2a2f6156-f7ba-4d26-a7fe-4598892cf02b" absoluteBounds="0.51500000000000012, 3.335, 1.9700000000000002, 4.4800211588541661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8d599f91-e724-445d-abb5-72502e185f5f" isExpanded="false" absoluteBounds="0.5, 6.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tExchangeIndexValue" />
+      <nestedChildShapes>
+        <elementListCompartment Id="87d777af-3897-490b-80fe-81399db394a9" absoluteBounds="0.51500000000000012, 6.835, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.5 : 5.825); (1.5 : 6.375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tExchangeIndex/tExchangeIndex_tExchangeIndexValue" />
+      <nodes>
+        <classShapeMoniker Id="64481d32-3cb0-4c83-a27d-04c0b0531fd9" />
+        <classShapeMoniker Id="8d599f91-e724-445d-abb5-72502e185f5f" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="1c7ecdf7-4bf8-4024-aa1f-5883c725a140" isExpanded="false" absoluteBounds="0.5, 7.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c613aab8-a4e6-4318-83f9-12b834097f59" absoluteBounds="0.515, 7.835, 1.9700000000000002, 0.44169108072916663" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4416c168-11a1-4b5e-8075-6a81d9d7052f" isExpanded="false" absoluteBounds="2.875, 7.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationWhere" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d8a17897-3bb9-4a4f-9c77-8893c6294b95" absoluteBounds="2.8899999999999997, 7.585, 1.9700000000000002, 4.095418294270833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.8125 : 6.7); (3.8125 : 7.125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclaration/sInvestmentDeclaration_sInvestmentDeclarationWhere" />
+      <nodes>
+        <classShapeMoniker Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" />
+        <classShapeMoniker Id="4416c168-11a1-4b5e-8075-6a81d9d7052f" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" isExpanded="false" absoluteBounds="5.125, 7.125, 2.25, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationSecurity" />
+      <nestedChildShapes>
+        <elementListCompartment Id="88fa219c-5bcd-40e7-a89b-1da849beefa3" absoluteBounds="5.14, 7.585, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(4.875 : 7.35); (4.88541666666667 : 7.35 : JumpStart); (5.11458333333333 : 7.35 : JumpEnd); (5.125 : 7.35)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationWhere/sInvestmentDeclarationWhere_sInvestmentDeclarationSecurity" />
+      <nodes>
+        <classShapeMoniker Id="4416c168-11a1-4b5e-8075-6a81d9d7052f" />
+        <classShapeMoniker Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.28875 : 8.125); (5.28875 : 7.575)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurityGroup/tSecurityGroup_sInvestmentDeclarationSecurity" />
+      <nodes>
+        <classShapeMoniker Id="15f4d485-1e33-4bfd-b863-4192d15472ee" />
+        <classShapeMoniker Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="a43389ee-01c6-4d3d-843c-fbed9a1b748e" isExpanded="false" absoluteBounds="5.25, 9.875, 2.25, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationGroupType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="18b5dec5-8d29-483f-b855-0d69c2092098" absoluteBounds="5.265, 10.335, 2.2199999999999998, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="fb01d8fe-692d-422b-9056-9c6b69a18425" isExpanded="false" absoluteBounds="7.375, 8.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecuritySecurityGroup" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a31ca707-e1a4-4a36-9430-73136a19d4f0" absoluteBounds="7.3900000000000006, 8.585, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(7.125 : 8.35); (7.375 : 8.35)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurityGroup/tSecurityGroup_tSecuritySecurityGroup" />
+      <nodes>
+        <classShapeMoniker Id="15f4d485-1e33-4bfd-b863-4192d15472ee" />
+        <classShapeMoniker Id="fb01d8fe-692d-422b-9056-9c6b69a18425" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.25 : 3.493752); (5.048995 : 3.493752); (5.048995 : 7.2015625); (5.125 : 7.2015625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tObjClassifier/tObjClassifier_sInvestmentDeclarationSecurity" />
+      <nodes>
+        <classShapeMoniker Id="bc25797c-49f8-4985-a43e-bf4a59d3f3d2" />
+        <classShapeMoniker Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="673a3226-549e-45a6-8e5c-b5d4c4dad6ea" isExpanded="false" absoluteBounds="1.875, 8.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecurityGroupType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f27b84d9-dad5-4c45-833a-a7e803a8b06f" absoluteBounds="1.8900000000000001, 9.085, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.28125 : 8.625); (3.28125 : 8.3125); (4.82291666666667 : 8.3125 : JumpStart); (5.11458333333333 : 8.3125 : JumpEnd); (5.125 : 8.3125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurityGroupType/tSecurityGroupType_tSecurityGroup" />
+      <nodes>
+        <classShapeMoniker Id="673a3226-549e-45a6-8e5c-b5d4c4dad6ea" />
+        <classShapeMoniker Id="15f4d485-1e33-4bfd-b863-4192d15472ee" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="27b2f8e4-60a9-40c3-858d-308cb77fe723" isExpanded="false" absoluteBounds="1.5, 9.75, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tIfxNew" />
+      <nestedChildShapes>
+        <elementListCompartment Id="264bd72c-7aba-4222-a24a-3cb88c8c68cb" absoluteBounds="1.5150000000000001, 10.21, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4f7347a1-a069-4234-8c6e-5337a0ea6b8d" isExpanded="false" absoluteBounds="0.625, 3.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPortfolio" />
+      <nestedChildShapes>
+        <elementListCompartment Id="941c2a60-e7bb-44c9-9b93-027e0e094a17" absoluteBounds="0.64, 4.085, 1.9700000000000002, 3.3262125651041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="42d0cf51-7c27-4871-9e45-6a9045a45e62" isExpanded="false" absoluteBounds="0.5, 11.75, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tWorkDate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="3564465e-7624-412e-bf0a-ded00ef185c4" absoluteBounds="0.51500000000000012, 12.21, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9a7daffb-4cdd-43c9-8b71-a062f9603c16" isExpanded="false" absoluteBounds="8, 12.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tExchangeSecurity" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e33c0c88-1419-4a5b-8a53-cba04398a3b7" absoluteBounds="8.015, 12.835, 1.9700000000000002, 2.7493082682291665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c3310a16-2add-4fd9-8cf3-6a3fda74acc6" isExpanded="false" absoluteBounds="8.125, 13.25, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tExchangePrice" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d765cdf7-3373-46ce-b047-2a28493f5d0b" absoluteBounds="8.14, 13.71, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(9.34375 : 12.825); (9.34375 : 13.25)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tExchangeSecurity/tExchangeSecurity_tExchangePrice" />
+      <nodes>
+        <classShapeMoniker Id="9a7daffb-4cdd-43c9-8b71-a062f9603c16" />
+        <classShapeMoniker Id="c3310a16-2add-4fd9-8cf3-6a3fda74acc6" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="d31a764a-ea7f-4df0-873a-ad37a4e66029" isExpanded="false" absoluteBounds="5.625, 13, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinPlanSchema" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f44a1a61-5fc7-451f-b1ee-9adf391219e1" absoluteBounds="5.64, 13.46, 1.9700000000000002, 3.903116861979167" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0a4a20c4-7181-4c9a-9e3c-045ed7fb6e9b" isExpanded="false" absoluteBounds="2.875, 13, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinPlan" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1019a338-8cdc-411c-92f2-502b9054897f" absoluteBounds="2.89, 13.46, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.625 : 13.225); (5.27083333333333 : 13.225 : JumpStart); (5.10416666666667 : 13.225 : JumpEnd); (4.875 : 13.225)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinPlanSchema/tFinPlanSchema_tFinPlan" />
+      <nodes>
+        <classShapeMoniker Id="d31a764a-ea7f-4df0-873a-ad37a4e66029" />
+        <classShapeMoniker Id="0a4a20c4-7181-4c9a-9e3c-045ed7fb6e9b" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="0b761666-038f-4790-a7d2-6c7f006210d7" isExpanded="false" absoluteBounds="2.625, 18, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinDohod" />
+      <nestedChildShapes>
+        <elementListCompartment Id="42aa9389-cea8-4c36-b6c3-4d7f738b2655" absoluteBounds="2.64, 18.46, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="a3d911ae-ea23-4cff-acc7-7b964f12d32d" isExpanded="false" absoluteBounds="5.25, 18, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinDohodSchema" />
+      <nestedChildShapes>
+        <elementListCompartment Id="cbdf0e8a-f187-4fac-9c49-65f0e7ed6cfb" absoluteBounds="5.265, 18.46, 1.9700000000000002, 5.6338297526041661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.25 : 18.225); (4.625 : 18.225)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinDohodSchema/tFinDohodSchema_tFinDohod" />
+      <nodes>
+        <classShapeMoniker Id="a3d911ae-ea23-4cff-acc7-7b964f12d32d" />
+        <classShapeMoniker Id="0b761666-038f-4790-a7d2-6c7f006210d7" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="7e1aabd6-c1e5-4709-97e9-c520e66a2a27" isExpanded="false" absoluteBounds="0.5, 13, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tQUIK_Rate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="590b7b92-1c83-404c-be6b-1956ca25a69d" absoluteBounds="0.515, 13.46, 1.9700000000000002, 5.4415283203125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e4d1de23-db7e-44ab-9fda-dee157b05073" isExpanded="false" absoluteBounds="0.5, 14.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tClass" />
+      <nestedChildShapes>
+        <elementListCompartment Id="0058f609-01bc-49ce-b16e-c3f1c0d8236b" absoluteBounds="0.515, 14.835, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.18419230769231 : 14.825); (1.18419230769231 : 15.075); (1.83084615384615 : 15.075); (1.83084615384615 : 14.825)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tClass/tClass_tClass" />
+      <nodes>
+        <classShapeMoniker Id="e4d1de23-db7e-44ab-9fda-dee157b05073" />
+        <classShapeMoniker Id="e4d1de23-db7e-44ab-9fda-dee157b05073" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="b93b7bce-c745-42a1-b3e8-28d9e9a58a4a" isExpanded="false" absoluteBounds="2.875, 13.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tClassData" />
+      <nestedChildShapes>
+        <elementListCompartment Id="49de15cf-a36d-46c5-85c3-79785c63f7ad" absoluteBounds="2.89, 14.085, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9433a3a0-150a-4e3a-88b5-baa46e95727a" isExpanded="false" absoluteBounds="5.625, 11.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDivident" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1c550f20-dd19-4ea3-a931-92a425ee54a7" absoluteBounds="5.64, 12.085, 1.9700000000000002, 5.249226888020833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="b525948a-8c58-4759-993e-fe42a4bf3373" isExpanded="false" absoluteBounds="0.5, 0.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecurity" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9e267269-48cb-4dbd-8942-7f472d55bc72" absoluteBounds="0.515, 0.96, 1.9700000000000002, 6.7876383463541661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.5 : 0.95); (1.5 : 2.0625); (2.47916666666667 : 2.0625 : JumpStart); (2.64583333333333 : 2.0625 : JumpEnd); (4.921875 : 2.0625); (4.921875 : 7.37031175); (4.94791666666667 : 7.37031175 : JumpStart); (5.11458333333333 : 7.37031175 : JumpEnd); (5.125 : 7.37031175)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_sInvestmentDeclarationSecurity" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.5 : 0.725); (5.4375 : 0.725); (5.4375 : 1.0125); (9.3125 : 1.0125); (9.3125 : 8.03125); (8.375 : 8.03125); (8.375 : 8.125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tSecuritySecurityGroup" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="fb01d8fe-692d-422b-9056-9c6b69a18425" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="f5499eb8-97c2-4321-87cb-36363966cab1" isExpanded="false" absoluteBounds="2.75, 2.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tAccountBalance" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d0b41f87-bf86-4993-abe1-1272a87cca6c" absoluteBounds="2.765, 3.335, 1.9700000000000002, 5.0569254557291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.6875 : 2.575); (3.6875 : 2.875)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tAccount/tAccount_tAccountBalance" />
+      <nodes>
+        <classShapeMoniker Id="014012cc-bdaa-4b1d-bab4-360a80df8b6c" />
+        <classShapeMoniker Id="f5499eb8-97c2-4321-87cb-36363966cab1" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="39134c4c-5766-488e-95b9-0c7096378ad0" isExpanded="false" absoluteBounds="2.875, 3.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDeal" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e17e16a1-f9e6-4cd8-b6df-3d88a80bdffd" absoluteBounds="2.89, 4.085, 1.9700000000000002, 9.2875569661458321" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.031252 : 0.95); (2.031252 : 2); (2.5625 : 2); (2.5625 : 3.5625); (2.6875 : 3.5625); (2.6875 : 3.85); (2.875 : 3.85)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tDeal" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="39134c4c-5766-488e-95b9-0c7096378ad0" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(0.968748 : 0.95); (0.968748 : 1.9375); (1.41666666666667 : 1.9375 : JumpStart); (1.58333333333333 : 1.9375 : JumpEnd); (2.5625 : 1.9375); (2.5625 : 3.5); (2.71875 : 3.5); (2.71875 : 3.706248); (2.875 : 3.706248)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tDeal1" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="39134c4c-5766-488e-95b9-0c7096378ad0" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="22a967e7-c05a-4283-b061-725d2b45f604" isExpanded="false" absoluteBounds="2.875, 4.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecurityRate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5cb171c7-cebe-4cbb-a12b-3499dc97d0ca" absoluteBounds="2.89, 4.835, 1.9700000000000002, 4.2877197265625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.296878 : 0.95); (2.296878 : 1.875); (2.5625 : 1.875); (2.5625 : 3.4375); (2.65625 : 3.4375); (2.65625 : 4.6); (2.875 : 4.6)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tSecurityRate" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="22a967e7-c05a-4283-b061-725d2b45f604" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="a0de3d30-1c74-483a-acd0-8d3a2b051c0f" isExpanded="false" absoluteBounds="0.5, 2.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/taLib" />
+      <nestedChildShapes>
+        <elementListCompartment Id="15a7924c-1e76-49dc-998f-fabc34264efa" absoluteBounds="0.515, 2.585, 1.9700000000000002, 4.2877197265625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="730c877f-ae33-44dd-8caa-8bb16a8fd186" isExpanded="false" absoluteBounds="5.625, 14.25, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pCBDividend" />
+      <nestedChildShapes>
+        <elementListCompartment Id="36b07235-f1a0-4da7-85f6-a00c9dd3f97c" absoluteBounds="5.6400000000000006, 14.71, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4b9f91f2-23b5-49da-b578-404002383914" isExpanded="false" absoluteBounds="0.5, 18.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnvoiHoraireType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5ff97e15-4c36-4d55-8f3a-b0e5addfbabe" absoluteBounds="0.515, 18.585, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="17994118-2d7b-49c0-9ec5-f0b91bcd1c64" isExpanded="false" absoluteBounds="1.5, 10.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinActive" />
+      <nestedChildShapes>
+        <elementListCompartment Id="44650bfe-079f-4d0c-b121-c82985c640aa" absoluteBounds="1.5150000000000001, 11.085, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="30d9a901-d81c-43ca-9717-66b378cbe7ae" isExpanded="false" absoluteBounds="5.625, 15.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinSale" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4c90ebeb-2c35-4cfd-b61a-d8b76edf26f0" absoluteBounds="5.64, 15.585, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="20b92d32-64b9-4c8a-8afb-9efab06e0c74" isExpanded="false" absoluteBounds="5.75, 16, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinProfit" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7c4f34df-cf63-4750-bea4-7d716caa3e58" absoluteBounds="5.765, 16.46, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="32d63281-0718-47a6-838c-5631c94aef61" isExpanded="false" absoluteBounds="3.125, 19.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tConseilHoraire" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7e16453b-5531-4077-b9be-ba77c5f1c85d" absoluteBounds="3.14, 19.585, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.5 : 18.575); (3.125 : 19.125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnvoiHoraireType/tEnvoiHoraireType_tConseilHoraire" />
+      <nodes>
+        <classShapeMoniker Id="4b9f91f2-23b5-49da-b578-404002383914" />
+        <classShapeMoniker Id="32d63281-0718-47a6-838c-5631c94aef61" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="30d7e02c-20ef-438e-8d88-ace1650acda6" isExpanded="false" absoluteBounds="5.625, 23.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tAccountPortfolio" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9b220d51-0dd2-413c-87a4-b299ea4a957e" absoluteBounds="5.64, 24.085, 1.9700000000000002, 2.7493082682291665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" isExpanded="false" absoluteBounds="3.5, 23.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tUser" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b0aea546-ee48-4ad8-814c-855e59b77d94" absoluteBounds="3.515, 23.96, 1.9700000000000002, 3.1339111328125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(4.765626 : 23.5); (4.765626 : 19.6375); (5.1875 : 19.6375); (5.1875 : 8.6375); (5.09375 : 8.6375); (5.09375 : 6.475); (5.02295333333333 : 6.475 : JumpStart); (4.83854166666667 : 6.475 : JumpEnd); (4.75 : 6.475)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_sInvestmentDeclaration" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(4.367187 : 23.5); (4.367187 : 19.7); (5.1875 : 19.7); (5.1875 : 8.7); (5.16145833333333 : 8.7 : JumpStart); (4.99479166666667 : 8.7 : JumpEnd); (4.96875 : 8.7); (4.96875 : 6.618752); (4.75 : 6.618752)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_sInvestmentDeclaration1" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(3.703122 : 23.5); (3.703122 : 19.7625); (4.68229266666667 : 19.7625 : JumpStart); (4.84895933333333 : 19.7625 : JumpEnd); (5.1875 : 19.7625); (5.1875 : 8.7625); (5 : 8.7625); (5 : 7.4624995); (4.875 : 7.4624995)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_sInvestmentDeclarationWhere" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="4416c168-11a1-4b5e-8075-6a81d9d7052f" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.0078155 : 23.5); (5.0078155 : 19.825); (5.1875 : 19.825); (5.1875 : 8.825); (5.078125 : 8.825); (5.078125 : 7.278124); (5.05208333333333 : 7.278124 : JumpStart); (4.88541666666667 : 7.278124 : JumpEnd); (4.875 : 7.278124)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_sInvestmentDeclarationWhere1" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="4416c168-11a1-4b5e-8075-6a81d9d7052f" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.3437495 : 23.5); (5.3437495 : 19.8875); (5.1875 : 19.8875); (5.1875 : 8.8875); (5.03125 : 8.8875); (5.03125 : 3.85); (4.875 : 3.85)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_tDeal" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="39134c4c-5766-488e-95b9-0c7096378ad0" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="758cd988-1eeb-4365-9011-ce300a161714" absoluteBounds="8.125, 22, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tKladrKLADR" />
+      <nestedChildShapes>
+        <elementListCompartment Id="0bad969d-7e68-430f-81bb-3d208be77381" absoluteBounds="8.14, 22.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e6844750-aeb6-46b6-a757-47195d40c670" absoluteBounds="3.5, 27.5, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRiskMapHoraire" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7f026187-a67a-445d-8bea-32fab5252ac3" absoluteBounds="3.515, 27.96, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(0.60125 : 18.575); (0.60125 : 28.7331133455404); (2.97916666666667 : 28.7331133455404 : JumpStart); (3.14583333333333 : 28.7331133455404 : JumpEnd); (3.5 : 28.7331133455404)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnvoiHoraireType/tEnvoiHoraireType_tRiskMapHoraire" />
+      <nodes>
+        <classShapeMoniker Id="4b9f91f2-23b5-49da-b578-404002383914" />
+        <classShapeMoniker Id="e6844750-aeb6-46b6-a757-47195d40c670" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="7ae21e73-3ab4-417c-b652-2c6a521c7a59" isExpanded="false" absoluteBounds="8.125, 15.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tExchangeCFI" />
+      <nestedChildShapes>
+        <elementListCompartment Id="fbe8076f-2a4b-4c3f-bd28-d596bc1e1d83" absoluteBounds="8.14, 16.335, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="4ba38c1a-19e4-45e1-9d84-5102bca2357e" absoluteBounds="8.25, 24.75, 2, 1.9631982421875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinActProfit" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6ab042fa-ddea-480a-8d62-29b59cfc5fd8" absoluteBounds="8.265, 25.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e5f322f4-ca6a-49a9-9ccb-0f8bcc4129ef" absoluteBounds="8.25, 27.25, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinInOutCome" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1cd53b7c-c801-4152-847e-91a91aa932f7" absoluteBounds="8.265, 27.71, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0ce025db-c9a0-462a-82f8-8312683ba052" absoluteBounds="8.375, 30, 2, 1.9631982421875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPIFerResource" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8a91dee4-c6d6-414c-855e-4816c677a01f" absoluteBounds="8.39, 30.46, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="368217f5-4365-4689-a37e-69e29120a7d3" absoluteBounds="6, 27.375, 2, 1.5785953776041666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinInstAttr" />
+      <nestedChildShapes>
+        <elementListCompartment Id="7bd84e6a-9dc1-45ad-9b62-3a4b11192f5e" absoluteBounds="6.015, 27.835, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="6c590ac4-c2fe-496a-b29a-be3d2881f0e5" absoluteBounds="3.75, 29.75, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinPart" />
+      <nestedChildShapes>
+        <elementListCompartment Id="0e9b847a-ab62-48c9-b654-de4455321f1c" absoluteBounds="3.765, 30.21, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="42aaa316-532a-4be2-a20b-3349bf2466fb" absoluteBounds="0.75, 29.625, 2, 2.7324039713541666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDictionariesConnection" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a2dc944e-6924-459b-a7da-5ed466ae7fed" absoluteBounds="0.765, 30.085, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="3e87e831-481d-4a39-9c75-fa5f66c778da" isExpanded="false" absoluteBounds="8, 9.75, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclarationLink" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c403dd72-a53a-44df-9f4f-a890754a7c7e" absoluteBounds="8.015, 10.21, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.75 : 6.7); (3.75 : 7.0625); (4.90625 : 7.0625); (4.90625 : 9.8125); (5.10416666666667 : 9.8125 : JumpStart); (5.27083333333333 : 9.8125 : JumpEnd); (7.90625 : 9.8125); (7.90625 : 9.975); (8 : 9.975)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/sInvestmentDeclaration/sInvestmentDeclaration_sInvestmentDeclarationLink" />
+      <nodes>
+        <classShapeMoniker Id="d16430b0-1ab4-4e04-a082-2bca27cfc239" />
+        <classShapeMoniker Id="3e87e831-481d-4a39-9c75-fa5f66c778da" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="5af2887d-2abd-491f-9a3b-0a001eaeaafc" absoluteBounds="0.875, 32.75, 2, 4.0785139973958326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tInvDeclErrorJournal" />
+      <nestedChildShapes>
+        <elementListCompartment Id="255e8048-2de1-433c-9fa2-d30fcf77d51d" absoluteBounds="0.89, 33.21, 1.9700000000000002, 3.518513997395833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="aafa841b-baaa-44a8-811c-8e1706e06ddf" absoluteBounds="5.875, 32.5, 2, 1.3862939453125">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pPifSecDate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="3b45dc96-a090-41e4-b89f-aac6ecbf7705" absoluteBounds="5.8900000000000006, 32.96, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="501deb3b-21f3-454f-ad23-e42034e6bd14" absoluteBounds="6.25, 29.75, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPIFerRest" />
+      <nestedChildShapes>
+        <elementListCompartment Id="371bc2e9-41eb-48fd-927f-35fa40861718" absoluteBounds="6.265, 30.21, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="74e734c9-1d55-462a-83aa-d31795c6a7c8" absoluteBounds="8.625, 32.5, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPIFerTurn" />
+      <nestedChildShapes>
+        <elementListCompartment Id="76a149ba-891e-4751-bdc6-731b312a6584" absoluteBounds="8.64, 32.96, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="52dfec0f-743d-4b9d-9dc1-a9cf9a91ed61" absoluteBounds="6, 34.25, 2, 1.3862939453125">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tInstContact" />
+      <nestedChildShapes>
+        <elementListCompartment Id="0ec41421-a043-4602-84ab-68ad9265a813" absoluteBounds="6.015, 34.71, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0b5a12f9-a632-495f-93e9-184cc50258e4" absoluteBounds="6.375, 36.375, 2, 2.7324039713541666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEDisc" />
+      <nestedChildShapes>
+        <elementListCompartment Id="80720af4-7950-45fc-9a17-4d797a9fe217" absoluteBounds="6.39, 36.835, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="64b5f579-eaf3-4860-be93-1a28a3351c27" isExpanded="false" absoluteBounds="1.125, 37.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tWarrant" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5847d45e-2dcb-45a5-9f93-52dff4c316a2" absoluteBounds="1.1400000000000001, 37.835, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8e46de07-73c8-4954-ad08-29836e0db0da" isExpanded="false" absoluteBounds="8.125, 10.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tLog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d2de7197-89a1-4ab1-a9f6-29a2fb788e29" absoluteBounds="8.14, 10.96, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="84461d00-ec5d-4415-b502-a90038e05c05" absoluteBounds="3.375, 32.125, 2, 5.2323225911458326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRiskEvent" />
+      <nestedChildShapes>
+        <elementListCompartment Id="836ea581-0fea-4bfe-aa43-07fdf4e2fd22" absoluteBounds="3.39, 32.585, 1.9700000000000002, 4.672322591145833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e10dd4ec-ae8d-421f-b48e-e8e996a6a4f7" isExpanded="false" absoluteBounds="0.875, 24.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRiskMap" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5e6648f5-7a68-46e5-bb4e-a2fce6abd52c" absoluteBounds="0.89, 25.335, 1.9700000000000002, 3.7108154296875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.875 : 25.325); (1.875 : 28.1328248811849); (2.97916666666667 : 28.1328248811849 : JumpStart); (3.14583333333333 : 28.1328248811849 : JumpEnd); (3.5 : 28.1328248811849)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tRiskMap/tRiskMap_tRiskMapHoraire" />
+      <nodes>
+        <classShapeMoniker Id="e10dd4ec-ae8d-421f-b48e-e8e996a6a4f7" />
+        <classShapeMoniker Id="e6844750-aeb6-46b6-a757-47195d40c670" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="b30c3f8d-4760-43ae-8c26-c0aa0dde946d" isExpanded="false" absoluteBounds="0.625, 16.25, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnvoiHoraire" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5d5175bc-8f6c-4734-9127-e1ae4cc3fac8" absoluteBounds="0.64, 16.71, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.6562525 : 18.125); (1.6562525 : 16.7)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnvoiHoraireType/tEnvoiHoraireType_tEnvoiHoraire" />
+      <nodes>
+        <classShapeMoniker Id="4b9f91f2-23b5-49da-b578-404002383914" />
+        <classShapeMoniker Id="b30c3f8d-4760-43ae-8c26-c0aa0dde946d" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="aaa900d2-b5a0-44ee-9ee2-9bdd360db17a" absoluteBounds="4, 50.5, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSecKind" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6edd67c5-0cfe-4bb4-b2ee-ab2150cd5afb" absoluteBounds="4.015, 50.96, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="026661ef-691f-4422-9305-3b552491591a" absoluteBounds="4.125, 53, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEntAttrValue" />
+      <nestedChildShapes>
+        <elementListCompartment Id="22e626e0-33b8-46d9-a3e4-c1ffa26b15ff" absoluteBounds="4.14, 53.46, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="f4d63fb8-3acd-43d3-9760-c9cc58579798" absoluteBounds="6.875, 50.5, 2, 2.9247054036458331">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/taNab" />
+      <nestedChildShapes>
+        <elementListCompartment Id="135e7666-2267-43d3-b762-fdf303cc1935" absoluteBounds="6.89, 50.96, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c155f95c-f07a-4a8b-a7e1-cff3c4654fb3" isExpanded="false" absoluteBounds="3.125, 11.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tCharge" />
+      <nestedChildShapes>
+        <elementListCompartment Id="d019b58d-ecf3-46ec-9069-f1124e3b8a7c" absoluteBounds="3.14, 11.96, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="6bc9d25c-b44f-4d0c-9c1a-57f1d8b374c1" absoluteBounds="7.125, 54, 2.25, 4.6554182942708326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tAccountBalanceTurn" />
+      <nestedChildShapes>
+        <elementListCompartment Id="be667c51-eb81-4775-ab81-6f240b44772d" absoluteBounds="7.14, 54.46, 2.2199999999999998, 4.095418294270833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="b4c2896d-c683-4392-a32f-b25b55bb5a60" isExpanded="false" absoluteBounds="1.375, 50.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDiv" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1e5736d5-9acc-4014-aad5-8ccd51d0ce8b" absoluteBounds="1.3900000000000001, 51.085, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.765626 : 0.95); (1.765626 : 1.8125); (1.94791866666667 : 1.8125 : JumpStart); (2.11458533333333 : 1.8125 : JumpEnd); (2.5625 : 1.8125); (2.5625 : 3.59375); (2.6875 : 3.59375); (2.6875 : 8.5625); (3.9375 : 8.5625); (3.9375 : 11.4375); (2.8125 : 11.4375); (2.8125 : 17.9375); (2.5625 : 17.9375); (2.5625 : 18.9375); (2.82859848484848 : 18.9375 : JumpStart); (2.99526515151515 : 18.9375 : JumpEnd); (3.0625 : 18.9375); (3.0625 : 37.3125); (3.2975 : 37.3125); (3.2975 : 50.5625); (3.4375 : 50.5625); (3.4375 : 50.85); (3.375 : 50.85)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tDiv" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="b4c2896d-c683-4392-a32f-b25b55bb5a60" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(1.234374 : 0.95); (1.234374 : 1.75); (1.41666666666667 : 1.75 : JumpStart); (1.58333333333333 : 1.75 : JumpEnd); (1.94791866666667 : 1.75 : JumpStart); (2.11458533333333 : 1.75 : JumpEnd); (2.21354466666667 : 1.75 : JumpStart); (2.38021133333333 : 1.75 : JumpEnd); (2.5625 : 1.75); (2.5625 : 3.53125); (2.6875 : 3.53125); (2.6875 : 8.5); (3.19791666666667 : 8.5 : JumpStart); (3.36458333333333 : 8.5 : JumpEnd); (3.9375 : 8.5); (3.9375 : 11.375); (2.8125 : 11.375); (2.8125 : 17.875); (2.5625 : 17.875); (2.5625 : 18.875); (2.75757575757576 : 18.875 : JumpStart); (2.92424242424242 : 18.875 : JumpEnd); (3.0625 : 18.875); (3.0625 : 37.3125); (3.2975 : 37.3125); (3.2975 : 50.5625); (3.5 : 50.5625); (3.5 : 50.706248); (3.375 : 50.706248)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tDiv1" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="b4c2896d-c683-4392-a32f-b25b55bb5a60" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="4567c729-9851-4b11-804f-49130e332c09" isExpanded="false" absoluteBounds="0.875, 21, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPortfolioUser" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e1b5493f-8ad7-45cd-979e-86f4616d193b" absoluteBounds="0.89, 21.46, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.625 : 4.075); (1.625 : 4.5625); (0.4375 : 4.5625); (0.4375 : 21.225); (0.517916666666667 : 21.225 : JumpStart); (0.684583333333333 : 21.225 : JumpEnd); (0.875 : 21.225)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tPortfolio/tPortfolio_tPortfolioUser" />
+      <nodes>
+        <classShapeMoniker Id="4f7347a1-a069-4234-8c6e-5337a0ea6b8d" />
+        <classShapeMoniker Id="4567c729-9851-4b11-804f-49130e332c09" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(3.968748 : 23.5); (3.968748 : 21.225); (3.78645533333333 : 21.225 : JumpStart); (3.61978866666667 : 21.225 : JumpEnd); (3.14583333333333 : 21.225 : JumpStart); (2.97916666666667 : 21.225 : JumpEnd); (2.875 : 21.225)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tUser/tUser_tPortfolioUser" />
+      <nodes>
+        <classShapeMoniker Id="4739d4de-7e8b-4c8c-bafd-ded7a46ddf12" />
+        <classShapeMoniker Id="4567c729-9851-4b11-804f-49130e332c09" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="30accac5-cbab-46d1-bc2c-29a53f82a504" isExpanded="false" absoluteBounds="1, 19, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tConseil" />
+      <nestedChildShapes>
+        <elementListCompartment Id="15dc0e3f-dce4-4a8e-a737-e318f61a3573" absoluteBounds="1.0150000000000001, 19.46, 1.9700000000000002, 3.3262125651041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3 : 19.3187525); (3.125 : 19.3187525)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tConseil/tConseil_tConseilHoraire" />
+      <nodes>
+        <classShapeMoniker Id="30accac5-cbab-46d1-bc2c-29a53f82a504" />
+        <classShapeMoniker Id="32d63281-0718-47a6-838c-5631c94aef61" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="8df6c854-24ff-44ed-a421-d4ead45ec1bc" absoluteBounds="1.5, 52, 2, 1.9631982421875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tDivRel" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5af3d18a-0eb0-4744-ad1a-66a3abd81540" absoluteBounds="1.5150000000000001, 52.46, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.4375 : 51.075); (2.4375 : 52)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tDiv/tDiv_tDivRel" />
+      <nodes>
+        <classShapeMoniker Id="b4c2896d-c683-4392-a32f-b25b55bb5a60" />
+        <classShapeMoniker Id="8df6c854-24ff-44ed-a421-d4ead45ec1bc" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="980e078c-bfa5-4d28-bf94-23267614b676" absoluteBounds="1.25, 38.5, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tOrdPaymentLog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e09d2733-dd84-4cdc-8c67-5ca3ab72e077" absoluteBounds="1.2650000000000001, 38.96, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="dca0fc8b-4ec0-4ecc-a8cc-ae5a59ab8158" isExpanded="false" absoluteBounds="0.75, 15.125, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnvoi" />
+      <nestedChildShapes>
+        <elementListCompartment Id="0ed3ddda-b63b-43c7-8682-321a79f169c0" absoluteBounds="0.765, 15.585, 1.9700000000000002, 3.518513997395833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(1.6875 : 15.575); (1.6875 : 16.25)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnvoi/tEnvoi_tEnvoiHoraire" />
+      <nodes>
+        <classShapeMoniker Id="dca0fc8b-4ec0-4ecc-a8cc-ae5a59ab8158" />
+        <classShapeMoniker Id="b30c3f8d-4760-43ae-8c26-c0aa0dde946d" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="16d1d5d7-9a53-40cd-a933-551281374532" isExpanded="false" absoluteBounds="3.125, 14.5, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnvoiExec" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f8c57fe8-ca47-46b2-8ad0-594fdea07c3e" absoluteBounds="3.14, 14.96, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.75 : 15.125); (3.125 : 14.95)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnvoi/tEnvoi_tEnvoiExec" />
+      <nodes>
+        <classShapeMoniker Id="dca0fc8b-4ec0-4ecc-a8cc-ae5a59ab8158" />
+        <classShapeMoniker Id="16d1d5d7-9a53-40cd-a933-551281374532" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="4318b33e-f89d-4c14-8d0b-bf04327cf753" absoluteBounds="6.625, 48.5, 2, 1.9631982421875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tCountry" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9258ded8-06ec-45cf-9753-327cae4c7dfa" absoluteBounds="6.64, 48.96, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="15ff43b1-7deb-48a3-bf68-12e34efe4618" absoluteBounds="1.25, 47.375, 2, 3.6939111328124996">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tContragent" />
+      <nestedChildShapes>
+        <elementListCompartment Id="bc462e3e-a531-4839-8e03-6c56673af776" absoluteBounds="1.2650000000000001, 47.835, 1.9700000000000002, 3.1339111328125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9bc0496b-2578-4059-aee0-e84032139b18" absoluteBounds="3.875, 47, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tContragentDog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c67e6a96-6451-429a-b073-8d0e482b9968" absoluteBounds="3.89, 47.46, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.25 : 48.2652498372396); (3.63541666666667 : 48.2652498372396 : JumpStart); (3.80208333333333 : 48.2652498372396 : JumpEnd); (3.875 : 48.2652498372396)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tContragent/tContragent_tContragentDog" />
+      <nodes>
+        <classShapeMoniker Id="15ff43b1-7deb-48a3-bf68-12e34efe4618" />
+        <classShapeMoniker Id="9bc0496b-2578-4059-aee0-e84032139b18" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="a537a32d-5689-4fae-b526-eb10a42f7c0f" isExpanded="false" absoluteBounds="5.625, 18.75, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnregistrementDet" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6d8e5561-bb43-4a74-a42b-c5b269b42d3f" absoluteBounds="5.64, 19.21, 1.9700000000000002, 3.1339111328125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="1c5dfbf6-c22a-4e7c-9e93-6d8d5d582915" isExpanded="false" absoluteBounds="8, 18.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnregistrementDetLog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="712c3c30-3df7-4e04-b072-7221a57d8e83" absoluteBounds="8.015, 19.335, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(7.625 : 19.0375); (8 : 19.0375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnregistrementDet/tEnregistrementDet_tEnregistrementDetLog" />
+      <nodes>
+        <classShapeMoniker Id="a537a32d-5689-4fae-b526-eb10a42f7c0f" />
+        <classShapeMoniker Id="1c5dfbf6-c22a-4e7c-9e93-6d8d5d582915" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="47a7d49d-18cc-43c0-b335-c01810f04d49" absoluteBounds="11, 35.375, 2, 5.8092268880208326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pOrdersTree" />
+      <nestedChildShapes>
+        <elementListCompartment Id="69f410da-040a-4050-95f3-d7f813862955" absoluteBounds="11.015, 35.835, 1.9700000000000002, 5.249226888020833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e2acc183-b04d-43a9-aa32-19f67a495d70" isExpanded="false" absoluteBounds="6.625, 8.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/taEuroClear" />
+      <nestedChildShapes>
+        <elementListCompartment Id="65afa593-a673-4315-869b-0a84cddc5bb9" absoluteBounds="6.64, 9.335, 1.9700000000000002, 5.0569254557291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="243adede-fe77-4ef4-a075-659dbd07db14" absoluteBounds="8.875, 41, 2, 3.8862125651041666">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tOrdPaymentConf" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a2ebc703-cfa4-4daa-b061-694208437aa3" absoluteBounds="8.89, 41.46, 1.9700000000000002, 3.3262125651041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8ec1030d-b98f-4120-a3e7-73b52f9e6644" isExpanded="false" absoluteBounds="6.125, 2.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinancialInstitutionGroupFinancialInstitution" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4c5b7741-1b2c-4677-a933-413dfd90117a" absoluteBounds="6.14, 2.835, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="7c6eff00-d861-4b90-b030-71cd7ae15f63" isExpanded="false" absoluteBounds="5.625, 10.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tCharges2" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b6eb0d9e-28b1-4eb7-b7f9-17e51224a04d" absoluteBounds="5.64, 11.085, 1.9700000000000002, 3.3262125651041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="10b2c447-e5de-41ef-8086-6329bf7b1c16" isExpanded="false" absoluteBounds="4.375, 56, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tClientAct" />
+      <nestedChildShapes>
+        <elementListCompartment Id="359f04e6-148f-4dbe-972b-3e6620712d16" absoluteBounds="4.39, 56.46, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="b2faaa2c-d2d8-4689-9ecc-422887aa0f24" isExpanded="false" absoluteBounds="1.375, 56, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tClient" />
+      <nestedChildShapes>
+        <elementListCompartment Id="064d5a25-2344-4aca-aa31-72e4dcf4f87d" absoluteBounds="1.3900000000000001, 56.46, 1.9700000000000002, 3.903116861979167" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.375 : 56.225); (4.375 : 56.225)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tClient/tClient_tClientAct" />
+      <nodes>
+        <classShapeMoniker Id="b2faaa2c-d2d8-4689-9ecc-422887aa0f24" />
+        <classShapeMoniker Id="10b2c447-e5de-41ef-8086-6329bf7b1c16" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="1ce2fc97-ab00-4cd6-bbd7-80de25d4a72f" absoluteBounds="1.5, 57, 2, 3.6939111328124996">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tTreatyValue" />
+      <nestedChildShapes>
+        <elementListCompartment Id="948575e8-45f6-480d-989f-c33f4184ab5a" absoluteBounds="1.5150000000000001, 57.46, 1.9700000000000002, 3.1339111328125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="3cc9e52d-9ece-405c-9c1c-565b90bd11f5" absoluteBounds="1.125, 41.375, 2, 5.6169254557291657">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tLeave" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a07b2f0a-8413-41f3-820e-ff5be195c7a5" absoluteBounds="1.1400000000000001, 41.835, 1.9700000000000002, 5.0569254557291661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0c84dc34-f816-432b-947d-7bd489cd878e" absoluteBounds="6.5, 39.5, 2, 3.5016097005208326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tOrdPaymentDet" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6d0ce8be-8a6d-47cd-92e8-723f1d9dc05d" absoluteBounds="6.515, 39.96, 1.9700000000000002, 2.941609700520833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9de15097-fc4b-4cf8-9498-185aba916420" absoluteBounds="4.5, 57.125, 2, 11.578269856770833">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tSurvey" />
+      <nestedChildShapes>
+        <elementListCompartment Id="36d879f1-1227-4320-aab6-b7ee16c23c5a" absoluteBounds="4.515, 57.585, 1.9700000000000002, 11.018269856770832" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="18230399-f628-48d4-975c-97778b0b029e" isExpanded="false" absoluteBounds="3.25, 1, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tTreaty" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c88d8a66-9ff9-42b1-83e8-00d3b04bd095" absoluteBounds="3.265, 1.46, 1.9700000000000002, 4.4800211588541661" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.25 : 1.1999975); (9.22916666666667 : 1.1999975 : JumpStart); (9.39583333333333 : 1.1999975 : JumpEnd); (9.71875 : 1.1999975); (9.71875 : 9.75)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tTreaty/tTreaty_sInvestmentDeclarationLink" />
+      <nodes>
+        <classShapeMoniker Id="18230399-f628-48d4-975c-97778b0b029e" />
+        <classShapeMoniker Id="3e87e831-481d-4a39-9c75-fa5f66c778da" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.5 : 0.95); (3.25 : 1)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tSecurity/tSecurity_tTreaty" />
+      <nodes>
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+        <classShapeMoniker Id="18230399-f628-48d4-975c-97778b0b029e" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="c61a8bea-7d98-4494-a6df-1ea9f15ddd3c" absoluteBounds="7.25, 59.125, 2, 4.2708154296875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pEdo" />
+      <nestedChildShapes>
+        <elementListCompartment Id="85303650-e430-4297-8040-315f661d8aaa" absoluteBounds="7.265, 59.585, 1.9700000000000002, 3.7108154296875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" isExpanded="false" absoluteBounds="5.5, 2, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution" />
+      <nestedChildShapes>
+        <elementListCompartment Id="54542636-9fa6-4823-8af5-0f76d8fb68ad" absoluteBounds="5.515, 2.46, 1.9700000000000002, 5.826131184895833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.5 : 2.256252); (4.93962 : 2.256252); (4.93962 : 7.37031175); (4.94791666666667 : 7.37031175 : JumpStart); (5.11458333333333 : 7.37031175 : JumpEnd); (5.125 : 7.37031175)]" fixedFrom="Algorithm" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution/tFinancialInstitution_sInvestmentDeclarationSecurity" />
+      <nodes>
+        <classShapeMoniker Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" />
+        <classShapeMoniker Id="31ac6172-42ce-4432-9c4c-35ca8245cf91" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.5 : 2.1281235); (4.75 : 2.1281235); (4.75 : 1.625); (2.38021133333333 : 1.625 : JumpStart); (2.21354466666667 : 1.625 : JumpEnd); (2.11458533333333 : 1.625 : JumpStart); (1.94791866666667 : 1.625 : JumpEnd); (1.84895933333333 : 1.625 : JumpStart); (1.68229266666667 : 1.625 : JumpEnd); (1.58333333333333 : 1.625 : JumpStart); (1.41666666666667 : 1.625 : JumpEnd); (1.31770733333333 : 1.625 : JumpStart); (1.15104066666667 : 1.625 : JumpEnd); (1.05208133333333 : 1.625 : JumpStart); (0.885414666666667 : 1.625 : JumpEnd); (0.703122 : 1.625); (0.703122 : 0.95)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution/tFinancialInstitution_tSecurity" />
+      <nodes>
+        <classShapeMoniker Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" />
+        <classShapeMoniker Id="b525948a-8c58-4759-993e-fe42a4bf3373" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(7.5 : 2.15625); (9.22916666666667 : 2.15625 : JumpStart); (9.39583333333333 : 2.15625 : JumpEnd); (9.5468725 : 2.15625); (9.5468725 : 9.75)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution/tFinancialInstitution_sInvestmentDeclarationLink" />
+      <nodes>
+        <classShapeMoniker Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" />
+        <classShapeMoniker Id="3e87e831-481d-4a39-9c75-fa5f66c778da" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.5 : 2); (5.25 : 1.45)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution/tFinancialInstitution_tTreaty" />
+      <nodes>
+        <classShapeMoniker Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" />
+        <classShapeMoniker Id="18230399-f628-48d4-975c-97778b0b029e" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.5 : 2); (5.25 : 1.45)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tFinancialInstitution/tFinancialInstitution_tTreaty1" />
+      <nodes>
+        <classShapeMoniker Id="7f671fab-717e-41f1-b39f-02e3f6a2c8d4" />
+        <classShapeMoniker Id="18230399-f628-48d4-975c-97778b0b029e" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="ac350fa7-4f89-4a9f-ac74-b0104c4b5e82" absoluteBounds="3.875, 24.5, 2, 2.5401025390625">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pPPZ" />
+      <nestedChildShapes>
+        <elementListCompartment Id="ab5a8eeb-2150-49b9-9b18-80952f7d7ea5" absoluteBounds="3.89, 24.96, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c8ed3150-4a33-4f3c-8b52-83f9e202f5fc" absoluteBounds="3.625, 37.75, 2, 7.1553369140625">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tOrdPayment" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8916ae89-b66f-4eef-b4a9-774b5671f33d" absoluteBounds="3.64, 38.21, 1.9700000000000002, 6.5953369140625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(3.625 : 39.5777498372396); (3.25 : 39.5777498372396)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tOrdPayment/tOrdPayment_tOrdPaymentLog" />
+      <nodes>
+        <classShapeMoniker Id="c8ed3150-4a33-4f3c-8b52-83f9e202f5fc" />
+        <classShapeMoniker Id="980e078c-bfa5-4d28-bf94-23267614b676" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(4.625 : 37.75); (4.625 : 37.6875); (5.6875 : 37.6875); (5.6875 : 43.0625); (8.78125 : 43.0625); (8.78125 : 42.9431062825521); (8.875 : 42.9431062825521)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tOrdPayment/tOrdPayment_tOrdPaymentConf" />
+      <nodes>
+        <classShapeMoniker Id="c8ed3150-4a33-4f3c-8b52-83f9e202f5fc" />
+        <classShapeMoniker Id="243adede-fe77-4ef4-a075-659dbd07db14" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.625 : 41.2508048502604); (6.5 : 41.2508048502604)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tOrdPayment/tOrdPayment_tOrdPaymentDet" />
+      <nodes>
+        <classShapeMoniker Id="c8ed3150-4a33-4f3c-8b52-83f9e202f5fc" />
+        <classShapeMoniker Id="0c84dc34-f816-432b-947d-7bd489cd878e" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(3.25 : 49.8277498372396); (3.71875 : 49.8277498372396); (3.71875 : 44.9053369140625)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tContragent/tContragent_tOrdPayment" />
+      <nodes>
+        <classShapeMoniker Id="15ff43b1-7deb-48a3-bf68-12e34efe4618" />
+        <classShapeMoniker Id="c8ed3150-4a33-4f3c-8b52-83f9e202f5fc" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="e07fa578-6801-4652-a2c8-11411155a4c3" absoluteBounds="9, 35.5, 2, 6.5784326171875">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/pOrder" />
+      <nestedChildShapes>
+        <elementListCompartment Id="ed66fc15-bb13-405c-85ce-18a2d93ffc99" absoluteBounds="9.015, 35.96, 1.9700000000000002, 6.0184326171875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e0c2efa3-584e-4ef9-bbf6-6a30a3bd5f2f" absoluteBounds="1.125, 62.625, 2, 2.5401025390625">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tReqChange" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1a1b6c4b-4eb2-4327-bfd4-ae09b0eb6b13" absoluteBounds="1.1400000000000001, 63.085, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="0921e1a6-b2b7-4519-9665-5624a4da351b" isExpanded="false" absoluteBounds="6.25, 3.875, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tOutgoing" />
+      <nestedChildShapes>
+        <elementListCompartment Id="16240246-7b78-46b1-91a7-e64710e14498" absoluteBounds="6.265, 4.335, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="1f71dc23-08da-4ae6-b2b8-457ce013ad2f" isExpanded="false" absoluteBounds="7, 4.75, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tCouponPeriod" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b5e00e90-9a02-4d39-84ea-c83a723871a4" absoluteBounds="7.015, 5.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="d7245fb5-404a-4523-860b-d249d46d293e" isExpanded="false" absoluteBounds="7, 5.375, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tAmortization" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c0684dd7-6f75-4608-8926-0bb42d197072" absoluteBounds="7.015, 5.835, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="51cf1f2f-c42b-43b4-accd-9c02cff84475" isExpanded="false" absoluteBounds="7.25, 6, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRedemption" />
+      <nestedChildShapes>
+        <elementListCompartment Id="990ec49a-7eea-42c3-9b5c-8806bdf038e8" absoluteBounds="7.265, 6.46, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8a2b9629-ab1a-4cf5-b011-a3455d276e25" isExpanded="false" absoluteBounds="6.25, 19.625, 2, 0.45">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tEnregistrement" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9f7948a3-5953-4ff0-858b-7d147e5637b3" absoluteBounds="6.265, 20.085, 1.9700000000000002, 4.8646240234375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(6.9375 : 19.625); (6.9375 : 19.2)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnregistrement/tEnregistrement_tEnregistrementDet" />
+      <nodes>
+        <classShapeMoniker Id="8a2b9629-ab1a-4cf5-b011-a3455d276e25" />
+        <classShapeMoniker Id="a537a32d-5689-4fae-b526-eb10a42f7c0f" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(8.125 : 19.625); (8.125 : 19.325)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tEnregistrement/tEnregistrement_tEnregistrementDetLog" />
+      <nodes>
+        <classShapeMoniker Id="8a2b9629-ab1a-4cf5-b011-a3455d276e25" />
+        <classShapeMoniker Id="1c5dfbf6-c22a-4e7c-9e93-6d8d5d582915" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="3ca60483-2cef-46bb-a0df-d09440a85a33" absoluteBounds="10.125, 5, 2, 1.1939925130208333">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tPortfolioType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5e9caf25-a793-4ebf-adb8-9461fc01dfab" absoluteBounds="10.14, 5.46, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(10.125 : 5.9125); (9.80208333333333 : 5.9125 : JumpStart); (9.63541666666667 : 5.9125 : JumpEnd); (9.63020583333333 : 5.9125 : JumpStart); (9.46353916666667 : 5.9125 : JumpEnd); (9.39583333333333 : 5.9125 : JumpStart); (9.22916666666667 : 5.9125 : JumpEnd); (5.13232833333333 : 5.9125 : JumpStart); (4.83854166666667 : 5.9125 : JumpEnd); (2.77083333333333 : 5.9125 : JumpStart); (2.60416666666667 : 5.9125 : JumpEnd); (2.59375 : 5.9125); (2.59375 : 4.075)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/MiddleOfficeDataContext/tPortfolioType/tPortfolioType_tPortfolio" />
+      <nodes>
+        <classShapeMoniker Id="3ca60483-2cef-46bb-a0df-d09440a85a33" />
+        <classShapeMoniker Id="4f7347a1-a069-4234-8c6e-5337a0ea6b8d" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="9c261bdb-a3c0-44b5-a11f-ad5185fc8298" absoluteBounds="6.625, 43.125, 2, 5.2323225911458326">
+      <DataClassMoniker Name="/MiddleOfficeDataContext/tRegDoc" />
+      <nestedChildShapes>
+        <elementListCompartment Id="2c61fca5-d0a5-4e33-8030-227352062d6f" absoluteBounds="6.64, 43.585, 1.9700000000000002, 4.672322591145833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

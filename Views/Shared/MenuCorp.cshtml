@@ -1,0 +1,12 @@
+﻿{ text: 'Переход', xtype: 'button', menu: { items: [
+{ text: 'Корпоративные события', handler: function () { window.location = '@Url.Action("Index", "CorpEvents", new { area = "code" })'} }, 
+{ text: 'Журнал дивидендов', handler: function () { window.location = '@Url.Action("Index", "div", new { area = "code" })'} }, 
+{ text: 'Распоряжение на оплату', handler: function () { window.location = '@Url.Action("OrderPayment", "Report", new { area = "" })'} },
+{ text: 'Журнал предоставления отчетности', handler: function () { window.location = '@Url.Action("dep", "envoi", new { area = "code" })'} },
+{ text: 'Загрузка ЦБ из Euroclear', handler: function () { window.location = '@Url.Action("index", "euroclear", new { area = "code" })'} }
+@if (User.IsInRole("regdocv") || User.IsInRole("regdoc"))
+{
+  <text>,
+{ text: 'Журнал исполнения поручений', handler: function () { window.location = '@Url.Action("index", "regdoc", new { area = "code" })' } }</text>
+}
+]} }

@@ -1,0 +1,1039 @@
+﻿@{
+  ViewBag.Title = "Журнал исполнения поручений";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .gray-row .x-grid-cell, .gray-row .x-grid-cell a {
+      color: gray;
+    }
+    .green-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: green;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      /*border: 1px solid #fff;*/
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link href="~/Scripts/ExtJS41/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+  <link href="~/Scripts/ExtJS41/ux/grid/css/GridFilters.css" rel="stylesheet" type="text/css" />
+  <script src="~/Scripts/ExtJS41/bootstrap.js" type="text/javascript"></script>
+  <script src="~/Scripts/ExtJS41/ext-lang-ru.js" type="text/javascript"></script>
+  @*  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/4.2.1/bootstrap.js"></script>
+  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/4.2.1/packages/ext-locale/build/ext-locale-ru.js"></script>*@
+  <script src="~/Scripts/ExtJS41/ux/Exporter.js" type="text/javascript"></script>
+  <script type="text/javascript">
+
+    Ext.Loader.setPath('Ext.ux', '@Href("~/Scripts/ExtJS41/ux")');
+    Ext.require([
+      'Ext.ux.grid.FiltersFeature'
+    ]);
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = field.ownerCt.getComponent(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = field.ownerCt.getComponent(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+
+    Ext.util.Format.renderFileI = function (value) {
+      if (!value) return '';
+      return Ext.String.format('<a href="@Url.Action("GetFileI")?data={1}" target="_blank">{0}</a>', value, encodeURIComponent(value));
+    };
+
+    Ext.util.Format.renderFileO = function (value) {
+      if (!value) return '';
+      return Ext.String.format('<a href="@Url.Action("GetFileO")?data={1}" target="_blank">{0}</a>', value, encodeURIComponent(value));
+    };
+
+    Ext.util.Format.renderLotusLinkI = function (value) {
+      if (!value) return '';
+      return Ext.String.format('<a href="{0}">Открыть</a>', value);
+    };
+
+    Ext.define('RegDoc', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      autoSync: false,
+      autoLoad: false,
+      idProperty: 'Id',
+      fields: ['Id', 'DocNum', 'RegNum', 'TypeID',
+        { name: 'TypeName', persist: false },
+        { name: 'DocDate', type: 'date', dateFormat: 'c' },
+        { name: 'ODate', type: 'date', dateFormat: 'c' },
+        { name: 'TDate', type: 'date', dateFormat: 'c' }, { name: 'ADate', type: 'date', dateFormat: 'c' }, 'Theme', 'Resolution', 'Directed', 'EmailTo',
+        { name: 'EmailToName', persist: false },
+        'EmailCc',
+        { name: 'EmailCcName', persist: false },
+        'ANum', 'LotusLinkI', 'FileNameI', 'FileNameO',
+        { name: 'UserName', persist: false },
+        'Comment',
+        { name: 'IsAcquaintance', type: 'bool' },
+        { name: 'IsComplaint', type: 'bool' },
+        'LicenseID',
+        { name: 'LicenseName', persist: false }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getRegDocList")',
+          create: '@Url.Action("addRegDoc")',
+          update: '@Url.Action("updRegDoc")',
+          destroy: '@Url.Action("delRegDoc")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storerd',
+      model: 'RegDoc'
+    });
+
+    Ext.define('EMail', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name', 'email']
+    });
+
+    var storeEMail = Ext.create('Ext.data.Store', {
+      remoteSort: true,
+      model: 'EMail',
+      autoLoad: true,
+      proxy: {
+        actionMethods: { read: 'POST' },
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getEMailList")'
+        },
+        reader: {
+          type: 'json',
+          root: 'data'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.define('EMailList', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name', 'email', { name: 'ui', type: 'bool' }]
+    });
+
+    var storeEMailTo = Ext.create('Ext.data.Store', {
+      model: 'EMailList'
+    });
+
+    var storeEMailCc = Ext.create('Ext.data.Store', {
+      model: 'EMailList'
+    });
+
+    Ext.define('CbModel', {
+      extend: 'Ext.data.Model',
+      idProperty: 'id',
+      fields: ['id', 'name']
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storeTypeId',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent", new { id = 17566 })',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      autoLoad: true,
+      remoteSort: true,
+      storeId: 'storeLicenseId',
+      model: 'CbModel',
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("GetObjClsByParent", new { id = 134654 })',
+        reader: {
+          type: 'json',
+          root: 'data'
+        }
+      }
+    });
+
+    Ext.define('RegDoc.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.regdocwin',
+
+      initComponent: function () {
+        this.addEvents('create');
+        this.addEvents('update');
+        Ext.apply(this, {
+          width: 600,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            fieldDefaults: {
+              labelAlign: 'left',
+              labelWidth: 150,
+              msgTarget: 'side'
+            },
+            items: [{
+              xtype: 'tabpanel',
+              itemId: 'tp',
+              anchor: '100%',
+              border: false,
+              height: 600,
+              border: false,
+              items: [{
+                tag: 0,
+                title: 'Параметры',
+                bodyPadding: 10,
+                layout: 'anchor',
+                border: false,
+                defaultType: 'textfield',
+                defaults: { anchor: '100%' },
+                items: [{
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  anchor: '100%',
+                  fieldDefaults: {
+                    labelAlign: 'top',
+                    msgTarget: 'bottom'
+                  },
+                  items: [{
+                    xtype: 'textfield',
+                    name: 'DocNum',
+                    fieldLabel: '№ документа',
+                    margin: '0 10 0 0',
+                    width: 120
+                  }, {
+                    xtype: 'datefield',
+                    name: 'DocDate',
+                    fieldLabel: 'Дата документа',
+                    margin: '0 10 0 0',
+                    width: 120,
+                    startDay: 1,
+                    format: 'd.m.Y'
+                  }, {
+                    xtype: 'textfield',
+                    name: 'RegNum',
+                    fieldLabel: 'Регистр. №',
+                    allowBlank: false,
+                    margin: '0 10 0 0',
+                    width: 120
+                  }, {
+                    xtype: 'datefield',
+                    name: 'ODate',
+                    fieldLabel: 'Дата регистрации',
+                    width: 120,
+                    startDay: 1,
+                    allowBlank: false,
+                    margin: '0 10 0 0',
+                    format: 'd.m.Y'
+                  }]
+                }, {
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  fieldDefaults: {
+                    labelAlign: 'top',
+                    msgTarget: 'bottom'
+                  },
+                  items: [{
+                    xtype: 'combo',
+                    fieldLabel: 'Вид документа',
+                    store: 'storeTypeId',
+                    displayField: 'name',
+                    flex: 2,
+                    emptyText: '*',
+                    valueField: 'id',
+                    typeAhead: true,
+                    queryMode: 'local',
+                    selectOnFocus: true,
+                    allowBlank: false,
+                    name: 'TypeID'
+                  }, {
+                    xtype: 'combo',
+                    fieldLabel: 'Лицензия',
+                    store: 'storeLicenseId',
+                    displayField: 'name',
+                    //flex: 1,
+                    emptyText: '*',
+                    valueField: 'id',
+                    typeAhead: true,
+                    queryMode: 'local',
+                    selectOnFocus: true,
+                    name: 'LicenseID',
+                    margin: '0 0 0 10'
+                  }]
+                }, {
+                  xtype: 'textareafield',
+                  name: 'Theme',
+                  fieldLabel: 'Тема документа',
+                  allowBlank: false,
+                  height: 40
+                }, {
+                  xtype: 'textareafield',
+                  name: 'Resolution',
+                  fieldLabel: 'Резолюция',
+                  height: 40
+                }, {
+                  name: 'Directed',
+                  fieldLabel: 'Кем направлен',
+                  allowBlank: false
+                }, {
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  items: [{
+                    xtype: 'datefield',
+                    name: 'TDate',
+                    fieldLabel: 'Срок исполнения',
+                    startDay: 1,
+                    margin: '0 10 0 0',
+                    format: 'd.m.Y',
+                    width: 270,
+                    allowBlank: false
+                  }, {
+                    xtype: 'checkboxfield',
+                    name: 'IsAcquaintance',
+                    fieldLabel: 'Для ознакомления',
+                    labelAlign: 'right',
+                    margin: '0 10 0 0',
+                    labelWidth: 110,
+                    inputValue: 1,
+                    uncheckedValue: 0
+                  }, {
+                    xtype: 'checkboxfield',
+                    name: 'IsComplaint',
+                    fieldLabel: 'Жалоба, претензия',
+                    labelAlign: 'right',
+                    margin: '0 10 0 0',
+                    labelWidth: 120,
+                    inputValue: 1,
+                    uncheckedValue: 0
+                  }]
+                }, {
+                  xtype: 'textareafield',
+                  name: 'Comment',
+                  fieldLabel: 'Примечание',
+                  height: 40
+                }, {
+                  xtype: 'fieldcontainer',
+                  layout: 'hbox',
+                  fieldDefaults: {
+                    labelAlign: 'left',
+                    msgTarget: 'bottom'
+                  },
+                  items: [{
+                    xtype: 'textfield',
+                    name: 'ANum',
+                    margin: '0 10 0 0',
+                    fieldLabel: 'Исходящий номер ответа',
+                    width: 280
+                  }, {
+                    xtype: 'datefield',
+                    name: 'ADate',
+                    fieldLabel: 'Дата направления ответа',
+                    margin: '0 10 0 0',
+                    startDay: 1,
+                    format: 'd.m.Y',
+                    width: 260
+                  }]
+                }/*, {
+                  name: 'LotusLinkI',
+                  fieldLabel: 'Документ Lotus Notes'
+                }*/, {
+                  name: 'FileNameI',
+                  fieldLabel: 'Вх.файл',
+                  readOnly: true
+                }, {
+                  xtype: 'form',
+                  padding: '0 0 15 0',
+                  border: false,
+                  waitMsgTarget: true,
+                  defaults: { anchor: '100%' },
+                  items: [{
+                    xtype: 'filefield',
+                    emptyText: 'Выбор файла',
+                    name: 'FileName',
+                    fieldLabel: 'Загрузка',
+                    buttonText: '',
+                    buttonConfig: {
+                      iconCls: 'upload-icon'
+                    }
+                  }],
+                  buttons: [{
+                    text: 'Загрузить',
+                    handler: function () {
+                      var form = this.up('form').getForm();
+                      if (form.isValid()) {
+                        form.submit({
+                          url: '@Url.Action("FileUploadI")' + '?id=' + this.up('window').activeRecord.data.Id,
+                          waitMsg: 'Отправка файла...',
+                          waitMsgTarget: true,
+                          success: function (fp, o) {
+                            fp.owner.up('form').getForm().findField('FileNameI').setValue(o.result.file);
+                            alert('Файл "' + o.result.file + '" сохранен');
+                          },
+                          failure: function (fp, o) {
+                            alert('Ошибка');
+                          }
+                        });
+                      }
+                    }
+                  }]
+                }, {
+                  name: 'FileNameO',
+                  fieldLabel: 'Исх.файл',
+                  readOnly: true
+                }, {
+                  xtype: 'form',
+                  border: false,
+                  waitMsgTarget: true,
+                  defaults: { anchor: '100%' },
+                  items: [{
+                    xtype: 'filefield',
+                    emptyText: 'Выбор файла',
+                    name: 'FileName',
+                    fieldLabel: 'Загрузка',
+                    buttonText: '',
+                    buttonConfig: {
+                      iconCls: 'upload-icon'
+                    }
+                  }],
+                  buttons: [{
+                    text: 'Загрузить',
+                    handler: function () {
+                      var form = this.up('form').getForm();
+                      if (form.isValid()) {
+                        form.submit({
+                          url: '@Url.Action("FileUploadO")' + '?id=' + this.up('window').activeRecord.data.Id,
+                          waitMsg: 'Отправка файла...',
+                          waitMsgTarget: true,
+                          success: function (fp, o) {
+                            fp.owner.up('form').getForm().findField('FileNameO').setValue(o.result.file);
+                            alert('Файл "' + o.result.file + '" сохранен');
+                          },
+                          failure: function (fp, o) {
+                            alert('Ошибка');
+                          }
+                        });
+                      }
+                    }
+                  }]
+                }, {
+                  itemId: 'EmailTo',
+                  name: 'EmailTo',
+                  xtype: 'hidden'
+                }, {
+                  itemId: 'EmailCc',
+                  name: 'EmailCc',
+                  xtype: 'hidden'
+                }]
+              }, {
+                tag: 1,
+                title: 'Исполнители',
+                layout: 'anchor',
+                defaults: { anchor: '100%' },
+                border: false,
+                flex: 1,
+                items: [{
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gTo',
+                  anchor: '100% 100%',
+                  title: 'Кому',
+                  store: storeEMailTo,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }]
+              }, {
+                tag: 2,
+                title: 'Для ознакомления',
+                layout: 'anchor',
+                defaults: { anchor: '100%' },
+                border: false,
+                flex: 1,
+                items: [{
+                  xtype: 'grid',
+                  border: false,
+                  itemId: 'gCc',
+                  anchor: '100% 100%',
+                  title: 'Кому',
+                  store: storeEMailCc,
+                  columns: [{
+                    xtype: 'checkcolumn',
+                    dataIndex: 'ui',
+                    width: 30
+                  }, {
+                    header: "Имя",
+                    dataIndex: 'name',
+                    width: 240
+                  }, {
+                    header: "EMail",
+                    dataIndex: 'email',
+                    flex: 1
+                  }]
+                }]
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        this.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          this.items.items[0].getForm().loadRecord(record);
+        } else {
+          this.down('#save').disable();
+          this.items.items[0].getForm().reset();
+        }
+        var re = /\s*,\s*/
+        var to = (record.data.EmailTo == null ? '' : record.data.EmailTo).split(re);
+        storeEMailTo.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailTo.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(to, r.data.email) });
+        });
+        this.down('#gTo').reconfigure(storeEMailTo);
+        var cc = (record.data.EmailCc == null ? '' : record.data.EmailCc).split(re);
+        storeEMailCc.removeAll();
+        storeEMail.each(function (r, i) {
+          storeEMailCc.add({ id: r.data.id, name: r.data.name, email: r.data.email, ui: Ext.Array.contains(cc, r.data.email) });
+        });
+        this.down('#gCc').reconfigure(storeEMailCc);
+        this.down('tabpanel').setActiveTab(0);
+      },
+
+      onSave: function () {
+        var active = this.activeRecord, form = this.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        var s = '', f = true;
+        storeEMailTo.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailTo').setValue(s);
+        s = '';
+        f = true;
+        storeEMailCc.each(function (r, i) {
+          if (r.data.ui) {
+            s += (!f ? ', ' : '') + r.data.email;
+            if (f) f = false;
+          }
+        });
+        this.down('#EmailCc').setValue(s);
+        if (form.isValid()) {
+          if (this.title == 'Добавить')
+            this.fireEvent('create', this, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            this.fireEvent('update');
+          }
+          this.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    var filters = {
+      ftype: 'filters',
+      encode: true,
+      local: true,
+      autoReload: false,
+      menuFilterText: 'Фильтр'
+    };
+
+    Ext.define('RegDoc.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.rdgrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true,
+            getRowClass: function (record) {
+              if (record.get('ADate') != null)
+                return 'gray-row';
+              if (record.get('IsAcquaintance') == true)
+                return 'green-row';
+            }
+          },
+          features: [filters],
+          columns: [{
+            header: '№ документа',
+            dataIndex: 'DocNum',
+            width: 70,
+            filter: {
+            }
+          }, {
+            header: 'Дата документа',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'DocDate',
+            width: 80
+          }, {
+            header: 'Рег. номер',
+            dataIndex: 'RegNum',
+            width: 70,
+            filter: {
+            }
+          }, {
+            header: 'Дата регистрации',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'ODate',
+            width: 80,
+            filter: {
+            }
+          }, {
+            header: 'Вид документа',
+            dataIndex: 'TypeName',
+            width: 150,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Тема документа',
+            dataIndex: 'Theme',
+            width: 200,
+            tdCls: 'wrap-text',
+            filter: {
+            }
+          }, {
+            header: 'Кем направлен',
+            dataIndex: 'Directed',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Исполнители',
+            dataIndex: 'EmailToName',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Для ознакомления',
+            dataIndex: 'EmailCcName',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Срок исполнения',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'TDate',
+            width: 80,
+            filter: {
+            }
+          }, {
+            header: 'Жалоба,<br/>претензия',
+            dataIndex: 'IsComplaint',
+            width: 40,
+            xtype: 'checkcolumn',
+            tdCls: 'wrap-text',
+            listeners: {
+              beforecheckchange: function (e) {
+                return false;
+              }
+            }
+          }, {
+            header: 'Лицензия',
+            dataIndex: 'LicenseName',
+            width: 60,
+            tdCls: 'wrap-text',
+            filter: {
+              type: 'list'
+            }
+          }, {
+            header: 'Исходящий номер<br/> ответа',
+            dataIndex: 'ANum',
+            width: 150,
+            tdCls: 'wrap-text',
+            filter: {
+            }
+          }, {
+            header: 'Дата направления<br/> ответа',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'ADate',
+            width: 80,
+            filter: {
+            }
+          }, {
+            header: 'Входящий файл',
+            dataIndex: 'FileNameI',
+            renderer: 'renderFileI',
+            width: 150,
+            isExport: false
+          }, {
+            header: 'Исходящий файл',
+            dataIndex: 'FileNameO',
+            renderer: 'renderFileO',
+            width: 150,
+            isExport: false
+          }/*, {
+            header: 'Документ Lotus Notes',
+            dataIndex: 'LotusLinkI',
+            renderer: 'renderLotusLinkI',
+            width: 150
+          }*/, {
+            header: 'Примечание',
+            dataIndex: 'Comment',
+            width: 100,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Резолюция',
+            dataIndex: 'Resolution',
+            width: 100,
+            tdCls: 'wrap-text',
+            filter: {
+            }
+          }, {
+            header: 'id',
+            dataIndex: 'Id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, Ext.create('Ext.form.field.ComboBox', {
+              itemId: 'cbType',
+              store: Ext.create('Ext.data.Store', {
+                fields: ['id', 'value'],
+                data: [
+                    { id: 0, value: 'Дата регистрации' },
+                    { id: 1, value: 'Срок исполнения' },
+                    { id: 2, value: 'Дата направления ответа' }
+                ]
+              }),
+              displayField: 'value',
+              typeAhead: true,
+              queryMode: 'local',
+              valueField: 'id',
+              selectOnFocus: true,
+              width: 120,
+              listeners: {
+                beforerender: function () { this.setValue(0, false); }
+              }
+            }), ' Без выполненных: ', {
+              xtype: 'checkbox',
+              checked: true,
+              itemId: 'cbSF'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Отправить',
+              itemId: 'sendEmail',
+              disabled: true,
+              scope: this,
+              handler: this.onSendEmailClick
+            }, {
+              xtype: 'exporterbutton',
+              text: 'Экспорт',
+              action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+              file: 'Поручения.xml'
+            }, {
+              text: 'Очистить фильтр',
+              itemId: 'clearFilter',
+              scope: this,
+              handler: this.onClearFilterClick
+            }, {
+              text: 'Сотрудники',
+              handler: function () { window.location = '@Url.Action("email", "envoi", new { area = "code" })' }
+            }, {
+              text: 'Исходящие',
+              handler: function () { window.location = '@Url.Action("out")' }
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+        this.store.on('load', function () {
+          this.filters.createFilters();
+        }, this);
+      },
+
+      onSendEmailClick: function () {
+        if (window.confirm('Отправить сообщение?')) {
+          Ext.Ajax.request({
+            url: '@Url.Action("regdocCourriel")',
+            timeout: 60000,
+            params: {
+              id: this.getView().getSelectionModel().getSelection()[0].data.Id
+            },
+            success: function (response) {
+              var text = response.responseText;
+              alert('Выполнено.');
+            },
+            failure: function (response) {
+              var text = response.responseText;
+              alert('Ошибка!');
+            }
+          });
+        }
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue(), type: me.down('#cbType').getValue(), sd: me.down('#cbSF').getValue() };
+        me.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#sendEmail').setDisabled(selections.length === 0);
+      },
+
+      onCreateWin: function () {
+        this.wini = Ext.create('RegDoc.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var me = this;
+        Ext.Ajax.request({
+          url: '@Url.Action("getNextRegNum")', params: {},
+          success: function (response) {
+
+            var rec = Ext.create('RegDoc', { 'ODate': Ext.Date.clearTime(new Date(), false), RegNum: response.responseText });
+            if (!me.wini) {
+              me.onCreateWin();
+            }
+            me.wini.setTitle('Добавить');
+            me.wini.setActiveRecord(rec);
+            me.wini.show(me);
+          }
+        });
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      },
+
+      onClearFilterClick: function () {
+        this.filters.clearFilters();
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          region: 'center',
+          itemId: 'grid',
+          border: false,
+          xtype: 'rdgrid',
+          store: 'storerd'
+        }]
+      });
+
+    });
+  </script>
+}

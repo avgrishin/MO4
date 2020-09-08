@@ -1,0 +1,23 @@
+﻿{ text: 'Переход', xtype: 'button', menu: { items: [
+{ text: 'Распоряжение на оплату', handler: function () { window.location = '@Url.Action("OrderPayment", "Report", new { area = "" })'} }, 
+{ text: 'Расходы', handler: function () { window.location = '@Url.Action("Charges", "Report", new { area = "" })'} }, 
+{ text: 'Расходы new', handler: function () { window.location = '@Url.Action("charges", "fin", new { area = "code" })'} }, 
+{ text: 'Расходы БКС', handler: function () { window.location = '@Url.Action("chargesbcs", "fin", new { area = "code" })'} }, 
+{ text: 'ФинПлан', handler: function () { window.location = '@Url.Action("FinPlan", "Report", new { area = "" })'} }, 
+{ text: 'ФинПлан схема', handler: function () { window.location = '@Url.Action("FinPlanSchema", "Report", new { area = "" })'} }, 
+{ text: 'ФинОтчет', handler: function () { window.location = '@Url.Action("GetFinRep", "Report", new { area = "" })'} }, 
+{ text: 'ФинАктивы', handler: function () { window.location = '@Url.Action("FinActive", "Report", new { area = "" })'} }, 
+{ text: 'ФинПродажи', handler: function () { window.location = '@Url.Action("FinSales", "Report", new { area = "" })'} }, 
+{ text: 'ФинДоходы', handler: function () { window.location = '@Url.Action("FinProfit", "Report", new { area = "" })'} }, 
+,'-',
+{ text: 'Доходность активов', handler: function () { window.location = '@Url.Action("FinActProfit", "Report", new { area = "" })'} }, 
+{ text: 'Доли активов', handler: function () { window.location = '@Url.Action("FinPart", "Report", new { area = "" })'} }, 
+{ text: 'Притоки/оттоки', handler: function () { window.location = '@Url.Action("FinInOutCome", "Report", new { area = "" })'} },
+{ text: 'Журнал предоставления отчетности', handler: function () { window.location = '@Url.Action("dep", "envoi", new { area = "code" })'} },
+{ text: 'Отчет об исполнении бюджета по контрагентам', handler: function () { window.location = '@Url.Action("RepFin", "Report", new { area = "" })'} }
+@if (User.IsInRole("regdocv") || User.IsInRole("regdoc"))
+{
+  <text>,
+{ text: 'Журнал исполнения поручений', handler: function () { window.location = '@Url.Action("index", "regdoc", new { area = "code" })' } }</text>
+}
+]} }

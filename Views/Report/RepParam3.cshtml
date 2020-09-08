@@ -1,0 +1,45 @@
+﻿@model MO.Models.Rep3Param
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div style="padding: 30px">
+  <h2>@ViewBag.Title</h2>
+  @Html.ValidationSummary("Пожалуйста исправьте ошибки и попробуйте еще раз.")
+  @{using (Html.BeginForm())
+    {
+    <fieldset>
+      <legend></legend>
+      <div id="repDiv">
+        <p>
+          @Html.LabelFor(m => m.DateB)
+          @Html.EditorFor(m => m.DateB, "Date")
+          @Html.ValidationMessageFor(m => m.DateB)
+        </p>
+        <p>
+          @Html.LabelFor(m => m.DateE)
+          @Html.EditorFor(m => m.DateE, "Date")
+          @Html.ValidationMessageFor(m => m.DateE)
+        </p>
+        <p>
+          <input type="submit" value="Выполнить" />
+        </p>
+      </div>
+    </fieldset>
+    }
+  }
+</div>
+@section scripts {
+  <link href="http://ajax.microsoft.com/ajax/beta/0911/extended/Calendar/Calendar.css" rel="stylesheet" type="text/css" />
+  @Ajax.GlobalizationScript()
+  <script src="http://ajax.microsoft.com/ajax/beta/0911/Start.js" type="text/javascript"></script>
+  <script src="http://ajax.microsoft.com/ajax/beta/0911/extended/ExtendedControls.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    Sys.require([Sys.components.calendar]);
+
+    Sys.onReady(function () {
+      Sys.Extended.UI.Resources.Calendar_Today = "Сегодня: {0}";
+      $("#DateB").calendar({ todaysDateFormat: "d MMMM yyyy" });
+      $("#DateE").calendar({ todaysDateFormat: "d MMMM yyyy" });
+    });
+  </script>
+}

@@ -1,0 +1,69 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public dynamic q { get; set; }
+  public int i { get; set; }
+}
+
+<style>
+  table
+  {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th
+  {
+    font-size: .8em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span
+  {
+    font-style: italic;
+  }
+
+  th
+  {
+    font-size: .7em;
+  }
+</style>
+<h4>Дирекция риск-менеджмента обращает внимание на необходимость соблюдения следующих операционных контролей</h4>
+<table>
+  <tr>
+    <th>Структурное подразделение</th>
+    <th>Бизнес процесс</th>
+    @*<th>№ риска</th>*@
+    <th>Риск наименование</th>
+    @*<th>Влияние</th>
+    <th>Вероятность</th>
+    <th>Сила контроля</th>
+    <th>Итоговая оценка</th>
+    <th>Существенный риск</th>
+    <th>Активное</th>*@
+    <th>@(i == 0 ? "Цель" : "Контроль")</th>
+    @(i == 0 ? "<th>Владелец цели</th>" : "")
+    <th>Владелец контроля</th>
+  </tr>
+  @foreach (var qq in q)
+  {
+    <tr>
+      <td>@qq.Dep</td>
+      <td>@qq.BisProc</td>
+      @*<td>@qq.NumRisk</td>*@
+      <td>@qq.RiskName</td>
+      @*<td>@qq.InfluenceName</td>
+    <td>@qq.ProbabiliteName</td>
+    <td>@qq.ControlForceName</td>
+    <td>@qq.TotalName</td>
+    <td>@(qq.EssentielRisk ? "Да" : "Нет")</td>
+    <td>@(qq.IsEnabled ? "Да" : "Нет")</td>*@
+      <td>@qq.c1</td>
+      @(i == 0 ? "<td>" + @qq.PossesseurBut + "</td>" : "")
+      <td>@qq.PossesseurControl</td>
+    </tr>
+  }
+</table>
+<br>
+<span>Дирекция риск-менеджмента</span>

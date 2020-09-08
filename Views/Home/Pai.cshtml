@@ -1,0 +1,680 @@
+﻿@model MO.ViewModels.SurveyViewModel
+@{
+  ViewBag.Title = "Опрос";
+}
+<form class="container" style="padding: 30px" method="post">
+  <h2 class="survey_title">Опросник по удовлетворенности услугами ИТ-поддержки</h2>
+  @if (!string.IsNullOrWhiteSpace(ViewBag.Error))
+  {
+    <div class="validation-summary-errors text-danger">@ViewBag.Error</div>
+  }
+  <h4 class="headergroup">Каким способом Вы чаще всего обращаетесь в ИТ-поддержку при возникновении проблем?</h4>
+  <div class="itemgroup">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a11" value="1" @(Model.a11 == 1 ? "checked" : "")>
+        По электронной почте Сервис Деск uk_support@uralsib.ru
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a11" value="2" @(Model.a11 == 2 ? "checked" : "")>
+        Напрямую к ИТ-специалисту
+      </label>
+    </div>
+    @Html.ValidationMessageFor(m => m.a11, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Насколько работа ИТ-поддержки в целом отвечает Вашим ожиданиям?</h4>
+  <div class="itemgroup">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a12" value="1" @(Model.a12 == 1 ? "checked" : "")>
+        Полностью удовлетворяет
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a12" value="2" @(Model.a12 == 2 ? "checked" : "")>
+        Частично удовлетворяет
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a12" value="3" @(Model.a12 == 3 ? "checked" : "")>
+        Не удовлетворяет
+      </label>
+    </div>
+    @Html.ValidationMessageFor(m => m.a12, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Были ли повторные, по одной и той же заявке, обращения к специалистам ИТ-поддержки после закрытия заявки в Сервис Деск?</h4>
+  <div class="itemgroup">
+    <label class="radio-inline">
+      <input type="radio" name="a13" value="1" @(Model.a13 == 1 ? "checked" : "")>
+      Нет
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a13" value="2" @(Model.a13 == 2 ? "checked" : "")>
+      Иногда
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a13" value="3" @(Model.a13 == 3 ? "checked" : "")>
+      Часто
+    </label>
+    @Html.ValidationMessageFor(m => m.a13, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Теряла ли актуальность Ваша заявка до начала работ по ней специалистом команды поддержки?</h4>
+  <div class="itemgroup">
+    <label class="radio-inline">
+      <input type="radio" name="a14" value="1" @(Model.a14 == 1 ? "checked" : "")>
+      Нет
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a14" value="2" @(Model.a14 == 2 ? "checked" : "")>
+      Иногда
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a14" value="3" @(Model.a14 == 3 ? "checked" : "")>
+      Часто
+    </label>
+    @Html.ValidationMessageFor(m => m.a14, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Отметьте наиболее важные, с Вашей точки зрения, критерии оценки услуг ИТ-поддержки. Если какие-то из критериев отсутствуют в списке, впишите их</h4>
+  <div class="itemgroup">
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a151)
+        Время от момента регистрации заявки до начала работ по заявке специалистами ИТ-поддержки
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a152)
+        Время выполнения заявок
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a153)
+        Отсутствие повторных обращений по выполнению заявок
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a154)
+        Личные качества ИТ-специалистов (вежливость, терпимость при общении с заказчиком, профессионализм)
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a155)
+        Восприимчивость к проблемам заказчика (т.е. понимание срочности и важности решения проблем у заказчика)
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a156)
+        Предоставление информации о ходе выполнения заявки
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a157)
+        Гарантированное выполнение заявки
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a158)
+        Другое:
+      </label>
+    </div>
+    <input class="form-control" type="text" value="@Model.n15" name="n15">
+    @Html.ValidationMessageFor(m => m.n15, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Какие проблемы у Вас возникают наиболее часто? Выберите несколько наиболее часто встречающихся из списка ниже. Выберите максимум 5 вариантов.</h4>
+  <div class="itemgroup">
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a161)
+        @*<input type="checkbox" name="a161" id="r161" value="true" @(Model.a161 == true ? "checked" : "")>*@
+        Неисправность компьютера или монитора
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a162)
+        Медленная работа компьютера, зависание
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a163)
+        Неисправность принтерного оборудования
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a164)
+        Неисправность копировальной техники
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a165)
+        Неполадки в офисной телефонии
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a166)
+        Проблемы при доступе к сетевым дискам
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a167)
+        Проблемы при работе системного ПО (Microsoft Windows)
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a168)
+        Проблемы при работе офисного ПО (Word, Excel, PowerPoint и т.д.)
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a169)
+        Проблемы с паролем при входе в сеть
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1610)
+        Проблемы с паролем при входе в Lotus
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1611)
+        Проблемы при работе с Диасофт
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1612)
+        Проблемы при работе с Ордербук
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1613)
+        Проблемы при работе с ПИФ-ЭДО
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1614)
+        Проблемы при работе с системами ЭДО, Клиент-Банк
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1615)
+        Проблемы с работой в сети Интернет
+      </label>
+    </div>
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1616)
+        Другое:
+      </label>
+    </div>
+    <input class="form-control" type="text" value="@Model.n16" name="n16">
+    <div class="checkbox">
+      <label>
+        @Html.CheckBoxFor(m => m.a1617)
+        Проблем не возникает вообще
+      </label>
+    </div>
+    @Html.ValidationMessageFor(m => m.n16, "", new { @class = "text-danger" })
+  </div>
+
+  <h4 class="headergroup">Оцените, пожалуйста, общую удовлетворенность сервисом: </h4>
+  <table class="table itemgroup">
+    <thead>
+      <tr>
+        <td>Решение проблем с компьютерной техникой</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a17" value="1" @(Model.a17 == 1 ? "checked" : "")>
+            отлично
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a17" value="2" @(Model.a17 == 2 ? "checked" : "")>
+            хорошо
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a17" value="3" @(Model.a17 == 3 ? "checked" : "")>
+            удовлетворительно
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a17" value="4" @(Model.a17 == 4 ? "checked" : "")>
+            плохо (с комментариями)
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a17" value="5" @(Model.a17 == 5 ? "checked" : "")>
+            не использую
+          </label>
+          <input class="form-control" type="text" value="@Model.n17" name="n17" placeholder="комментарий">
+          @Html.ValidationMessageFor(m => m.a17, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Копировально-печатная техника</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a18" value="1" @(Model.a18 == 1 ? "checked" : "")>
+            отлично
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a18" value="2" @(Model.a18 == 2 ? "checked" : "")>
+            хорошо
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a18" value="3" @(Model.a18 == 3 ? "checked" : "")>
+            удовлетворительно
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a18" value="4" @(Model.a18 == 4 ? "checked" : "")>
+            плохо (с комментариями)
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a18" value="5" @(Model.a18 == 5 ? "checked" : "")>
+            не использую
+          </label>
+          <input class="form-control" type="text" value="@Model.n18" name="n18" placeholder="комментарий">
+          @Html.ValidationMessageFor(m => m.a18, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система Диасофт</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a19" value="1" @(Model.a19 == 1 ? "checked" : "")>
+            отлично
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a19" value="2" @(Model.a19 == 2 ? "checked" : "")>
+            хорошо
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a19" value="3" @(Model.a19 == 3 ? "checked" : "")>
+            удовлетворительно
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a19" value="4" @(Model.a19 == 4 ? "checked" : "")>
+            плохо (с комментариями)
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a19" value="5" @(Model.a19 == 5 ? "checked" : "")>
+            не использую
+          </label>
+          <input class="form-control" type="text" value="@Model.n19" name="n19" placeholder="комментарий">
+          @Html.ValidationMessageFor(m => m.a19, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система Ордербук</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a20" value="1" @(Model.a20 == 1 ? "checked" : "")>
+            отлично
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a20" value="2" @(Model.a20 == 2 ? "checked" : "")>
+            хорошо
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a20" value="3" @(Model.a20 == 3 ? "checked" : "")>
+            удовлетворительно
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a20" value="4" @(Model.a20 == 4 ? "checked" : "")>
+            плохо (с комментариями)
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a20" value="5" @(Model.a20 == 5 ? "checked" : "")>
+            не использую
+          </label>
+          <input class="form-control" type="text" value="@Model.n20" name="n20" placeholder="комментарий">
+          @Html.ValidationMessageFor(m => m.a20, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система ПИФ-ЭДО</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a21" value="1" @(Model.a21 == 1 ? "checked" : "")>
+            отлично
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a21" value="2" @(Model.a21 == 2 ? "checked" : "")>
+            хорошо
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a21" value="3" @(Model.a21 == 3 ? "checked" : "")>
+            удовлетворительно
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a21" value="4" @(Model.a21 == 4 ? "checked" : "")>
+            плохо (с комментариями)
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a21" value="5" @(Model.a21 == 5 ? "checked" : "")>
+            не использую
+          </label>
+          <input class="form-control" type="text" value="@Model.n21" name="n21" placeholder="комментарий">
+          @Html.ValidationMessageFor(m => m.a21, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+    </thead>
+  </table>
+
+  <h4 class="headergroup">За какое время, по Вашей оценке, ИТ-служба выполняет Вашу заявку по сервисам:</h4>
+  <table class="table itemgroup">
+    <thead>
+      <tr>
+        <td>Решение проблем с компьютерной техникой</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="1" @(Model.a1 == 1 ? "checked" : "")>
+            менее часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="2" @(Model.a1 == 2 ? "checked" : "")>
+            1-2 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="3" @(Model.a1 == 3 ? "checked" : "")>
+            3-4 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="4" @(Model.a1 == 4 ? "checked" : "")>
+            рабочий день
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="5" @(Model.a1 == 5 ? "checked" : "")>
+            более 2-х рабочих дней
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a1" value="6" @(Model.a1 == 6 ? "checked" : "")>
+            не использую
+          </label>
+          @Html.ValidationMessageFor(m => m.a1, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Копировально-печатная техника</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="1" @(Model.a2 == 1 ? "checked" : "")>
+            менее часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="2" @(Model.a2 == 2 ? "checked" : "")>
+            1-2 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="3" @(Model.a2 == 3 ? "checked" : "")>
+            3-4 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="4" @(Model.a2 == 4 ? "checked" : "")>
+            рабочий день
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="5" @(Model.a2 == 5 ? "checked" : "")>
+            более 2-х рабочих дней
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a2" value="6" @(Model.a2 == 6 ? "checked" : "")>
+            не использую
+          </label>
+          @Html.ValidationMessageFor(m => m.a2, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система Диасофт</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="1" @(Model.a3 == 1 ? "checked" : "")>
+            менее часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="2" @(Model.a3 == 2 ? "checked" : "")>
+            1-2 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="3" @(Model.a3 == 3 ? "checked" : "")>
+            3-4 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="4" @(Model.a3 == 4 ? "checked" : "")>
+            рабочий день
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="5" @(Model.a3 == 5 ? "checked" : "")>
+            более 2-х рабочих дней
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a3" value="6" @(Model.a3 == 6 ? "checked" : "")>
+            не использую
+          </label>
+          @Html.ValidationMessageFor(m => m.a3, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система Ордербук</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="1" @(Model.a4 == 1 ? "checked" : "")>
+            менее часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="2" @(Model.a4 == 2 ? "checked" : "")>
+            1-2 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="3" @(Model.a4 == 3 ? "checked" : "")>
+            3-4 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="4" @(Model.a4 == 4 ? "checked" : "")>
+            рабочий день
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="5" @(Model.a4 == 5 ? "checked" : "")>
+            более 2-х рабочих дней
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a4" value="6" @(Model.a4 == 6 ? "checked" : "")>
+            не использую
+          </label>
+          @Html.ValidationMessageFor(m => m.a4, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+      <tr>
+        <td>Система ПИФ-ЭДО</td>
+        <td>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="1" @(Model.a5 == 1 ? "checked" : "")>
+            менее часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="2" @(Model.a5 == 2 ? "checked" : "")>
+            1-2 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="3" @(Model.a5 == 3 ? "checked" : "")>
+            3-4 часа
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="4" @(Model.a5 == 4 ? "checked" : "")>
+            рабочий день
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="5" @(Model.a5 == 5 ? "checked" : "")>
+            более 2-х рабочих дней
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="a5" value="6" @(Model.a5 == 6 ? "checked" : "")>
+            не использую
+          </label>
+          @Html.ValidationMessageFor(m => m.a5, "", new { @class = "text-danger" })
+        </td>
+      </tr>
+    </thead>
+  </table>
+
+  <h4 class="headergroup">Решаются ли Ваши заявки в день подачи обращения?</h4>
+  <div class="itemgroup">
+    <label class="radio-inline">
+      <input type="radio" name="a6" value="1" @(Model.a6 == 1 ? "checked" : "")>
+      часто
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a6" value="2" @(Model.a6 == 2 ? "checked" : "")>
+      редко
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a6" value="3" @(Model.a6 == 3 ? "checked" : "")>
+      никогда
+    </label>
+    @Html.ValidationMessageFor(m => m.a6, "", new { @class = "text-danger" })
+  </div>
+  <h4 class="headergroup">Устраивает ли Вас время выполнения ИТ-поддержкой Ваших заявок?</h4>
+  <div class="itemgroup">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a7" value="1" @(Model.a7 == 1 ? "checked" : "")>
+        Полностью устраивает
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a7" value="2" @(Model.a7 == 2 ? "checked" : "")>
+        В целом устраивает
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a7" value="3" @(Model.a7 == 3 ? "checked" : "")>
+        Хотелось бы существенно быстрее, т.к. влияет на мою работу (укажите перечень сервисов и причину влияния на деятельность)
+      </label>
+    </div>
+    <input class="form-control" type="text" value="@Model.n73" name="n73">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a7" value="4" @(Model.a7 == 4 ? "checked" : "")>
+        Не устраивает - сильно страдает не только моя линейная деятельность, но и деятельность сотрудников смежных подразделений (укажите перечень сервисов и причину влияния на деятельность)
+      </label>
+    </div>
+    <input class="form-control" type="text" value="@Model.n74" name="n74">
+    @Html.ValidationMessageFor(m => m.a7, "", new { @class = "text-danger" })
+  </div>
+  <h4 class="headergroup">Оцените как проходило общение с сотрудниками ИТ-поддержки при выполнении Вашей заявки?</h4>
+  <div class="itemgroup">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a8" id="r81" value="1" @(Model.a8 == 1 ? "checked" : "")>
+        Вежливо, с желанием помочь
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a8" id="r82" value="2" @(Model.a8 == 2 ? "checked" : "")>
+        Вежливо, но без энтузиазма
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a8" id="r83" value="3" @(Model.a8 == 3 ? "checked" : "")>
+        Чисто формально
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a8" id="r84" value="4" @(Model.a8 == 4 ? "checked" : "")>
+        Коммуникабельность сотрудников ИТ оставляет желать лучшего
+      </label>
+    </div>
+    @Html.ValidationMessageFor(m => m.a8, "", new { @class = "text-danger" })
+  </div>
+  <h4 class="headergroup">Если Вы получили ответ от специалистов ИТ-поддержки на вопрос, который может быть полезен не только Вам и в дальнейшем его можно решить без обращения ИТ-поддержку:</h4>
+  <div class="itemgroup">
+    <div class="radio">
+      <label>
+        <input type="radio" name="a9" id="r91" value="1" @(Model.a9 == 1 ? "checked" : "")>
+        Вы сразу обязательно расскажете об этом коллегам, чтобы они знали, как действовать в таких ситуациях без обращения в ИТ-поддержку
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a9" id="r92" value="2" @(Model.a9 == 2 ? "checked" : "")>
+        Вы расскажите коллегам только когда услышите, что у них возник вопрос, на который Вы уже получали ответ от специалистов ИТ-поддержки
+      </label>
+    </div>
+    <div class="radio">
+      <label>
+        <input type="radio" name="a9" id="r93" value="3" @(Model.a9 == 3 ? "checked" : "")>
+        Вы ничего никому рассказывать не будете
+      </label>
+    </div>
+    @Html.ValidationMessageFor(m => m.a9, "", new { @class = "text-danger" })
+  </div>
+  <h4 class="headergroup">Являетесь ли Вы сотрудником ИТ?</h4>
+  <div class="itemgroup">
+    <label class="radio-inline">
+      <input type="radio" name="a10" id="r101" value="1" @(Model.a10 == 1 ? "checked" : "")>
+      да
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="a10" id="r102" value="2" @(Model.a10 == 2 ? "checked" : "")>
+      нет
+    </label>
+    @Html.ValidationMessageFor(m => m.a10, "", new { @class = "text-danger" })
+  </div>
+  <p class="text-right">
+    <button class="btn btn-primary" type="submit">Отправить</button>
+  </p>
+</form>
+
+@Scripts.Render("~/bundles/bootstrap")
+@section css {
+  @Styles.Render("~/Content/bootstrap")
+  <style type="text/css">
+    .headergroup {
+      border-bottom: 1px solid #eee;
+      margin-top: 40px;
+    }
+    .itemgroup {
+      margin-left: 10px;
+    }
+    .form-control {
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .survey_title {
+      color: #16b67f;
+    }
+  </style>
+}
+@section scripts {
+
+}

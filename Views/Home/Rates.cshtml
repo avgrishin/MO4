@@ -1,0 +1,80 @@
+﻿@{
+  ViewBag.Title = "Rates";
+}
+@section scripts {
+  @Scripts.Render("~/bundles/knockout")
+  @Scripts.Render("~/bundles/signalR")
+  @*<script src="~/Scripts/jquery.signalR-2.1.2.js"></script>*@
+  <script src="/signalr/hubs"></script>
+  <script type="text/javascript">
+    $(function () {
+
+      var AppViewModel = function () {
+        var self = this;
+        self.courses = ko.observableArray();
+
+        function CourseViewModel(course) {
+          var self = this;
+          self.sec = course.sec;
+          self.cc = course.cc;
+          self.cl = course.cl;
+          self.chg = course.chg;
+          self.tm = course.tm
+          self.chg1 = ko.computed(function () {
+            return parseFloat(self.chg);
+          });
+        }
+        //WithAction
+        self.refresh = function () {
+          $.getJSON('@Url.RouteUrl("DefaultApi", new { httproute = "", controller = "RepWA", id = 2 })', function (courses) {
+            self.courses.removeAll();
+            $.each(courses, function (index, course) {
+              self.courses.push(new CourseViewModel(course));
+            })
+          });
+        }
+
+        $.getJSON('@Url.RouteUrl("DefaultApi", new { httproute = "", controller = "RepWA", id = 2 })', function (courses) {
+          $.each(courses, function (index, course) {
+            self.courses.push(new CourseViewModel(course));
+          })
+        });
+
+      }
+
+      $(document).ready(function () {
+        ko.applyBindings(new AppViewModel());
+      });
+
+      var hub = $.connection.rHub;
+      $.connection.hub.start().done(function () {
+        $('#open').click(function () {
+          hub.server.hello();
+        });
+      });
+
+      hub.client.hello = function () {
+        alert(1);
+      }
+    });
+  </script>
+}
+<div style="margin: 30px">
+  <div>
+    <h2>Курсы ЦБ</h2>
+    <table class="fp-currency">
+      <tbody data-bind="foreach: courses">
+        <tr>
+          <td data-bind="text: sec"></td>
+          <td class="ta-r" data-bind="text: cl"></td>
+          <td class="ta-r" data-bind="text: chg.toFixed(2), style: { color: chg < 0 ? 'red' : 'green' }"></td>
+          <td data-bind="text: tm"></td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="javascript:void()" data-bind="click: refresh">Обновить</a>
+  </div>
+  <input type="button" id="open" value="Open" />
+</div>
+<div>
+</div>

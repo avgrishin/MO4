@@ -1,0 +1,8 @@
+﻿@model dynamic
+@{
+  ViewBag.Title = "Распоряжение на оплату";
+  Layout = "_Layout.cshtml";
+}
+<div style="padding-top: 10px" class="container">
+  <div class="alert alert-@(Model.action == 1 ? "success" : "danger")">Распоряжение на оплату @(Model.action == 1 ? "подтверждено" : "возвращено").</div>
+</div>

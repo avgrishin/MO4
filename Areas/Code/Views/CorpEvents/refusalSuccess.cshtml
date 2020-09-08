@@ -1,0 +1,10 @@
+﻿@model dynamic
+@{
+  ViewBag.Title = "Отказ исполнен";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="padding-left:10px">
+  <h2>Отказ в выполнении документа @Model.ed.DocNum выполнен. @Model.NameTo Логин @User.Identity.Name</h2>
+  <i>@Model.descr</i>
+</div>

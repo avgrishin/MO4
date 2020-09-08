@@ -1,0 +1,620 @@
+﻿@{
+  ViewBag.Title = "Исходящие";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/user_add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS41/resources/themes/images/default/grid/refresh.gif")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .gray-row .x-grid-cell, .gray-row .x-grid-cell a {
+      color: gray;
+    }
+    .green-row .x-grid-cell, .green-row .x-grid-cell a {
+      color: green;
+    }
+    .search-item
+    {
+      font: normal 11px tahoma, arial, helvetica, sans-serif;
+      padding: 2px 5px 2px 5px;
+      /*border: 1px solid #fff;*/
+      border-bottom: 1px solid #eeeeee;
+      white-space: normal;
+      color: #555;
+    }
+    .search-item h3
+    {
+      display: block;
+      font: inherit;
+      font-weight: bold;
+      color: #222;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-classic/resources/theme-classic-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-classic/theme-classic.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+  <script type="text/javascript">
+
+    Ext.apply(Ext.form.VTypes, {
+      daterange: function (val, field) {
+        var date = field.parseDate(val);
+        if (!date) {
+          return false;
+        }
+        if (field.startDateField) {
+          var start = field.ownerCt.getComponent(field.startDateField);
+          if (!start.maxValue || (date.getTime() != start.maxValue.getTime())) {
+            start.setMaxValue(date);
+            start.validate();
+          }
+        }
+        else if (field.endDateField) {
+          var end = field.ownerCt.getComponent(field.endDateField);
+          if (!end.minValue || (date.getTime() != end.minValue.getTime())) {
+            end.setMinValue(date);
+            end.validate();
+          }
+        }
+        /*
+        * Always return true since we're only using this vtype to set the
+        * min/max allowed values (these are tested for after the vtype test)
+        */
+        return true;
+      }
+    });
+
+    Ext.define('Outgoing', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      idProperty: 'Id',
+      fields: [
+        { name: 'Id', type: 'int' },
+        { name: 'Number', type: 'string' },
+        { name: 'ODate', type: 'date', dateFormat: 'c' },
+        { name: 'Theme', type: 'string' },
+        { name: 'Recipient', type: 'string' },
+        { name: 'Signer', type: 'string' },
+        { name: 'Sender', type: 'string' },
+        { name: 'FileName', type: 'string' },
+        { name: 'UserName', type: 'string', persist: false }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          read: '@Url.Action("getOutgoingList")',
+          create: '@Url.Action("addOutgoing")',
+          update: '@Url.Action("updOutgoing")',
+          destroy: '@Url.Action("delOutgoing")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          rootProperty: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          root: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true,
+        listeners: {
+          exception: function (proxy, response, operation) {
+            Ext.MessageBox.show({
+              title: 'REMOTE EXCEPTION',
+              msg: operation.getError(),
+              icon: Ext.MessageBox.ERROR,
+              buttons: Ext.Msg.OK
+            });
+          }
+        }
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeog',
+      model: 'Outgoing'
+    });
+
+    Ext.define('Outgoing.Win', {
+      extend: 'Ext.window.Window',
+
+      initComponent: function () {
+        Ext.apply(this, {
+          width: 500,
+          closeAction: 'hide',
+          modal: true,
+          buttonAlign: 'center',
+          items: [{
+            xtype: 'form',
+            border: false,
+            activeRecord: null,
+            bodyPadding: 10,
+            fieldDefaults: {
+              labelAlign: 'top',
+              labelWidth: 100,
+              msgTarget: 'side',
+              anchor: '100%'
+            },
+            defaultType: 'textfield',
+            items: [{
+              xtype: 'fieldcontainer',
+              layout: 'hbox',
+              anchor: '100%',
+              fieldDefaults: {
+                labelAlign: 'top',
+                msgTarget: 'bottom'
+              },
+              items: [{
+                xtype: 'textfield',
+                name: 'Number',
+                fieldLabel: 'Исх №',
+                margin: '0 10 0 0',
+                width: 120
+              }, {
+                xtype: 'datefield',
+                name: 'ODate',
+                fieldLabel: 'Дата',
+                width: 120,
+                startDay: 1,
+                allowBlank: false,
+                margin: '0 10 0 0',
+                format: 'd.m.Y'
+              }]
+            }, {
+              fieldLabel: 'Тема документа',
+              allowBlank: false,
+              name: 'Theme'
+            }, {
+              fieldLabel: 'Получатель',
+              allowBlank: false,
+              name: 'Recipient'
+            }, {
+              fieldLabel: 'Подписант',
+              allowBlank: false,
+              name: 'Signer'
+            }, {
+              fieldLabel: 'Отправитель',
+              allowBlank: false,
+              name: 'Sender'
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              //iconCls: 'icon-cancel',
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        me.activeRecord = record;
+        if (record) {
+          var form = me.down('form').getForm();
+          me.down('#save').enable();
+          form.reset();
+          form.loadRecord(record);
+        } else {
+          me.down('#save').disable();
+          me.down('form').getForm().reset();
+        }
+      },
+
+      onSave: function () {
+        var me = this;
+        var active = me.activeRecord, form = me.down('form').getForm();
+        if (!active) {
+          return;
+        }
+        if (form.isValid()) {
+          if (me.title == 'Добавить')
+            me.fireEvent('create', me, form.getValues(false, false, false, true));
+          else {
+            form.updateRecord(active);
+            me.fireEvent('update');
+          }
+          me.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('File.Win', {
+      extend: 'Ext.window.Window',
+      alias: 'widget.filewin',
+      initComponent: function () {
+        Ext.apply(this, {
+          activeRecord: null,
+          fileurl: null,
+          width: 500,
+          closeAction: 'hide',
+          //layout: 'fit',
+          modal: true,
+          autoHeight: true,
+          plain: true,
+          buttonAlign: 'center',
+          border: true,
+          items: [{
+            xtype: 'form',
+            itemId: 'f',
+            bodyPadding: 10,
+            border: false,
+            defaults: { anchor: '100%' },
+            defaultType: 'textfield',
+            layoutConfig: { labelSeparator: '' },
+            fieldDefaults: { labelWidth: 100, labelAlign: 'left' },
+            items: [{
+              itemId: 'FileName',
+              name: 'FileName',
+              fieldLabel: 'Файл',
+              readOnly: true
+            }, {
+              xtype: 'form',
+              //padding: '0 0 50 0',
+              border: false,
+              waitMsgTarget: true,
+              defaults: { anchor: '100%' },
+              items: [{
+                xtype: 'filefield',
+                emptyText: 'Выбор файла',
+                name: 'fn',
+                fieldLabel: 'Загрузка',
+                buttonText: '',
+                buttonConfig: {
+                  iconCls: 'upload-icon'
+                }
+              }],
+              buttons: [{
+                text: 'Загрузить',
+                handler: function () {
+                  var form = this.up('form').getForm();
+                  if (form.isValid()) {
+                    form.submit({
+                      url: this.up('window').fileurl + '?id=' + this.up('window').activeRecord.get('Id'),
+                      waitMsg: 'Отправка файла...',
+                      waitMsgTarget: true,
+                      success: function (fp, o) {
+                        fp.owner.up('window').down('form').getForm().findField('FileName').setValue(o.result.file);
+                        alert('Файл "' + o.result.file + '" загружен.');
+                      },
+                      failure: function (fp, o) {
+                        alert('Ошибка');
+                      }
+                    });
+                  }
+                }
+              }]
+            }]
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'save',
+              text: 'Сохранить',
+              disabled: true,
+              scope: this,
+              handler: this.onSave
+            }, {
+              text: 'Отмена',
+              scope: this,
+              handler: this.onCancel
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      setActiveRecord: function (record) {
+        var me = this;
+        var form = me.down('form').getForm();
+        me.activeRecord = record;
+        if (record) {
+          this.down('#save').enable();
+          form.loadRecord(record);
+        } else {
+          me.down('#save').disable();
+          form.reset();
+        }
+      },
+
+      setUrl: function (_fileurl) {
+        var me = this
+        me.fileurl = _fileurl
+      },
+
+      onSave: function () {
+        var me = this;
+        var form = me.down('form').getForm();
+        if (!me.activeRecord) {
+          return;
+        }
+        if (form.isValid()) {
+          form.updateRecord(me.activeRecord);
+          me.fireEvent('update');
+          me.hide();
+        }
+      },
+
+      onCancel: function () {
+        this.hide();
+      }
+    });
+
+    Ext.define('Outgoing.Grid', {
+      extend: 'Ext.grid.Panel',
+      alias: 'widget.oggrid',
+      initComponent: function () {
+        Ext.apply(this, {
+          wini: null,
+          allowDeselect: false,
+          defaultType: 'textfield',
+          invalidateScrollerOnRefresh: false,
+          layoutConfig: { labelSeparator: '' },
+          viewConfig: {
+            preserveScrollOnRefresh: true,
+            enableTextSelection: true
+          },
+          columns: [{
+            header: 'Исх №',
+            dataIndex: 'Number',
+            width: 70,
+            filter: {
+            }
+          }, {
+            header: 'Дата',
+            xtype: 'datecolumn',
+            format: 'd.m.Y',
+            dataIndex: 'ODate',
+            width: 80
+          }, {
+            header: 'Тема документа',
+            dataIndex: 'Theme',
+            width: 400
+          }, {
+            header: 'Получатель',
+            dataIndex: 'Recipient',
+            width: 200
+          }, {
+            header: 'Подписант',
+            dataIndex: 'Signer',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Отправитель',
+            dataIndex: 'Sender',
+            width: 200,
+            tdCls: 'wrap-text'
+          }, {
+            header: 'Скан',
+            dataIndex: 'FileName',
+            renderer: function (v) {
+              return !v ? '' : Ext.String.format('<a href="@Url.Action("GetFileOG")?data={1}" target="_blank">{0}</a>', v, encodeURIComponent(v));
+            },
+            width: 150
+          }, {
+            header: 'id',
+            dataIndex: 'Id',
+            width: 30,
+            hidden: true
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'top',
+            items: [{
+              xtype: 'tbtext', text: ' Период: '
+            }, {
+              xtype: 'datefield',
+              itemId: 'd1',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              endDateField: 'd2',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, -Ext.Date.getDayOfYear(new Date())),
+              width: 100
+            }, ' ', {
+              xtype: 'datefield',
+              itemId: 'd2',
+              allowBlank: false,
+              format: 'd.m.Y',
+              vtype: 'daterange',
+              startDateField: 'd1',
+              startDay: 1,
+              value: Ext.Date.add(Ext.Date.clearTime(new Date(), false), Ext.Date.DAY, 0),
+              width: 100,
+              margin: '0 5 0 0'
+            }, {
+              iconCls: 'icon-refresh',
+              text: 'Обновить',
+              scope: this,
+              handler: this.onRefreshClick
+            }, {
+              iconCls: 'icon-user-add',
+              text: 'Добавить',
+              scope: this,
+              handler: this.onAddClick
+            }, {
+              text: 'Изменить',
+              disabled: true,
+              itemId: 'change',
+              scope: this,
+              handler: this.onChangeClick
+            }, {
+              iconCls: 'icon-delete',
+              text: 'Удалить',
+              disabled: true,
+              itemId: 'delete',
+              scope: this,
+              handler: this.onDeleteClick
+            }, {
+              text: 'Скан',
+              disabled: true,
+              itemId: 'file',
+              scope: this,
+              handler: this.onScanClick
+            }]
+          }]
+        })
+        this.callParent();
+        this.getSelectionModel().on('selectionchange', this.onSelectChange, this);
+        this.on('itemdblclick', this.onRowDblClick, this);
+      },
+
+      onRefreshClick: function () {
+        var me = this;
+        me.store.proxy.extraParams = { d1: me.down('#d1').getValue(), d2: me.down('#d2').getValue() };
+        me.store.load();
+      },
+
+      onSelectChange: function (selModel, selections) {
+        this.down('#delete').setDisabled(selections.length === 0);
+        this.down('#change').setDisabled(selections.length === 0);
+        this.down('#file').setDisabled(selections.length === 0);
+      },
+
+      onScanClick: function () {
+        var me = this;
+        if (!me.winf) {
+          me.winf = Ext.create('File.Win', {
+            scope: me,
+            listeners: {
+              scope: me,
+              update: function () {
+                me.store.sync();
+              }
+            }
+          });
+        }
+        me.winf.setTitle('Привязать');
+        me.winf.setUrl('@Url.Action("FileUploadOG")');
+        me.winf.setActiveRecord(me.getSelectionModel().getSelection()[0]);
+        me.winf.show(me);
+      },
+    
+      onCreateWin: function () {
+        this.wini = Ext.create('Outgoing.Win', {
+          scope: this,
+          listeners: {
+            scope: this,
+            create: function (form, data) {
+              this.store.insert(0, data);
+              this.store.sync();
+            },
+            update: function () {
+              this.store.sync();
+            }
+          }
+        });
+      },
+
+      onAddClick: function () {
+        var me = this;
+        var rec = Ext.create('Outgoing', { 'ODate': Ext.Date.clearTime(new Date(), false)/*, Number: response.responseText*/ });
+        if (!me.wini) {
+          me.onCreateWin();
+        }
+        me.wini.setTitle('Добавить');
+        me.wini.setActiveRecord(rec);
+        me.wini.show(me);
+
+@*        Ext.Ajax.request({
+          url: '@Url.Action("getNextOutNum")', params: {},
+          success: function (response) {
+          }
+        });*@
+      },
+
+      onChangeClick: function () {
+        if (!this.wini) {
+          this.onCreateWin();
+        }
+        this.wini.setTitle('Изменить');
+        this.wini.setActiveRecord(this.getSelectionModel().getSelection()[0]);
+        this.wini.show(this);
+      },
+
+      onRowDblClick: function () {
+        this.onChangeClick();
+      },
+
+      onSync: function () {
+        this.store.sync();
+      },
+
+      onDeleteClick: function () {
+        var selection = this.getView().getSelectionModel().getSelection()[0];
+        if (selection) {
+          if (window.confirm('Удалить стр.?')) {
+            this.store.remove(selection);
+            this.onSync();
+          }
+        }
+      }
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+      Ext.create('Ext.Viewport', {
+        layout: 'border',
+        items: [{
+          region: 'north',
+          border: false,
+          contentEl: 'header'
+        }, {
+          region: 'center',
+          itemId: 'grid',
+          border: false,
+          xtype: 'oggrid',
+          store: 'storeog'
+        }]
+      });
+
+    });
+  </script>
+}

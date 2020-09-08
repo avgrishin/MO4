@@ -1,0 +1,80 @@
+﻿@model MO.Models.Mission
+@{
+  Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@ViewBag.Title</title>
+  @Styles.Render("~/Content/bootstrap")
+  <style type="text/css">
+    @@font-face
+    {
+      font-family: HelveticaNeue-Light;
+      src: url('/fonts/HelveticaNeue-Light.ttf') format('truetype');
+    }
+
+    html, body
+    {
+      height: 100%;
+      width: 100%;
+      margin:0 0 0 0;
+      padding: 0 0 0 0;
+      font-family: 'HelveticaNeue-Light';
+    }
+
+    body
+    {
+      background-image: url(/content/images/8890281719_1933cef307_k.jpg);
+      background-size: cover;
+      display: table;
+    }
+
+    .theme-showcase
+    {
+      vertical-align: middle;
+      display: table-cell;
+    }
+    h2
+    {
+      font-size: 22px;
+      text-transform: uppercase;
+      color: green;
+    }
+
+    .divthanks
+    {
+      max-width: 700px;
+      padding: 15px;
+      margin: 0 auto;
+      background-color: white;
+    }
+    .div-header
+      {
+        background-image: url(/Content/Images/header-bg.png);
+        height: 80px;
+        margin: -15px -15px 0 -15px;
+        position: relative;
+      }
+  </style>
+  @Scripts.Render("~/bundles/jquery")
+  @Scripts.Render("~/bundles/bootstrap")
+</head>
+<body>
+  <div class="container theme-showcase" role="main">
+    <div class="row text-center divthanks">
+      <div class="div-header">
+        <div class="float-left">
+          <img alt="" border="0" src="@Href("~/Content/Images/logo2.png")" style="padding-top:0px;padding-left:20px;" />
+        </div>
+      </div>
+      <h2>Спасибо за участие в @ViewBag.Type</h2>
+      @Html.ActionLink("Пройти ещё раз", "pai", "home")
+    </div>
+  </div>
+</body>
+</html>

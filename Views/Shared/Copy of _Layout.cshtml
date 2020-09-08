@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>@ViewBag.Title</title>
+  <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  <meta name="viewport" content="width=device-width" />
+  @Styles.Render("~/Content/css")
+  @Scripts.Render("~/bundles/modernizr")
+  @Scripts.Render("~/bundles/jquery")
+  @RenderSection("scripts", required: false)
+</head>
+<body>
+  <header>
+    <div class="content-wrapper">
+      <div class="float-left" >
+        <p class="site-title">@Html.ActionLink("Уралсиб", "Index", "Home")</p>
+      </div>
+      <div class="float-right">
+        <section id="login">
+                        Hello, <span class="username">@User.Identity.Name</span>!
+                    </section>
+        <nav>
+          <ul id="menu">
+            <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { })</li>
+            <li>@Html.ActionLink("Отчеты", "Index", "Report", new { area = "" }, new { })</li>
+            @if (User.IsInRole("Admin"))
+            {
+              <li>@Html.ActionLink("Admin", "Index", "Admin", new { area = "" }, new { })</li>
+            }
+            <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { })</li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <div id="body">
+    @RenderSection("featured", required: false)
+    <section class="content-wrapper main-content clear-fix">
+      @RenderBody()
+    </section>
+  </div>
+  <footer>
+    <div class="content-wrapper">
+      <div class="float-left">
+        <p>
+          &copy; @DateTime.Now.Year - ЗАО УК Уралсиб</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

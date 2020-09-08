@@ -1,0 +1,123 @@
+﻿@{
+  Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>График</title>
+  <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/5.0.0/build/packages/ext-theme-crisp/build/resources/ext-theme-crisp-all.css">
+@*  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/5.0.0/build/ext-all.js"></script>
+  <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/5.0.0/build/packages/ext-charts/build/ext-charts.js"></script>*@
+  <link href="@Url.Content("~/Scripts/ExtJS41/resources/css/ext-all.css")" rel="stylesheet" type="text/css" />
+  <script src="@Url.Content("~/Scripts/ExtJS41/bootstrap.js")" type="text/javascript"></script>
+  <script src="@Url.Content("~/Scripts/ExtJS41/ext-lang-ru.js")" type="text/javascript"></script>
+  <script type="text/javascript">
+    //Ext.require('Ext.chart.*');
+    //Ext.require(['Ext.layout.container.Fit', 'Ext.window.MessageBox']);
+
+    Ext.onReady(function () {
+      var store = Ext.create('Ext.data.JsonStore', {
+        remoteSort: true,
+        autoLoad: true,
+        idProperty: 'sec',
+        fields: ['sec', 'vcur', 'vmax', 'vmin', 'scur', 'smax', 'smin'],
+        proxy: {
+          type: 'ajax',
+          actionMethods: { read: 'POST' },
+          url: '@Url.Action("GetSecChart", "Report")',
+          reader: {
+            type: 'json',
+            root: 'data'
+          },
+          simpleSortMode: true
+        }
+      });
+
+      var chart = Ext.create('Ext.chart.Chart', {
+        //xtype: 'chart',
+        animate: true,
+        shadow: true,
+        store: store,
+        legend: {
+          position: 'right'
+        },
+        axes: [{
+          type: 'Numeric',
+          position: 'left',
+          fields: ['vmin', 'vcur', 'vmax'],
+          title: false,
+          grid: true,
+          label: {
+            renderer: function (v) {
+              return String(v);
+            }
+          }
+        }, {
+          type: 'Category',
+          position: 'bottom',
+          fields: ['sec'],
+          title: false,
+          label: {
+            rotate: {
+              degrees: 270
+            }
+          }
+        }],
+        series: [{
+          type: 'column',
+          axis: 'left',
+          gutter: 80,
+          //          label: {
+          //            display: 'insideEnd',
+          //            field: 'smin',
+          //            orientation: 'vertical',
+          //            contrast: true,
+          //            renderer: function (v) { return v; }, //Ext.util.Format.numberRenderer('g'),
+          //            'text-anchor': 'middle'
+          //          },
+          xField: 'sec',
+          yField: ['vmin', 'vcur', 'vmax'],
+          stacked: true,
+          style: {
+            opacity: 0.93
+          },
+          tips: {
+            trackMouse: true,
+            width: 50,
+            height: 20,
+            renderer: function (storeItem, item) {
+              this.setTitle(String(item.yField == 'vmax' ? storeItem.data.smax : item.yField == 'vmin' ? storeItem.data.smin : storeItem.data.scur));
+            }
+          }
+        }]
+      });
+
+
+      var panel1 = Ext.create('widget.panel', {
+        width: 600,
+        height: 400,
+        title: 'Начальная дата 01.01.2008',
+        renderTo: Ext.getBody(),
+        layout: 'fit',
+        tbar: [{
+          text: 'Save Chart',
+          handler: function () {
+            Ext.MessageBox.confirm('Confirm Download', 'Would you like to download the chart as an image?', function (choice) {
+              if (choice == 'yes') {
+                chart.save({
+                  type: 'image/png'
+                });
+              }
+            });
+          }
+        }],
+        items: chart
+      });
+    });
+  </script>
+</head>
+<body>
+  <div>
+  </div>
+</body>
+</html>

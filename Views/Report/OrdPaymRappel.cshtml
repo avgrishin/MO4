@@ -1,0 +1,64 @@
+﻿@* Generator: Template GeneratePrettyNames : true *@
+
+@functions {
+  public string host { get; set; }
+  public dynamic q1 { get; set; }
+  public dynamic em { get; set; }
+  public System.Web.Mvc.UrlHelper url { get; set; }
+}
+
+<style>
+  table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+  }
+
+  td, span, th {
+    font-size: .8em;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    text-align: left;
+  }
+
+  span {
+    font-style: italic;
+  }
+
+  th {
+    font-size: .7em;
+  }
+
+  .em {
+    color: #fff;
+    font-size: .7em;
+  }
+
+  .r {
+    text-align: right;
+  }
+</style>
+<table>
+  <tr>
+    <th>Номер</th>
+    <th>Получатель</th>
+    <th>Договор</th>
+    <th>Сумма</th>
+    <th>Валюта</th>
+    <th>Дата составления</th>
+  </tr>
+  @{
+    foreach (var r in q1)
+    {
+    <tr>
+
+      <td><a href='@url.RouteUrl("Default", new { action = "opcs", id = r.id, s = r.StateID }, "http")'>@r.id</a></td>
+      <td>@r.Receiver</td>
+      <td>@(r.DogovorID == null ? r.Dogovor : (r.DogName + (r.DogDate != null ? " от " + r.DogDate.ToShortDateString() + "г." : "")))&nbsp;</td>
+      <td class="r">@(r.Qty == null ? "" : string.Format("{0:N2}", r.Qty))</td>
+      <td>@r.FundName</td>
+      <td>@r.DateCreate.ToString("dd.MM.yy")</td>
+    </tr>
+    }
+  }
+</table>
+<br>
+<span class="em">@em</span>

@@ -1,0 +1,412 @@
+﻿@{
+  ViewBag.Title = "Admin";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section scripts {
+  <style type="text/css">
+    table
+    {
+      margin-top: 0;
+    }
+
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Scripts/ExtJS62/build/classic/theme-crisp/resources/images/tree/drop-add.gif")) !important;
+    }
+
+    .icon-user-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS62/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS62/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  <style>
+    @@-ms-viewport {
+      width: auto!important;
+    }
+  </style>
+  <script type="text/javascript" src="~/Scripts/ExtJS62/ext-bootstrap.js"></script>
+  <script src="~/Scripts/ExtJS5/ux/Exporter.js" type="text/javascript"></script>
+  @Scripts.Render("~/bundles/signalR")
+  <script src="/signalr/hubs" type="text/javascript"></script>
+  <script type="text/javascript">
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      var win, wini, wing, grstore;
+      var record;
+
+      Ext.define('Admin', {
+        extend: 'Ext.data.Model',
+        idProperty: 'UID',
+        fields: ['UID', 'UN',
+          { name: 'LAD', type: 'date', dateFormat: "MS" },
+          { name: 'LUD', type: 'date', dateFormat: "MS" }
+        ]
+      });
+
+      var store = Ext.create('Ext.data.Store', {
+        remoteSort: true,
+        model: 'Admin',
+        autoLoad: true,
+        proxy: {
+          actionMethods: { read: 'POST' },
+          type: 'ajax',
+          url: '@Url.Action("ListJsonExt")',
+          reader: {
+            type: 'json',
+            root: 'data'
+          },
+          simpleSortMode: true
+        }
+      });
+
+      var grid = Ext.create('Ext.grid.Panel', {
+        id: 'grid-panel',
+        renderTo: 'grid',
+        height: 700,
+        title: 'Пользователи',
+        store: store,
+        columnLines: true,
+        columns: [{
+          xtype: 'rownumberer',
+          width: 30,
+          sortable: false
+        }, {
+          header: "Юзер",
+          dataIndex: 'UN',
+          width: 140,
+          sortable: true
+        }, {
+          header: "LastActivityDate",
+          dataIndex: 'LAD',
+          width: 140,
+          renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+          sortable: true
+        }, {
+          header: "LastUpdatedDate",
+          dataIndex: 'LUD',
+          width: 140,
+          renderer: Ext.util.Format.dateRenderer('d.m.Y H:i'),
+          sortable: true
+        }],
+        viewConfig: {
+          loadMask: false,
+          enableTextSelection: true,
+          animate: false,
+          trackOver: true,
+          stripeRows: true,
+          listeners: {
+            itemcontextmenu: function (view, rec, node, index, e) {
+              e.stopEvent();
+              if (!view.rowCtxMenu) {
+                view.rowCtxMenu = Ext.create('Ext.menu.Menu', {
+                  items: [{
+                    text: 'Группы',
+                    handler: userGrp
+                  }, {
+                    iconCls: 'icon-user-delete',
+                    text: 'Удалить',
+                    handler: userDel
+                  }]
+                });
+              }
+              view.rowCtxMenu.showAt(e.getXY());
+              return false;
+            }
+          }
+        },
+        tbar: [{
+          iconCls: 'icon-user-add',
+          text: 'Добавить',
+          handler: userCrt
+        }, {
+          iconCls: 'icon-refresh',
+          text: 'Обновить',
+          handler: function () { store.load(); }
+        }, {
+          xtype: 'exporterbutton',
+          text: 'Export',
+          action: '@Url.Action("ExportExcel", "Home", new { area = "" })',
+          file: 'excel.xml'
+        }, '->',@Html.Partial("MenuAdmin"), ' ', @Html.Partial("MenuFin"), ' ']
+      });
+
+      var tpl = new Ext.Template('<p>Юзер: {UN}</p><p>LastActivityDate: {LAD:date("d.m.Y H:i")}</p><p>LastUpdatedDate: {LUD:date("d.m.Y H:i")}</p>');
+
+      var p2 = Ext.create('Ext.form.Panel', {
+        border: true,
+        autoHeight: true,
+        autoWidth: true,
+        baseCls: 'x-plain',
+        bodyStyle: 'padding: 5px',
+        labelWidth: 100,
+        viewConfig: {
+          //listeners: { 'render': function () { if (this.contentToLoad) this.update(this.contentToLoad); } }
+        }
+      });
+
+      function userDel() {
+        if (!win) {
+          p2 = Ext.create('Ext.form.Panel', {
+            border: true,
+            autoHeight: true,
+            autoWidth: true,
+            baseCls: 'x-plain',
+            bodyStyle: 'padding: 5px',
+            labelWidth: 100,
+            viewConfig: {
+              trackOver: false,
+              listeners: { 'render': function () { if (this.contentToLoad) this.update(this.contentToLoad); } }
+            }
+          });
+          win = Ext.create('Ext.Window', {
+            title: 'Удалить',
+            width: 300,
+            autoHeight: true,
+            closeAction: 'hide',
+            modal: true,
+            layout: 'fit',
+            plain: true,
+            bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            border: true,
+            items: p2,
+            buttons: [{
+              text: 'Удалить',
+              handler: function () {
+                if (window.confirm('Удалить?')) {
+                  win.items.items[0].getForm().submit({
+                    url: '@Url.Action("Delete1")',
+                    params: { id: grid.getSelectionModel().getSelection()[0].data.UID },
+                    success: function (fp, o) { alert(o.result.msg); win.hide(); Ext.getCmp('grid-panel').store.load(); },
+                    failure: function (fp, o) { alert(o.result.msg); },
+                    waitMsg: 'Ждите...'
+                  });
+                }
+              }
+            }, {
+              text: 'Отмена',
+              handler: function () {
+                win.hide();
+              }
+            }]
+          });
+        }
+
+        p2.update(tpl.applyTemplate(grid.getSelectionModel().getSelection()[0].data));
+        win.show();
+      }
+
+      function userCrt() {
+        if (!wini) {
+          wini = Ext.create('Ext.window.Window', {
+            title: 'Добавить',
+            width: 250,
+            autoHeight: true,
+            closeAction: 'hide',
+            modal: true,
+            layout: 'fit',
+            plain: true,
+            bodyStyle: 'padding:5px;',
+            buttonAlign: 'center',
+            border: true,
+            items: Ext.create('Ext.form.Panel', {
+              border: false,
+              //frame:true,
+              autoHeight: true,
+              autoWidth: true,
+              forceFit: true,
+              baseCls: 'x-plain',
+              bodyStyle: 'padding:5px 5px 0',
+              bodyPadding: 5,
+              defaults: { anchor: '100%' },
+              layoutConfig: { labelSeparator: '' },
+              //labelWidth: 40,
+              items: [{
+                xtype: 'textfield',
+                name: 'UN',
+                fieldLabel: 'Юзер',
+                labelWidth: 40,
+                allowBlank: false,
+                blankText: 'Введите логин юзера',
+                emptyText: 'Введите логин',
+                msgTarget: 'side'
+              }]
+            }),
+            buttons: [{
+              text: 'Сохранить',
+              handler: function () {
+                wini.items.items[0].getForm().submit({
+                  url: '@Url.Action("Create")',
+                  success: function (fp, o) { alert(o.result.msg); wini.hide(); Ext.getCmp('grid-panel').store.load(); },
+                  failure: function (fp, o) { alert(o.result.msg); },
+                  waitMsg: 'Ждите...'
+                });
+              }
+            }, {
+              text: 'Отмена',
+              handler: function () {
+                wini.hide();
+              }
+            }]
+          });
+        }
+        wini.items.items[0].getForm().reset();
+        wini.show();
+      }
+
+      Ext.define('Roles', {
+        extend: 'Ext.data.Model',
+        idProperty: 'RoleName',
+        fields: ['RoleName', 'UserID', 'uinr']
+      });
+
+      function userGrp() {
+        if (!grstore) {
+          grstore = Ext.create('Ext.data.Store', {
+            model: 'Roles',
+            remoteSort: true,
+            autoLoad: false,
+            autoSync: false,
+            proxy: {
+              actionMethods: { read: 'POST' },
+              type: 'ajax',
+              api: {
+                read: '@Url.Action("GetUserRolesJson")',
+                update: '@Url.Action("SetUserRolesJson1")'
+              },
+              reader: {
+                type: 'json',
+                successProperty: 'success',
+                root: 'data',
+                messageProperty: 'message'
+              },
+              writer: {
+                type: 'json',
+                root: 'data',
+                writeAllFields: true,
+                allowSingle: false,
+                encode: false
+              }
+            },
+            listeners: {
+              write: function (proxy, operation) {
+                //alert(operation.action+'<br>'+operation.resultSet.message);
+              },
+              load: function (sm) {
+                if (!wing) {
+                  wing = Ext.create('Ext.window.Window', {
+                    title: 'Группы',
+                    width: 250,
+                    autoHeight: true,
+                    closeAction: 'hide',
+                    modal: true,
+                    layout: 'fit',
+                    plain: true,
+                    bodyStyle: 'padding:5px;',
+                    buttonAlign: 'center',
+                    border: true,
+                    items: Ext.create('Ext.grid.Panel', {
+                      border: false,
+                      autoHeight: true,
+                      forceFit: true,
+                      frame: false,
+                      hideHeaders: true,
+                      lines: false,
+                      store: grstore,
+                      viewConfig: {
+                        //scrollOffset: 0
+                      },
+                      columns: [{
+                        xtype: 'checkcolumn',
+                        header: "cc",
+                        dataIndex: 'uinr',
+                        width: 30
+                      }, {
+                        header: 'RoleName',
+                        dataIndex: 'RoleName',
+                        width: 95
+                      }]
+                    }),
+                    buttons: [{
+                      text: 'Сохранить',
+                      handler: function () {
+                        wing.items.items[0].store.sync();
+                      }
+                    }, {
+                      text: 'Выход',
+                      handler: function () {
+                        wing.hide();
+                      }
+                    }]
+                  });
+                }
+                var rec = grid.getSelectionModel().getSelection()[0];
+                wing.setTitle('Группы (' + rec.data.UN + ')');
+                wing.show();
+              }
+            }
+          });
+        }
+        grstore.load({ params: { id: grid.getSelectionModel().getSelection()[0].data.UID } });
+      };
+
+      Ext.define('Signal', {
+        extend: 'Ext.data.Model',
+        fields: ['Message', { name: 'DT', type: 'date', dateFormat: 'c' }]
+      });
+
+      var grid2 = Ext.create('Ext.grid.Panel', {
+        renderTo: 'det',
+        height: 700,
+        title: 'Сообщения',
+        store: Ext.create('Ext.data.Store', {
+          model: 'Signal'
+        }),
+        columnLines: true,
+        columns: [{
+          xtype: 'rownumberer',
+          width: 30,
+          sortable: false
+        }, {
+          header: "Текст",
+          dataIndex: 'Message',
+          flex: 1,
+          sortable: true
+        }, {
+          header: "Время",
+          dataIndex: 'DT',
+          width: 120,
+          renderer: Ext.util.Format.dateRenderer('d.m.Y H:i:s'),
+          sortable: true
+        }],
+        viewConfig: {
+          enableTextSelection: true,
+          animate: false,
+          trackOver: true,
+          stripeRows: true
+        },
+      });
+
+      var hub = $.connection.aHub;
+
+      hub.client.newmsg = function (u, p) {
+        grid2.store.add({ Message: u + ' зашел на страницу "' + p + '" ' + Ext.Date.format(new Date(), 'd.m.Y H:i:s'), DT: new Date() });
+      }
+      $.connection.hub.start().done(function () {
+        /*hub.server.send('#displayname', '#message');*/
+      });
+
+    });
+  </script>
+}
+<div id="grid" style="padding: 30px">
+</div>
+<div id="det" style="padding: 30px">
+</div>

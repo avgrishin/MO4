@@ -1,0 +1,441 @@
+﻿@{
+  ViewBag.Title = "Запрос на изменение";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts {
+  <style type="text/css">
+    .icon-user-add
+    {
+      background-image: url(@Href("~/Content/images/add.png")) !important;
+    }
+    .icon-save
+    {
+      background-image: url(@Href("~/Content/images/save.gif")) !important;
+    }
+    .upload-icon
+    {
+      background-image: url(@Href("~/Content/images/image_add.png")) !important;
+    }
+    .icon-delete
+    {
+      background-image: url(@Href("~/Content/images/delete.png")) !important;
+    }
+    .icon-refresh
+    {
+      background-image: url(@Href("~/Scripts/ExtJS71/build/classic/theme-crisp/resources/images/grid/refresh.png")) !important;
+    }
+    td.wrap-text div {
+      white-space: normal;
+    }
+    .search-item
+    {
+      /*padding: 5px 0px 5px 0px;*/
+      border-bottom: 1px solid #f0f0f0;
+      white-space: normal;
+      color: #222;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="~/Scripts/ExtJS71/build/classic/theme-crisp/resources/theme-crisp-all.css" />
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/ext-all.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/theme-crisp/theme-crisp.js"></script>
+  <script type="text/javascript" src="~/Scripts/ExtJS71/build/classic/locale/locale-ru.js"></script>
+
+  <script type="text/javascript">
+
+
+    Ext.define('ReqChange', {
+      extend: 'Ext.data.Model',
+      idProperty: 'ID',
+      fields: [
+        { name: 'ID', type: 'int' },
+        { name: 'Number', type: 'string' },
+        { name: 'Name1', type: 'string' },
+        { name: 'Name2', type: 'string' },
+        { name: 'Name3', type: 'string' }
+      ],
+      proxy: {
+        type: 'ajax',
+        api: {
+          create: '@Url.Action("addReqChange1")'
+        },
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        writer: {
+          type: 'json',
+          rootProperty: 'data',
+          writeAllFields: true,
+          allowSingle: false,
+          encode: false
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storerc',
+      model: 'ReqChange'
+    });
+
+    Ext.define('PPZ', {
+      extend: 'Ext.data.Model',
+      idProperty: 'CODE',
+      fields: [{ name: 'CODE', type: 'string' }, { name: 'DO', type: 'string' }, { name: 'TD', type: 'string' }],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("getPPZ")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeppz',
+      model: 'PPZ',
+      autoLoad: true
+    });
+
+    Ext.define('DogNumber', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      idProperty: 'Number',
+      fields: [{ name: 'Number', type: 'string' }],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("getDogNumber")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storedg',
+      model: 'DogNumber'
+    });
+
+    Ext.define('OrdNumber', {
+      extend: 'Ext.data.Model',
+      pageSize: 500,
+      remoteSort: true,
+      idProperty: 'Number',
+      fields: [{ name: 'Number', type: 'string' }],
+      proxy: {
+        type: 'ajax',
+        url: '@Url.Action("getOrdNumber")',
+        actionMethods: { read: 'POST' },
+        reader: {
+          type: 'json',
+          root: 'data',
+          totalProperty: 'totalCount'
+        },
+        simpleSortMode: true
+      }
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeord',
+      model: 'OrdNumber'
+    });
+
+    Ext.create('Ext.data.Store', {
+      storeId: 'storeKM',
+      idProperty: 'Name',
+      fields: ['Name'],
+      autoLoad: false,
+      proxy: {
+        type: 'ajax',
+        actionMethods: { read: 'POST' },
+        url: '@Url.Action("getKM")',
+        reader: {
+          type: 'json',
+          rootProperty: 'data'
+        }
+      }
+    });
+
+    Ext.define('ReqChangeDU.Form', {
+      extend: 'Ext.form.Panel',
+      xtype: 'rcduform',
+      initComponent: function () {
+        Ext.apply(this, {
+          defaultType: 'textfield',
+          bodyPadding: 10,
+          frame: true,
+          border: true,
+          fieldDefaults: {
+            labelAlign: 'right',
+            msgTarget: 'under',
+            anchor: '100%'
+          },
+          title: 'Договор ДУ',
+          items: [{
+            xtype: 'combo',
+            store: 'storedg',
+            displayField: 'Number',
+            valueField: 'Number',
+            queryParam: 'q',
+            queryMode: 'remote',
+            fieldLabel: 'Договор',
+            typeAhead: false,
+            queryDelay: 1000,
+            width: 570,
+            hideTrigger: true,
+            forceSelection: true,
+            name: 'Number',
+            allowBlank: false,
+            minChars: 2
+          }, {
+            xtype: 'combo',
+            store: 'storeppz',
+            displayField: 'DO',
+            valueField: 'CODE',
+            queryMode: 'local',
+            fieldLabel: 'ППЗ',
+            typeAhead: true,
+            hideTrigger: false,
+            selectOnFocus: true,
+            forceSelection: true,
+            name: 'Name1',
+            tpl: Ext.create('Ext.XTemplate',
+              '<ul class="x-list-plain"><tpl for=".">',
+                '<li role="option" class="x-boundlist-item">{CODE} - {DO}</li>',
+              '</tpl></ul>'
+            ),
+            displayTpl: Ext.create('Ext.XTemplate',
+              '<tpl for=".">',
+                '{CODE} - {DO}',
+              '</tpl>'
+            )
+          }, {
+            xtype: 'combo',
+            store: 'storeKM',
+            displayField: 'Name',
+            valueField: 'Name',
+            queryParam: 'q',
+            queryMode: 'remote',
+            typeAhead: false,
+            queryDelay: 1000,
+            width: 570,
+            hideTrigger: true,
+            forceSelection: false,
+            minChars: 2,
+            name: 'Name2',
+            fieldLabel: 'Менеджер'
+          }/*, {
+            name: 'Name3',
+            fieldLabel: 'Таб.номер'
+          }*/],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'add',
+              text: 'Отправить',
+              disabled: true,
+              scope: this,
+              handler: this.onAddReqChange1,
+              formBind: true
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onAddReqChange1: function () {
+        var me = this;
+        if (me.getForm().isValid()) {
+          me.getForm().submit({
+            jsonSubmit: true,
+            url: '@Url.Action("addReqChange1")',
+            success: function (f, a) {
+              if (a.result.success) {
+                f.reset();
+                Ext.Msg.alert('Info', 'Создана заявка на изменение.');
+              }
+              else {
+                Ext.Msg.alert('Error', 'Проверьте значения данных.');
+              }
+            },
+            failure: function (f, a) {
+              Ext.Msg.alert('Error', 'Изменения не записаны. Проверьте значения данных.');
+            }
+          });
+        }
+      }
+
+    });
+
+    Ext.define('ReqChangePIF.Form', {
+      extend: 'Ext.form.Panel',
+      xtype: 'rcpifform',
+      initComponent: function () {
+        Ext.apply(this, {
+          defaultType: 'textfield',
+          bodyPadding: 10,
+          frame: true,
+          border: true,
+          fieldDefaults: {
+            labelAlign: 'right',
+            msgTarget: 'under',
+            anchor: '100%'
+          },
+          title: 'Заявка ПИФ',
+          items: [{
+            xtype: 'combo',
+            store: 'storeord',
+            displayField: 'Number',
+            valueField: 'Number',
+            queryParam: 'q',
+            queryMode: 'remote',
+            fieldLabel: 'Номер',
+            typeAhead: false,
+            queryDelay: 1000,
+            width: 570,
+            hideTrigger: true,
+            forceSelection: true,
+            name: 'Number',
+            allowBlank: false,
+            minChars: 8,
+            listeners: {
+              select: this.onSelectNumber
+            }
+          }, {
+            xtype: 'combo',
+            store: 'storeppz',
+            displayField: 'DO',
+            valueField: 'CODE',
+            queryMode: 'local',
+            fieldLabel: 'ППЗ',
+            typeAhead: true,
+            hideTrigger: false,
+            selectOnFocus: true,
+            forceSelection: true,
+            name: 'Name1',
+            tpl: Ext.create('Ext.XTemplate',
+              '<ul class="x-list-plain"><tpl for=".">',
+                '<li role="option" class="x-boundlist-item">{CODE} - {DO}</li>',
+              '</tpl></ul>'
+            ),
+            displayTpl: Ext.create('Ext.XTemplate',
+              '<tpl for=".">',
+                '{CODE} - {DO}',
+              '</tpl>'
+            )
+          }, {
+            xtype: 'combo',
+            store: 'storeKM',
+            displayField: 'Name',
+            valueField: 'Name',
+            queryParam: 'q',
+            queryMode: 'remote',
+            typeAhead: false,
+            queryDelay: 1000,
+            width: 570,
+            hideTrigger: true,
+            forceSelection: false,
+            minChars: 2,
+            name: 'Name2',
+            fieldLabel: 'Менеджер'
+          }, {
+            name: 'Name3',
+            xtype: 'numberfield',
+            hideTrigger: true,
+            keyNavEnabled: false,
+            mouseWheelEnabled: false,
+            decimalPrecision: 0,
+            fieldLabel: 'Таб.номер'
+          }],
+          dockedItems: [{
+            xtype: 'toolbar',
+            dock: 'bottom',
+            ui: 'footer',
+            items: ['->', {
+              iconCls: 'icon-save',
+              itemId: 'add',
+              text: 'Отправить',
+              disabled: true,
+              scope: this,
+              handler: this.onAddReqChange2,
+              formBind: true
+            }]
+          }]
+        });
+        this.callParent();
+      },
+
+      onSelectNumber: function (combo, record) {
+        var f = combo.up('form').getForm();
+        f.findField('Name1').setValue(record.get('PPZCode'));
+        f.findField('Name2').setValue(record.get('Seller'));
+        f.findField('Name3').setValue(record.get('TabNomer'));
+      },
+
+      onAddReqChange2: function () {
+        var me = this;
+        if (me.getForm().isValid()) {
+          me.getForm().submit({
+            jsonSubmit: true,
+            url: '@Url.Action("addReqChange2")',
+            success: function (f, a) {
+              if (a.result.success) {
+                f.reset();
+                Ext.Msg.alert('Info', 'Создана заявка на изменение.');
+              }
+              else {
+                Ext.Msg.alert('Error', 'Проверьте значения данных.');
+              }
+            },
+            failure: function (f, a) {
+              Ext.Msg.alert('Error', 'Изменения не записаны. Проверьте значения данных.');
+            }
+          });
+        }
+      }
+
+    });
+
+    Ext.onReady(function () {
+      Ext.tip.QuickTipManager.init();
+
+      var main = Ext.create('Ext.container.Container', {
+        padding: '20 20 20 20',
+        width: 500,
+        //height: Ext.themeName === 'neptune' ? 700 : 650,
+        renderTo: 'f1',
+        layout: {
+          type: 'vbox',
+          align: 'stretch'
+        },
+        items: [{
+          itemId: 'form',
+          xtype: 'rcduform',
+          //manageHeight: false,
+          margin: '0 0 20 0',
+          listeners: {
+          }
+        }, {
+          xtype: 'rcpifform'
+        }]
+      });
+    });
+  </script>
+}
+<div id="f1">
+</div>

@@ -1,0 +1,17 @@
+﻿@{
+  //ViewBag.Title = "Статистика по заявкам на покупку";
+}
+
+@section scripts {
+  }
+<div id="f" style="padding: 30px">
+  <form method="post" action="https://api.telegram.org/bot930948388:AAGwTHmhjkb2nxXrrY1_cEucDvfsrwDstLw/sendDocument" enctype="multipart/form-data">
+    <input type="text" name="chat_id" value="235939056" />
+    <input type="file" name="document" />
+    <input type="submit" value="send" />
+  </form>
+</div>
+<form id="export" method="POST" style="display: none;">
+  <input type="hidden" name="d1" />
+  <input type="hidden" name="d2" />
+</form>
